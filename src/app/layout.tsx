@@ -33,11 +33,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <header className="flex justify-between items-center p-4 gap-4 h-16">
+          <header className="flex justify-between items-center my-4 px-4 gap-4 h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
-                CyberShield
-              </Link>
+             <img src="/images/CyberShield_logo_Final-removebg.png" alt="CyberShield Logo" className="h-20 w-full object-contain" />
             </div>
             <div className="flex items-center gap-4">
               <SignedOut>
