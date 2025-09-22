@@ -1,50 +1,62 @@
-import { UserButton } from "@clerk/nextjs";
+"use client";
 
-interface TopBarProps {
-  userName?: string;
-  title?: string;
-  subtitle?: string;
-}
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { Bell } from "lucide-react";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 
-export default function TopBar({
-  userName,
-  title = "Welcome to CyberShield",
-  subtitle = "Your cybersecurity awareness journey starts here.",
-}: TopBarProps) {
+export default function TopBar() {
+  const pathname = usePathname();
+  const isDashboardPage = pathname.startsWith("/dashboard");
+
+  // Don't render TopBar on dashboard pages since it will be handled by dashboard layout
+  if (isDashboardPage) return null;
+
   return (
-    <div className="bg-white shadow-sm border-b border-medium-grey">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          {/* Left side - Title and subtitle */}
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold text-navy-blue">
-              {userName ? `${title}, ${userName}!` : title}
-            </h1>
-            <p className="mt-1 text-medium-grey text-sm">{subtitle}</p>
-          </div>
-
-          {/* Right side - User menu */}
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-neon-blue rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-semibold">
-                  {userName ? userName.charAt(0).toUpperCase() : "U"}
-                </span>
-              </div>
-              <span className="text-navy-blue font-medium hidden sm:block">
-                {userName || "User"}
-              </span>
-            </div>
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: "w-8 h-8",
-                },
-              }}
-            />
-          </div>
-        </div>
+    <header className="flex justify-between items-center my-4 px-4 gap-4 h-16">
+      <div className="flex items-center gap-4">
+        <Image
+          src="/images/CyberShield_logo_Final-removebg.png"
+          alt="CyberShield Logo"
+          width={200}
+          height={80}
+          className="h-20 w-full object-contain"
+        />
       </div>
-    </div>
+      <div className="flex items-center gap-4">
+        <SignedOut>
+          <Link
+            href="/sign-in"
+            className="text-gray-700 hover:text-gray-900 font-medium"
+          >
+            Sign In
+          </Link>
+          <Link
+            href="/sign-up"
+            className="bg-navy-blue text-white rounded-md font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer flex items-center hover:bg-[#0f1a2a] transition-colors"
+          >
+            Sign Up
+          </Link>
+        </SignedOut>
+        <SignedIn>
+          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <Bell className="h-5 w-5 text-gray-600" />
+          </button>
+          <UserButton
+            afterSignOutUrl="/sign-in"
+            appearance={{
+              elements: {
+                avatarBox: "w-8 h-8",
+                userButtonPopoverCard: "shadow-lg border border-gray-200",
+                userButtonPopoverActionButton: "hover:bg-gray-50",
+                userButtonPopoverActionButtonText: "text-gray-700",
+                userButtonPopoverFooter: "hidden",
+              },
+            }}
+          />
+        </SignedIn>
+      </div>
+    </header>
   );
 }
