@@ -1,6 +1,5 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import TopBar from "@/components/TopBar";
 
 export default async function DashboardPage() {
   const user = await currentUser();
@@ -9,15 +8,9 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
   return (
-    <div className="min-h-screen bg-grey">
-      <TopBar
-        userName={user.firstName || undefined}
-        title="Welcome to CyberShield"
-        subtitle="Your cybersecurity awareness journey starts here."
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <>
+      <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-10">
           {/* Learning Modules Card */}
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
             <div className="flex items-center mb-4">
@@ -126,6 +119,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

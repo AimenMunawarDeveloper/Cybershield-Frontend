@@ -1,12 +1,14 @@
-import { SignUp } from '@clerk/nextjs';
+import { SignUp } from "@clerk/nextjs";
+import Image from "next/image";
 
 export default function SignUpPage() {
   return (
-       <div className="block lg:flex lg:h-screen w-full">
-
+    <div className="block lg:flex lg:h-screen w-full">
       <div className="flex flex-col justify-center items-center w-full lg:w-1/2 bg-[var(--white)] p-8 ">
-        <h1 className="text-3xl font-bold mb-6 text-[var(--navy-blue)]">Sign Up</h1>
-        <SignUp 
+        <h1 className="text-3xl font-bold mb-6 text-[var(--navy-blue)]">
+          Sign Up
+        </h1>
+        <SignUp
           appearance={{
             elements: {
               formButtonPrimary: {
@@ -14,15 +16,12 @@ export default function SignUpPage() {
                 color: "var(--white)",
                 borderRadius: "0.2rem",
                 padding: "8px 4px",
-                "&:hover": {
-
-                },
+                "&:hover": {},
               },
               card: {
                 border: "none",
                 padding: "40px",
                 borderRadius: "0",
-               
               },
               headerTitle: {
                 textAlign: "center",
@@ -42,7 +41,6 @@ export default function SignUpPage() {
                 "&:focus": {
                   outline: "none",
                   borderColor: "var(--navy-blue)",
-
                 },
               },
               formFieldLabel: {
@@ -63,9 +61,7 @@ export default function SignUpPage() {
                 border: "1px solid var(--navy-blue)",
                 borderRadius: "5px",
                 padding: "10px",
-                "&:hover": {
-
-                },
+                "&:hover": {},
               },
               socialButtonsBlockButtonText: {
                 color: "var(--navy-blue)",
@@ -76,8 +72,13 @@ export default function SignUpPage() {
         />
       </div>
       <div className="flex flex-col justify-center items-center w-full lg:w-1/2 bg-[var(--navy-blue)] relative">
-        <img src="/images/Signup_illustrator.png" alt='Signup illustrator' />
-
+        <Image
+          src="/images/Signup_illustrator.png"
+          alt="Signup illustrator"
+          width={800}
+          height={800}
+          className="w-100 h-100 object-contain"
+        />
       </div>
     </div>
   );
