@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
-  Shield,
   BarChart3,
   Settings,
   HelpCircle,
@@ -93,16 +93,14 @@ export function DashboardSidebar({
   return (
     <Sidebar variant="inset" className="bg-white" {...props}>
       <SidebarHeader className="bg-white">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-navy-blue text-white">
-            <Shield className="size-4" />
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">CyberShield</span>
-            <span className="truncate text-xs text-muted-foreground">
-              Security Platform
-            </span>
-          </div>
+        <div className="flex items-center justify-center px-2 py-2">
+          <Image
+            src="/images/CyberShield_logo_Final-removebg.png"
+            alt="CyberShield Logo"
+            width={180}
+            height={60}
+            className="h-12 w-auto object-contain"
+          />
         </div>
       </SidebarHeader>
       <SidebarContent className="bg-white">
