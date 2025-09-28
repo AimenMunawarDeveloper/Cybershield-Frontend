@@ -61,10 +61,10 @@ function UserGreeting() {
 
   return (
     <div className="flex flex-col">
-      <span className="text-lg font-semibold text-gray-900">
+      <span className="text-lg font-semibold text-white">
         Hello {firstName}
       </span>
-      <span className="text-sm" style={{ color: "var(--dark-grey)" }}>
+      <span className="text-sm text-[var(--medium-grey)]">
         {formatTime(currentTime)} • {formatDate(currentTime)}
       </span>
     </div>
@@ -77,13 +77,13 @@ function SearchBar() {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--medium-grey)]" />
       <Input
         type="text"
         placeholder="Search..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 w-80 h-8 text-sm"
+        className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)]"
       />
     </div>
   );
@@ -95,6 +95,8 @@ export default function TopBar({
 }: TopBarProps) {
   const pathname = usePathname();
   const isDashboardPage = pathname.startsWith("/dashboard");
+  const isAuthPage =
+    pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
   const { isLoaded } = useAuth();
 
   // Don't render TopBar on dashboard pages when variant is "main" since it will be handled by dashboard layout
@@ -119,16 +121,28 @@ export default function TopBar({
   }
 
   return (
-    <header className="flex justify-between items-center my-2 px-4 gap-4 h-12">
+    <header
+      className={`flex justify-between items-center gap-4 h-12 ${
+        variant === "dashboard"
+          ? "bg-transparent my-2 px-4"
+          : isAuthPage
+          ? "bg-white w-full px-4 py-4"
+          : "bg-[var(--navy-blue)] my-2 px-4"
+      }`}
+    >
       <div className="flex items-center gap-4">
-        {showSidebarTrigger && <SidebarTrigger className="-ml-1" />}
+        {showSidebarTrigger && (
+          <SidebarTrigger className="-ml-1 text-white hover:bg-[var(--navy-blue-lighter)]" />
+        )}
         {variant === "main" ? (
           <Image
             src="/images/CyberShield_logo_Final-removebg.png"
             alt="CyberShield Logo"
             width={200}
             height={60}
-            className="h-12 w-full object-contain"
+            className={`h-12 w-full object-contain ${
+              isAuthPage ? "brightness-0" : "brightness-0 invert"
+            }`}
           />
         ) : (
           <UserGreeting />
@@ -149,7 +163,11 @@ export default function TopBar({
                 <NavigationMenuLink asChild>
                   <Link
                     href="/sign-in"
-                    className="text-gray-700 hover:text-gray-900 font-medium"
+                    className={`font-medium ${
+                      isAuthPage
+                        ? "text-[var(--navy-blue)] hover:text-[var(--neon-blue)]"
+                        : "text-white hover:text-[var(--neon-blue)]"
+                    }`}
                   >
                     Sign In
                   </Link>
@@ -159,7 +177,7 @@ export default function TopBar({
                 <NavigationMenuLink asChild>
                   <Button
                     asChild
-                    className="bg-navy-blue text-white rounded-md font-medium text-sm h-8 px-4 cursor-pointer flex items-center hover:bg-[#0f1a2a] transition-colors"
+                    className="bg-[var(--neon-blue)] text-[var(--navy-blue)] rounded-md font-medium text-sm h-8 px-4 cursor-pointer flex items-center hover:bg-[var(--electric-blue)] transition-colors"
                   >
                     <Link href="/sign-up">Sign Up</Link>
                   </Button>
@@ -171,9 +189,9 @@ export default function TopBar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="p-1.5 hover:bg-gray-100 rounded-full transition-colors h-8 w-8"
+                  className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8"
                 >
-                  <Bell className="h-4 w-4 text-gray-600" />
+                  <Bell className="h-4 w-4 text-white" />
                 </Button>
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -183,9 +201,11 @@ export default function TopBar({
                   appearance={{
                     elements: {
                       avatarBox: "w-7 h-7",
-                      userButtonPopoverCard: "shadow-lg border border-gray-200",
-                      userButtonPopoverActionButton: "hover:bg-gray-50",
-                      userButtonPopoverActionButtonText: "text-gray-700",
+                      userButtonPopoverCard:
+                        "shadow-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-light)]",
+                      userButtonPopoverActionButton:
+                        "hover:bg-[var(--navy-blue-lighter)]",
+                      userButtonPopoverActionButtonText: "text-white",
                       userButtonPopoverFooter: "hidden",
                     },
                   }}
