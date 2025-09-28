@@ -305,7 +305,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-
       {/* Floating Chat */}
       <FloatingChat />
     </>

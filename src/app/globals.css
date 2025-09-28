@@ -163,7 +163,6 @@
     @apply bg-background text-foreground;
   }
 }
-
 /* Custom styles for dark theme */
 .blurred-background {
   position: fixed;
