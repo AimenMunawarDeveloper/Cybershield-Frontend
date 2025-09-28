@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
-  Shield,
   BarChart3,
   Settings,
   HelpCircle,
@@ -18,7 +18,6 @@ import {
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -91,34 +90,40 @@ export function DashboardSidebar({
   const pathname = usePathname();
 
   return (
-    <Sidebar variant="inset" className="bg-white" {...props}>
-      <SidebarHeader className="bg-white">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-navy-blue text-white">
-            <Shield className="size-4" />
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">CyberShield</span>
-            <span className="truncate text-xs text-muted-foreground">
-              Security Platform
-            </span>
-          </div>
+    <Sidebar
+      variant="inset"
+      className="bg-[var(--navy-blue-light)] border-r border-[var(--sidebar-border)]"
+      {...props}
+    >
+      <SidebarHeader className="bg-[var(--navy-blue-light)]">
+        <div className="flex items-center justify-center px-2 py-2">
+          <Image
+            src="/images/CyberShield_logo_Final-removebg.png"
+            alt="CyberShield Logo"
+            width={180}
+            height={60}
+            className="h-12 w-auto object-contain brightness-0 invert"
+          />
         </div>
+        {/* Shiny line below logo */}
+        <div className="mx-4 h-px bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-60"></div>
       </SidebarHeader>
-      <SidebarContent className="bg-white">
+      <SidebarContent className="bg-[var(--navy-blue-light)]">
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title} className="mb-2">
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
-                      <item.icon />
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                        <item.icon className="w-4 h-4 text-white" />
+                      </div>
                       <span>{item.title}</span>
                       {item.badge && (
                         <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
@@ -135,14 +140,16 @@ export function DashboardSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               {data.support.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title} className="mb-2">
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
-                      <item.icon />
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                        <item.icon className="w-4 h-4 text-white" />
+                      </div>
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -152,19 +159,6 @@ export function DashboardSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-white">
-        <div className="flex items-center gap-2 px-2 py-2">
-          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-            <div className="size-4 rounded-full bg-pink-500 border-2 border-white"></div>
-          </div>
-          <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-semibold">Security Status</span>
-            <span className="truncate text-xs text-muted-foreground">
-              All systems secure
-            </span>
-          </div>
-        </div>
-      </SidebarFooter>
     </Sidebar>
   );
 }

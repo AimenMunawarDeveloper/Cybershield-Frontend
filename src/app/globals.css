@@ -4,11 +4,15 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --navy-blue: #132235;
+  --navy-blue: #0f1a2a;
+  --navy-blue-light: #132235;
+  --navy-blue-lighter: #1a2a3f;
   --neon-blue: #51b0ec;
   --light-blue: #abd2eb;
   --medium-blue: #3a7ca5;
   --dark-blue: #264f69;
+  --electric-blue: #4fc3f7;
+  --purple-blue: #7c4dff;
   --sunset-orange: #e36414;
   --grey: #e5e5e5;
   --white: #ffffff;
@@ -17,38 +21,38 @@
   --crimson-red: #d72638;
   --success-green: #4caf50;
   --soft-purple: #a259ff;
-  --background: var(--white);
-  --foreground: var(--navy-blue);
+  --background: var(--navy-blue);
+  --foreground: var(--white);
   --radius: 0.625rem;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --card: var(--navy-blue-light);
+  --card-foreground: var(--white);
+  --popover: var(--navy-blue-light);
+  --popover-foreground: var(--white);
+  --primary: var(--neon-blue);
+  --primary-foreground: var(--navy-blue);
+  --secondary: var(--navy-blue-lighter);
+  --secondary-foreground: var(--white);
+  --muted: var(--navy-blue-lighter);
+  --muted-foreground: var(--medium-grey);
+  --accent: var(--navy-blue-lighter);
+  --accent-foreground: var(--white);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: rgba(255, 255, 255, 0.1);
+  --input: var(--navy-blue-lighter);
+  --ring: var(--neon-blue);
+  --chart-1: var(--neon-blue);
+  --chart-2: var(--electric-blue);
+  --chart-3: var(--purple-blue);
+  --chart-4: var(--light-blue);
+  --chart-5: var(--medium-blue);
+  --sidebar: var(--navy-blue-light);
+  --sidebar-foreground: var(--white);
+  --sidebar-primary: var(--navy-blue);
+  --sidebar-primary-foreground: var(--white);
+  --sidebar-accent: var(--navy-blue-lighter);
+  --sidebar-accent-foreground: var(--white);
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: var(--neon-blue);
 }
 
 @theme inline {
@@ -58,7 +62,12 @@
   --font-mono: var(--font-geist-mono);
 
   --color-navy-blue: var(--navy-blue);
+  --color-navy-blue-light: var(--navy-blue-light);
+  --color-navy-blue-lighter: var(--navy-blue-lighter);
   --color-neon-blue: var(--neon-blue);
+  --color-electric-blue: var(--electric-blue);
+  --color-purple-blue: var(--purple-blue);
+  --color-light-blue: var(--light-blue);
   --color-medium-blue: var(--medium-blue);
   --color-dark-blue: var(--dark-blue);
   --color-sunset-orange: var(--sunset-orange);
@@ -153,4 +162,42 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+/* Custom styles for dark theme */
+.blurred-background {
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 600px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(81, 176, 236, 0.5) 0%,
+    rgba(79, 195, 247, 0.4) 30%,
+    rgba(81, 176, 236, 0.2) 60%,
+    transparent 90%
+  );
+  border-radius: 60%;
+  filter: blur(100px);
+  z-index: 0;
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+.dashboard-card {
+  background: var(--navy-blue-light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
 }
