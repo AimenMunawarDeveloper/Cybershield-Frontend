@@ -13,6 +13,7 @@ import {
   Users,
   FileText,
   Trophy,
+  MessageSquare,
 } from "lucide-react";
 
 import {
@@ -48,6 +49,11 @@ const data = {
       url: "/dashboard/simulations",
       icon: AlertTriangle,
       badge: "3",
+    },
+    {
+      title: "WhatsApp Phishing",
+      url: "/dashboard/whatsapp-phishing",
+      icon: MessageSquare,
     },
     {
       title: "Risk Analysis",
