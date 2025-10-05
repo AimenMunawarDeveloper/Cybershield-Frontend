@@ -177,6 +177,122 @@ export class ApiClient {
     return response.json();
   }
 
+  // Group endpoints
+  async createGroup(orgId: string, name: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create group');
+    }
+    
+    return response.json();
+  }
+
+  async getGroups(orgId: string, page = 1, limit = 50, search?: string) {
+    const headers = await this.getAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (search) params.append('search', search);
+    
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch groups');
+    }
+    
+    return response.json();
+  }
+
+  async getGroupById(orgId: string, groupId: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups/${groupId}`, {
+      method: 'GET',
+      headers,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch group');
+    }
+    
+    return response.json();
+  }
+
+  async updateGroup(orgId: string, groupId: string, name: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups/${groupId}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({ name }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to update group');
+    }
+    
+    return response.json();
+  }
+
+  async deleteGroup(orgId: string, groupId: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups/${groupId}`, {
+      method: 'DELETE',
+      headers,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to delete group');
+    }
+    
+    return response.json();
+  }
+
+  async addMemberToGroup(orgId: string, groupId: string, userId: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups/${groupId}/members`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ userId }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to add member to group');
+    }
+    
+    return response.json();
+  }
+
+  async removeMemberFromGroup(orgId: string, groupId: string, userId: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/orgs/${orgId}/groups/${groupId}/members/${userId}`, {
+      method: 'DELETE',
+      headers,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to remove member from group');
+    }
+    
+    return response.json();
+  }
+
   // User endpoints
   async getUserProfile() {
     const headers = await this.getAuthHeaders();
