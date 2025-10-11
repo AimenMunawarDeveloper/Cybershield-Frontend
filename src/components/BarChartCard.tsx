@@ -1,234 +1,49 @@
 "use client";
 
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
-import {
-  Users,
-  Shield,
-  Target,
-  Award,
-  BookOpen,
-  TrendingUp,
-  UserCheck,
-} from "lucide-react";
+import { Users, MousePointer, ShoppingCart, Wrench } from "lucide-react";
 
-interface BarChartCardProps {
-  userRole?: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
-}
+const chartData = [
+  { name: "1", value: 320 },
+  { name: "2", value: 230 },
+  { name: "3", value: 120 },
+  { name: "4", value: 290 },
+  { name: "5", value: 490 },
+  { name: "6", value: 390 },
+  { name: "7", value: 470 },
+  { name: "8", value: 290 },
+  { name: "9", value: 170 },
+  { name: "10", value: 170 },
+];
 
-const getRoleBasedData = (role: string) => {
-  switch (role) {
-    case "system_admin":
-      return {
-        chartData: [
-          { name: "Week 1", value: 420 },
-          { name: "Week 2", value: 380 },
-          { name: "Week 3", value: 510 },
-          { name: "Week 4", value: 460 },
-          { name: "Week 5", value: 580 },
-          { name: "Week 6", value: 520 },
-          { name: "Week 7", value: 640 },
-          { name: "Week 8", value: 590 },
-        ],
-        title: "Platform Activity",
-        subtitle: "Total user engagement across all organizations",
-        metrics: [
-          {
-            icon: Users,
-            label: "Total Users",
-            value: "8,430",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Shield,
-            label: "Active Campaigns",
-            value: "47",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Target,
-            label: "Phishing Tests",
-            value: "1,247",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Award,
-            label: "Certificates",
-            value: "2,340",
-            color: "var(--neon-blue)",
-          },
-        ],
-      };
-    case "client_admin":
-      return {
-        chartData: [
-          { name: "Week 1", value: 85 },
-          { name: "Week 2", value: 92 },
-          { name: "Week 3", value: 78 },
-          { name: "Week 4", value: 96 },
-          { name: "Week 5", value: 88 },
-          { name: "Week 6", value: 94 },
-          { name: "Week 7", value: 87 },
-          { name: "Week 8", value: 91 },
-        ],
-        title: "Organization Activity",
-        subtitle: "Your institution's user engagement",
-        metrics: [
-          {
-            icon: Users,
-            label: "Org Users",
-            value: "342",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: UserCheck,
-            label: "Active Users",
-            value: "285",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Shield,
-            label: "Campaigns",
-            value: "5",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Award,
-            label: "Certificates",
-            value: "156",
-            color: "var(--neon-blue)",
-          },
-        ],
-      };
-    case "affiliated":
-      return {
-        chartData: [
-          { name: "Week 1", value: 2 },
-          { name: "Week 2", value: 4 },
-          { name: "Week 3", value: 3 },
-          { name: "Week 4", value: 5 },
-          { name: "Week 5", value: 4 },
-          { name: "Week 6", value: 6 },
-          { name: "Week 7", value: 5 },
-          { name: "Week 8", value: 7 },
-        ],
-        title: "Your Learning Progress",
-        subtitle: "Courses completed each week",
-        metrics: [
-          {
-            icon: BookOpen,
-            label: "Courses",
-            value: "8/15",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Award,
-            label: "Badges",
-            value: "8",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Shield,
-            label: "Tests Passed",
-            value: "12/15",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: TrendingUp,
-            label: "Streak",
-            value: "7 days",
-            color: "var(--neon-blue)",
-          },
-        ],
-      };
-    case "non_affiliated":
-      return {
-        chartData: [
-          { name: "Week 1", value: 1 },
-          { name: "Week 2", value: 2 },
-          { name: "Week 3", value: 1 },
-          { name: "Week 4", value: 3 },
-          { name: "Week 5", value: 2 },
-          { name: "Week 6", value: 4 },
-          { name: "Week 7", value: 3 },
-          { name: "Week 8", value: 5 },
-        ],
-        title: "Your Learning Progress",
-        subtitle: "Courses completed each week",
-        metrics: [
-          {
-            icon: BookOpen,
-            label: "Courses",
-            value: "3/10",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Award,
-            label: "Badges",
-            value: "4",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Shield,
-            label: "Tests Passed",
-            value: "8/12",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: TrendingUp,
-            label: "Streak",
-            value: "3 days",
-            color: "var(--neon-blue)",
-          },
-        ],
-      };
-    default:
-      return {
-        chartData: [
-          { name: "Week 1", value: 1 },
-          { name: "Week 2", value: 2 },
-          { name: "Week 3", value: 1 },
-          { name: "Week 4", value: 3 },
-          { name: "Week 5", value: 2 },
-          { name: "Week 6", value: 4 },
-          { name: "Week 7", value: 3 },
-          { name: "Week 8", value: 5 },
-        ],
-        title: "Your Learning Progress",
-        subtitle: "Courses completed each week",
-        metrics: [
-          {
-            icon: BookOpen,
-            label: "Courses",
-            value: "3/10",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Award,
-            label: "Badges",
-            value: "4",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: Shield,
-            label: "Tests Passed",
-            value: "8/12",
-            color: "var(--neon-blue)",
-          },
-          {
-            icon: TrendingUp,
-            label: "Streak",
-            value: "3 days",
-            color: "var(--neon-blue)",
-          },
-        ],
-      };
-  }
-};
+const metrics = [
+  {
+    icon: Users,
+    label: "Users",
+    value: "32,984",
+    color: "var(--neon-blue)",
+  },
+  {
+    icon: MousePointer,
+    label: "Clicks",
+    value: "2,42m",
+    color: "var(--neon-blue)",
+  },
+  {
+    icon: ShoppingCart,
+    label: "Sales",
+    value: "2,400$",
+    color: "var(--neon-blue)",
+  },
+  {
+    icon: Wrench,
+    label: "Items",
+    value: "320",
+    color: "var(--neon-blue)",
+  },
+];
 
-export default function BarChartCard({
-  userRole = "non_affiliated",
-}: BarChartCardProps) {
-  const { chartData, title, subtitle, metrics } = getRoleBasedData(userRole);
+export default function BarChartCard() {
   return (
     <div className="dashboard-card rounded-lg p-6 relative overflow-hidden">
       {/* Bar Chart Section */}
@@ -247,30 +62,31 @@ export default function BarChartCard({
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+              tick={{ fill: "transparent", fontSize: 0 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
               tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
-              domain={[0, Math.max(...chartData.map((d) => d.value)) + 50]}
+              domain={[0, 500]}
+              ticks={[0, 100, 200, 300, 400, 500]}
             />
             <Bar
               dataKey="value"
-              fill="var(--neon-blue)"
+              fill="white"
               radius={[8, 8, 0, 0]}
-              maxBarSize={30}
+              maxBarSize={20}
             />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Title Section */}
+      {/* Active Users Section */}
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-white mb-1">{title}</h3>
+        <h3 className="text-lg font-bold text-white mb-1">Active Users</h3>
         <p className="text-sm">
-          <span className="text-[var(--success-green)]">(+15%)</span>
-          <span className="text-[var(--medium-grey)]"> {subtitle}</span>
+          <span className="text-[var(--success-green)]">(+23)</span>
+          <span className="text-[var(--medium-grey)]"> than last week</span>
         </p>
       </div>
 
