@@ -44,8 +44,8 @@ const data = {
       isActive: true,
     },
     {
-      title: "Learning Modules",
-      url: "/dashboard/learning",
+      title: "Training Modules",
+      url: "/dashboard/training-modules",
       icon: BookOpen,
       badge: "12",
     },
