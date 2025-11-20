@@ -18,6 +18,7 @@ import {
   MessageSquare,
   Building2,
   Building,
+  Mail,
 } from "lucide-react";
 
 import {
@@ -59,6 +60,11 @@ const data = {
       title: "WhatsApp Phishing",
       url: "/dashboard/whatsapp-phishing",
       icon: MessageSquare,
+    },
+    {
+      title: "Email Phishing",
+      url: "/dashboard/email-phishing",
+      icon: Mail,
     },
     {
       title: "Risk Analysis",

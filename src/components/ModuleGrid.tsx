@@ -1,7 +1,21 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { Clock, Shield, Lock, Star, Users, Award } from "lucide-react";
+
+interface Module {
+  id: number;
+  title: string;
+  description: string;
+  duration: string;
+  difficulty: string;
+  imageUrl: string;
+  category: string;
+  isPremium: boolean;
+  isCustom: boolean;
+  progress: number;
+}
 
 // Container component for grid layout
 const ModuleGrid = () => {
@@ -145,8 +159,14 @@ const ModuleGrid = () => {
   );
 };
 
-const ModuleCard = ({ module }) => {
-  const getDifficultyColor = (difficulty) => {
+const ModuleCard = ({ module }: { module: Module }) => {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/dashboard/training-modules/${module.id}`);
+  };
+
+  const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "Beginner":
         return "bg-green-100 text-green-800";
@@ -159,7 +179,7 @@ const ModuleCard = ({ module }) => {
     }
   };
 
-  const getCategoryIcon = (category) => {
+  const getCategoryIcon = (category: string) => {
     switch (category) {
       case "Security Awareness":
         return <Shield className="w-4 h-4" />;
@@ -181,7 +201,10 @@ const ModuleCard = ({ module }) => {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:shadow-2xl hover:transform hover:scale-[1.03] cursor-pointer border border-gray-100">
+    <div 
+      onClick={handleCardClick}
+      className="group relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:shadow-2xl hover:transform hover:scale-[1.03] cursor-pointer border border-gray-100"
+    >
       <div className="absolute -right-12 -top-12 h-40 w-40 bg-gradient-to-br from-[var(--neon-blue)]/30 to-[var(--purple-blue)]/30 rounded-full blur-2xl group-hover:blur-3xl transition-all duration-300"></div>
 
       {/* Image Container with enhanced gradient */}
@@ -193,7 +216,8 @@ const ModuleCard = ({ module }) => {
           className="h-full w-full object-cover transform transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
           onError={(e) => {
-            e.target.src =
+            const target = e.target as HTMLImageElement;
+            target.src =
               "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
           }}
         />
@@ -245,7 +269,7 @@ const ModuleCard = ({ module }) => {
 
         {/* Footer with action buttons */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-          <div className="flex gap-2">
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
             <button className="px-3 py-1.5 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
               Update
             </button>
