@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import ReactPaginate from "react-paginate";
 import {
   ChevronUp,
@@ -13,10 +14,15 @@ import {
 } from "lucide-react";
 
 const ModuleTable = () => {
+  const router = useRouter();
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(0);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
+
+  const handleModuleClick = (moduleId: number) => {
+    router.push(`/dashboard/training-modules/${moduleId}`);
+  };
 
   const modules = [
     {
@@ -420,7 +426,11 @@ const ModuleTable = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentData.map((module) => (
-              <tr key={module.id} className="hover:bg-gray-50">
+              <tr 
+                key={module.id} 
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleModuleClick(module.id)}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {module.name}
@@ -470,7 +480,7 @@ const ModuleTable = () => {
                     />
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-2">
                     <button className="p-1 text-gray-400 hover:text-[var(--neon-blue)] transition-colors">
                       <Edit className="w-4 h-4" />
