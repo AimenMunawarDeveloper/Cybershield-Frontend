@@ -19,6 +19,7 @@ import {
   Building2,
   Building,
   Mail,
+  Phone,
 } from "lucide-react";
 
 import {
@@ -65,6 +66,11 @@ const data = {
       title: "Email Phishing",
       url: "/dashboard/email-phishing",
       icon: Mail,
+    },
+    {
+      title: "Voice Phishing",
+      url: "/dashboard/voice-phishing",
+      icon: Phone,
     },
     {
       title: "Risk Analysis",
