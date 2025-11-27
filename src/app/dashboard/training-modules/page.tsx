@@ -102,9 +102,17 @@ export default function TrainingModulesPage() {
 
           {/* Training Module Library Section */}
           <div className="mb-8 mx-4 sm:mx-6 lg:mx-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Training Module Library
-            </h2>
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                CYBERSHIELD CORE CURRICULUM (FOUNDATIONAL)
+              </h2>
+              <p className="text-lg text-gray-700 mb-2">
+                Beginner → Intermediate → Advanced Tracks
+              </p>
+              <p className="text-gray-600 mb-4">
+                Designed specifically for CyberShield LMS.
+              </p>
+            </div>
             <p className="text-gray-600 mb-6">
               See our training modules support article.{" "}
               <a href="#" className="text-[var(--neon-blue)] hover:underline">

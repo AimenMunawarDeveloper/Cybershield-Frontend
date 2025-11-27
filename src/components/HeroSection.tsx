@@ -56,7 +56,7 @@ export default function HeroSection() {
       duration: "15 min",
       image:
         "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      featured: true,
+      featured: false,
     },
     {
       id: 2,
@@ -65,7 +65,7 @@ export default function HeroSection() {
         "Master the art of creating and managing strong passwords to protect your digital identity.",
       duration: "12 min",
       image:
-        "https://images.unsplash.com/photo-1590736969955-71cc94901144?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        "https://images.unsplash.com/photo-1633265486064-086b219458ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       featured: false,
     },
     {
