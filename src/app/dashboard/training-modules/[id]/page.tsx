@@ -344,6 +344,11 @@ export default function TrainingModuleDetailPage() {
                               {module.submodules.map((submodule) => (
                                 <button
                                   key={submodule.id}
+                                  onClick={() =>
+                                    router.push(
+                                      `/dashboard/training-modules/${courseId}/${submodule.id}`
+                                    )
+                                  }
                                   className="w-full px-4 py-3 pl-14 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-[var(--neon-blue)] transition-colors flex items-center gap-2 border-b border-gray-100 last:border-b-0"
                                 >
                                   <ChevronRight className="w-4 h-4 text-gray-400" />
@@ -440,34 +445,29 @@ export default function TrainingModuleDetailPage() {
                 <p className="text-sm text-gray-600 mb-4">
                   Badges you can earn in this course.
                 </p>
-                <div className="grid grid-cols-3 gap-1.5">
-                  {/* Verified Badge - Smaller */}
-                  <div className="col-span-3 p-1.5 bg-gradient-to-br from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 border-2 border-[var(--neon-blue)] rounded-lg">
-                    <div className="flex flex-col items-center text-center">
-                      <Award className="w-4 h-4 text-[var(--neon-blue)] mb-0.5" />
-                      <span className="text-[10px] font-semibold text-[var(--neon-blue)]">
-                        Verified
-                      </span>
-                      <span className="text-[10px] text-gray-600 mt-0.5 line-clamp-2">
-                        {course.title}
-                      </span>
-                    </div>
+                <div className="grid grid-cols-3 gap-x-0.5 gap-y-2">
+                  {/* Course Badge - Square with Text */}
+                  <div className="w-16 h-16 p-1 bg-gradient-to-br from-[var(--electric-blue)]/15 to-[var(--medium-blue)]/15 border-2 border-[var(--electric-blue)] rounded-lg flex flex-col items-center justify-center">
+                    <Award className="w-4 h-4 text-[var(--electric-blue)] mb-0.5 flex-shrink-0" />
+                    <span className="text-[8px] font-semibold text-[var(--electric-blue)] text-center leading-tight line-clamp-2 px-0.5">
+                      {course.title.split(" ").slice(0, 2).join(" ")}
+                    </span>
                   </div>
-                  {/* Other Badges - Smaller */}
-                  <div className="p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center aspect-square">
-                    <Network className="w-2.5 h-2.5 text-[var(--neon-blue)]" />
+                  {/* Other Badges - Fixed Size */}
+                  <div className="w-16 h-16 p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center">
+                    <Network className="w-5 h-5 text-[var(--neon-blue)]" />
                   </div>
-                  <div className="p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center aspect-square">
-                    <Bug className="w-2.5 h-2.5 text-[var(--neon-blue)]" />
+                  <div className="w-16 h-16 p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center">
+                    <Bug className="w-5 h-5 text-[var(--neon-blue)]" />
                   </div>
-                  <div className="p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center aspect-square">
-                    <Key className="w-2.5 h-2.5 text-[var(--neon-blue)]" />
+                  <div className="w-16 h-16 p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center">
+                    <Key className="w-5 h-5 text-[var(--neon-blue)]" />
                   </div>
-                  <div className="p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center aspect-square">
-                    <Shield className="w-2.5 h-2.5 text-[var(--neon-blue)]" />
+                  <div className="w-16 h-16 p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-[var(--neon-blue)]" />
                   </div>
-                  <div className="p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center aspect-square">
-                    <Network className="w-2.5 h-2.5 text-[var(--neon-blue)]" />
+                  <div className="w-16 h-16 p-1 border-2 border-[var(--neon-blue)]/30 rounded-full flex items-center justify-center">
+                    <Network className="w-5 h-5 text-[var(--neon-blue)]" />
                   </div>
                 </div>
               </div>

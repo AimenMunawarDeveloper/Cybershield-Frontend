@@ -186,7 +186,7 @@ export const courses: Course[] = [
       "Students, general public, new employees, non-technical users",
     goal: "Identify, avoid, and report common cyber threats",
     imageUrl:
-      "https://images.unsplash.com/photo-1590736969955-71cc94901144?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1633265486064-086b219458ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
     isPremium: false,
     isCustom: false,
     modules: [
