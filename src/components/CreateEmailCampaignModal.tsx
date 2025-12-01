@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { X, Mail, FileText, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Mail, FileText } from "lucide-react";
 
 interface CreateEmailCampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (campaignData: EmailCampaignData) => void;
+  onSubmit: (emailData: EmailCampaignData) => Promise<void>;
+  isLoading?: boolean;
+  initialData?: Partial<EmailCampaignData>;
 }
 
 interface EmailCampaignData {
@@ -14,54 +16,60 @@ interface EmailCampaignData {
   sentTo: string;
   subject: string;
   bodyContent: string;
-  template?: string;
 }
 
 export default function CreateEmailCampaignModal({
   isOpen,
   onClose,
   onSubmit,
+  isLoading = false,
+  initialData,
 }: CreateEmailCampaignModalProps) {
   const [formData, setFormData] = useState<EmailCampaignData>({
     sentBy: "",
     sentTo: "",
     subject: "",
     bodyContent: "",
-    template: "",
   });
 
-  const templates = [
-    { id: "1", name: "Template 1" },
-    { id: "2", name: "Template 2" },
-    { id: "3", name: "Template 3" },
-  ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isOpen && initialData) {
+      setFormData((prev) => ({
+        sentBy: initialData.sentBy || prev.sentBy,
+        sentTo: initialData.sentTo || prev.sentTo,
+        subject: initialData.subject || prev.subject,
+        bodyContent: initialData.bodyContent || prev.bodyContent,
+      }));
+    } else if (!isOpen) {
+ 
+      setFormData({
+        sentBy: "",
+        sentTo: "",
+        subject: "",
+        bodyContent: "",
+      });
+    }
+  }, [isOpen, initialData]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    console.log("Email campaign form submitted!");
-    console.log("Form data:", formData);
+    if (isLoading) return;
 
-    // Check if form is valid
-    if (
-      !formData.sentBy ||
-      !formData.sentTo ||
-      !formData.subject ||
-      !formData.bodyContent
-    ) {
+    if (!formData.sentBy || !formData.sentTo || !formData.subject || !formData.bodyContent) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    onSubmit(formData);
-    onClose();
-    // Reset form
+    await onSubmit(formData);
+    
+    
     setFormData({
       sentBy: "",
       sentTo: "",
       subject: "",
       bodyContent: "",
-      template: "",
     });
   };
 
@@ -71,48 +79,17 @@ export default function CreateEmailCampaignModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Create New Email Campaign</h2>
+          <h2 className="text-xl font-bold text-white">Send Email</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors"
+            disabled={isLoading}
+            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5 text-white" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Template Selection */}
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <FileText className="w-4 h-4 inline mr-2" />
-              Choose Template
-            </label>
-            <div className="relative">
-              <select
-                value={formData.template}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, template: e.target.value }))
-                }
-                className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white focus:border-[var(--neon-blue)] focus:outline-none appearance-none pr-10"
-              >
-                <option value="" className="bg-[var(--navy-blue-lighter)]">
-                  Select a template
-                </option>
-                {templates.map((template) => (
-                  <option
-                    key={template.id}
-                    value={template.id}
-                    className="bg-[var(--navy-blue-lighter)]"
-                  >
-                    {template.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[var(--medium-grey)] pointer-events-none" />
-            </div>
-          </div>
-
-          {/* Sent By */}
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
@@ -127,10 +104,10 @@ export default function CreateEmailCampaignModal({
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder="sender@example.com"
               required
+              disabled={isLoading}
             />
           </div>
 
-          {/* Sent To */}
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
@@ -145,10 +122,10 @@ export default function CreateEmailCampaignModal({
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder="recipient@example.com"
               required
+              disabled={isLoading}
             />
           </div>
 
-          {/* Subject */}
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
@@ -163,14 +140,15 @@ export default function CreateEmailCampaignModal({
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder="Enter email subject"
               required
+              disabled={isLoading}
             />
           </div>
 
-          {/* Body Content */}
+    
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
-              Body Content <span className="text-red-400">*</span>
+              Body <span className="text-red-400">*</span>
             </label>
             <textarea
               value={formData.bodyContent}
@@ -184,6 +162,7 @@ export default function CreateEmailCampaignModal({
               placeholder="Enter email body content"
               rows={8}
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -191,15 +170,24 @@ export default function CreateEmailCampaignModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors"
+              disabled={isLoading}
+              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
+              disabled={isLoading}
+              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Create Campaign
+              {isLoading ? (
+                <>
+                  <span className="animate-spin">⏳</span>
+                  Sending...
+                </>
+              ) : (
+                "Send Email"
+              )}
             </button>
           </div>
         </form>
@@ -207,4 +195,3 @@ export default function CreateEmailCampaignModal({
     </div>
   );
 }
-
