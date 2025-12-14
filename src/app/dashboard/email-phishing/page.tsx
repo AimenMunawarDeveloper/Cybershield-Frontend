@@ -5,6 +5,7 @@ import { Mail, Send, Shield, AlertTriangle, Lock, Globe, CheckCircle2, XCircle, 
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface EmailTemplateContent {
   sentBy?: string;
@@ -35,6 +36,7 @@ interface EmailRecord {
 
 export default function EmailPhishingPage() {
   const { getToken } = useAuth();
+  const { t, tAsync, preTranslate, language } = useTranslation();
   const [showModal, setShowModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<PhishingTemplate | null>(null);
@@ -45,6 +47,7 @@ export default function EmailPhishingPage() {
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [emails, setEmails] = useState<EmailRecord[]>([]);
   const [loadingEmails, setLoadingEmails] = useState(true);
+  const [translationReady, setTranslationReady] = useState(false);
 
   // Fetch templates from MongoDB
   const fetchTemplates = async () => {
@@ -63,7 +66,22 @@ export default function EmailPhishingPage() {
 
       if (response.ok && result.success) {
         console.log("✅ Templates fetched successfully:", result.data.templates?.length || 0);
-        setTemplates(result.data.templates || []);
+        const templatesData = result.data.templates || [];
+        
+        // Pre-translate dynamic template data
+        if (language === "ur") {
+          const dynamicStrings = templatesData.flatMap((template: PhishingTemplate) => [
+            template.title,
+            template.description,
+            template.category,
+            template.emailTemplate.subject,
+            template.emailTemplate.bodyContent,
+          ]).filter(Boolean);
+          
+          await preTranslate(dynamicStrings);
+        }
+        
+        setTemplates(templatesData);
       } else {
         console.error("❌ Failed to fetch templates:", result.message);
       }
@@ -113,6 +131,81 @@ export default function EmailPhishingPage() {
     });
   };
 
+  // Pre-translate static strings when language changes
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page
+      const staticStrings = [
+        // Hero section
+        "Email Phishing Simulation",
+        "Create and manage realistic email phishing campaigns to test your organization's security awareness.",
+        "Realistic Scenarios",
+        "Security Training",
+        "Safe Testing",
+        "Send Email",
+        
+        // Features section
+        "Email Phishing Features",
+        "Multi-Vector Phishing Campaigns",
+        "Test your users with realistic email phishing scenarios including fake security alerts, account verifications, and urgent messages.",
+        "Campaign Management",
+        "Track campaign performance, user interactions, and generate detailed reports to measure security awareness improvements.",
+        "Why Choose Us?",
+        "Industry-leading platform for Security Awareness Training",
+        
+        // Templates section
+        "Phishing Email Templates",
+        "Banking Verification",
+        "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
+        "Financial",
+        "Account Security Alert",
+        "Test how users respond to urgent security notifications and password reset requests from seemingly legitimate sources.",
+        "Security",
+        "Package Delivery",
+        "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
+        "Delivery",
+        "Job Opportunity",
+        "Create realistic job offer emails to evaluate how well users can identify employment-related phishing attempts.",
+        "Employment",
+        "View Template",
+        "Use Template",
+        
+        // Email history section
+        "Email History",
+        "Recent email campaigns and their status",
+        "Sent",
+        "Failed",
+        "To",
+        
+        // Loading/error states
+        "Loading templates...",
+        "No templates available. Please seed the database first.",
+        "Loading emails...",
+        "No emails sent yet",
+        "Send your first phishing simulation email to get started.",
+        "Email sent successfully to",
+        "Failed to send email",
+        "Bulk email sent!",
+        "successful",
+        "failed",
+        "out of",
+        "recipients.",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
   useEffect(() => {
     fetchTemplates();
     fetchEmails();
@@ -153,18 +246,29 @@ export default function EmailPhishingPage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setMessage({ type: "success", text: `Email sent successfully to ${emailData.sentTo}!` });
+        const recipientCount = result.data?.total || 1;
+        const successCount = result.data?.successful || 1;
+        const failCount = result.data?.failed || 0;
+        
+        if (recipientCount > 1) {
+          setMessage({ 
+            type: "success", 
+            text: t(`Bulk email sent! ${successCount} successful, ${failCount} failed out of ${recipientCount} recipients.`)
+          });
+        } else {
+          setMessage({ type: "success", text: t(`Email sent successfully to ${emailData.sentTo}!`) });
+        }
         setShowModal(false);
         // Refresh email list after sending
         fetchEmails();
       } else {
-        setMessage({ type: "error", text: result.message || "Failed to send email" });
+        setMessage({ type: "error", text: result.message || t("Failed to send email") });
       }
     } catch (error) {
       console.error("Error sending email:", error);
       setMessage({ 
         type: "error", 
-        text: "Failed to send email. Please check your backend connection." 
+        text: t("Failed to send email. Please check your backend connection.") 
       });
     } finally {
       setIsLoading(false);
@@ -176,15 +280,36 @@ export default function EmailPhishingPage() {
     setShowTemplateModal(true);
   };
 
-  const handleUseTemplate = (template: PhishingTemplate, e: React.MouseEvent) => {
+  const handleUseTemplate = async (template: PhishingTemplate, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering the view modal
+    
+    // Wait for translations to complete before opening modal
+    const [translatedSubject, translatedBody] = await Promise.all([
+      tAsync(template.emailTemplate.subject),
+      tAsync(template.emailTemplate.bodyContent)
+    ]);
+    
     setInitialEmailData({
-      subject: template.emailTemplate.subject,
-      bodyContent: template.emailTemplate.bodyContent,
+      subject: translatedSubject,
+      bodyContent: translatedBody,
     });
     setShowModal(true);
   };
 
+
+  // Show loading state while translating or fetching data
+  if (!translationReady || loadingTemplates) {
+    return (
+      <div className="flex flex-1 items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">
+            {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -202,27 +327,26 @@ export default function EmailPhishingPage() {
               </div>
               
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                Email Phishing
-                <span className="block text-[var(--neon-blue)] mt-1">Awareness Training</span>
+                {t("Email Phishing")}
+                <span className="block text-[var(--neon-blue)] mt-1">{t("Awareness Training")}</span>
               </h1>
               
               <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
-                Protect your organization by training users to identify and respond to phishing emails. 
-                Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.
+                {t("Protect your organization by training users to identify and respond to phishing emails. Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Shield className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">Realistic Scenarios</span>
+                  <span className="text-white text-xs">{t("Realistic Scenarios")}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <AlertTriangle className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">Security Training</span>
+                  <span className="text-white text-xs">{t("Security Training")}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Lock className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">Safe Testing</span>
+                  <span className="text-white text-xs">{t("Safe Testing")}</span>
                 </div>
               </div>
             </div>
@@ -234,10 +358,10 @@ export default function EmailPhishingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Phishing Email Templates
+                {t("Phishing Email Templates")}
               </h2>
               <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
-                Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.
+                {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
 
@@ -245,12 +369,12 @@ export default function EmailPhishingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {loadingTemplates ? (
                 <div className="col-span-full text-center py-12">
-                  <div className="text-[var(--medium-grey)]">Loading templates...</div>
+                  <div className="text-[var(--medium-grey)]">{t("Loading templates...")}</div>
                 </div>
               ) : templates.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                  <p className="text-[var(--medium-grey)]">No templates available. Please seed the database first.</p>
+                  <p className="text-[var(--medium-grey)]">{t("No templates available. Please seed the database first.")}</p>
                 </div>
               ) : (
                 templates.map((template) => (
@@ -275,7 +399,7 @@ export default function EmailPhishingPage() {
                     {/* Category Badge with glow */}
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1.5 bg-[var(--neon-blue)] text-white text-xs font-semibold rounded-full shadow-lg shadow-[var(--neon-blue)]/50 backdrop-blur-sm">
-                        {template.category}
+                        {t(template.category)}
                       </span>
                     </div>
 
@@ -295,13 +419,13 @@ export default function EmailPhishingPage() {
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
-                          {template.title}
+                          {t(template.title)}
                         </h3>
                       </div>
                     </div>
                     
                     <p className="text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
-                      {template.description}
+                      {t(template.description)}
                     </p>
 
                     {/* Action Buttons */}
@@ -313,14 +437,14 @@ export default function EmailPhishingPage() {
                         }}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       >
-                        <span>View</span>
+                        <span>{t("View")}</span>
                         <Send className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => handleUseTemplate(template, e)}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       >
-                        <span>Use</span>
+                        <span>{t("Use")}</span>
                         <Mail className="w-4 h-4" />
                       </button>
                     </div>
@@ -343,9 +467,9 @@ export default function EmailPhishingPage() {
                       <Send className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Send Test Email</h2>
+                      <h2 className="text-2xl font-bold text-white">{t("Send Test Email")}</h2>
                       <p className="text-[var(--medium-grey)] text-sm">
-                        Send test emails for phishing awareness
+                        {t("Send test emails for phishing awareness")}
                       </p>
                     </div>
                   </div>
@@ -355,7 +479,7 @@ export default function EmailPhishingPage() {
                     className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors disabled:opacity-50"
                   >
                     <Send className="w-4 h-4" />
-                    Send Email
+                    {t("Send Email")}
                   </button>
                 </div>
 
@@ -382,26 +506,26 @@ export default function EmailPhishingPage() {
                 <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-6 border border-[var(--medium-grey)] border-opacity-20">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-white">
-                      Email History
+                      {t("Email History")}
                     </h3>
                     <button
                       onClick={fetchEmails}
                       disabled={loadingEmails}
                       className="text-sm text-[var(--neon-blue)] hover:text-[var(--neon-blue-dark)] transition-colors disabled:opacity-50"
                     >
-                      {loadingEmails ? "Refreshing..." : "Refresh"}
+                      {loadingEmails ? t("Refreshing...") : t("Refresh")}
                     </button>
                   </div>
 
                   {loadingEmails ? (
                     <div className="text-center py-8">
-                      <div className="text-[var(--medium-grey)]">Loading emails...</div>
+                      <div className="text-[var(--medium-grey)]">{t("Loading emails...")}</div>
                     </div>
                   ) : emails.length === 0 ? (
                     <div className="text-center py-8">
                       <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
                       <p className="text-sm text-[var(--medium-grey)]">
-                        No emails sent yet. Send your first email above!
+                        {t("No emails sent yet. Send your first email above!")}
                       </p>
                     </div>
                   ) : (
@@ -420,7 +544,7 @@ export default function EmailPhishingPage() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-start justify-between gap-2 mb-2">
                                 <p className="text-white font-semibold truncate">
-                                  {email.subject}
+                                  {t(email.subject)}
                                 </p>
                                 <span
                                   className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
@@ -429,15 +553,15 @@ export default function EmailPhishingPage() {
                                       : "bg-red-900/30 text-red-400 border border-red-500/30"
                                   }`}
                                 >
-                                  {email.status === "sent" ? "Sent" : "Failed"}
+                                  {email.status === "sent" ? t("Sent") : t("Failed")}
                                 </span>
                               </div>
                               <div className="space-y-1">
                                 <p className="text-sm text-[var(--medium-grey)] truncate">
-                                  <span className="text-white">To:</span> {email.sentTo}
+                                  <span className="text-white">{t("To")}:</span> {email.sentTo}
                                 </p>
                                 <p className="text-xs text-[var(--medium-grey)] truncate">
-                                  <span className="text-white">From:</span> {email.sentBy}
+                                  <span className="text-white">{t("From")}:</span> {email.sentBy}
                                 </p>
                                 <div className="flex items-center gap-1 text-xs text-[var(--medium-grey)] mt-2">
                                   <Clock className="w-3 h-3" />
