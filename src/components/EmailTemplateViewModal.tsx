@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Mail, Inbox, Send, Trash2, AlertCircle, Folder, Star, Archive, ChevronDown, User } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface EmailTemplateData {
   sentBy?: string;
@@ -22,16 +23,18 @@ export default function EmailTemplateViewModal({
   templateTitle,
   emailTemplate,
 }: EmailTemplateViewModalProps) {
+  const { t } = useTranslation();
+  
   if (!isOpen) return null;
 
   const sidebarItems = [
-    { icon: Inbox, label: "Inbox", active: true },
-    { icon: Star, label: "Starred", active: false },
-    { icon: Send, label: "Sent", active: false },
-    { icon: Archive, label: "Archive", active: false },
-    { icon: Trash2, label: "Trash", active: false },
-    { icon: AlertCircle, label: "Spam", active: false },
-    { icon: Folder, label: "Drafts", active: false },
+    { icon: Inbox, label: t("Inbox"), active: true },
+    { icon: Star, label: t("Starred"), active: false },
+    { icon: Send, label: t("Sent"), active: false },
+    { icon: Archive, label: t("Archive"), active: false },
+    { icon: Trash2, label: t("Trash"), active: false },
+    { icon: AlertCircle, label: t("Spam"), active: false },
+    { icon: Folder, label: t("Drafts"), active: false },
   ];
 
   // Parse email to extract display name and email address
@@ -72,7 +75,7 @@ export default function EmailTemplateViewModal({
             <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
               <Mail className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">Email Preview</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t("Email Preview")}</h2>
           </div>
           <button
             onClick={onClose}
@@ -89,7 +92,7 @@ export default function EmailTemplateViewModal({
             <div className="p-3 border-b border-gray-200">
               <button className="w-full px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium flex items-center justify-center gap-2">
                 <Send className="w-4 h-4" />
-                Compose
+                {t("Compose")}
               </button>
             </div>
 
@@ -156,7 +159,7 @@ export default function EmailTemplateViewModal({
               {/* Subject Line */}
               <div className="px-6 py-4 border-b border-gray-200">
                 <h1 className="text-xl font-medium text-gray-900">
-                  {emailTemplate.subject}
+                  {t(emailTemplate.subject)}
                 </h1>
               </div>
 
@@ -197,7 +200,7 @@ export default function EmailTemplateViewModal({
                     
                     {/* To separator */}
                     <div className="flex items-center gap-1.5 mt-1">
-                      <span className="text-sm text-gray-500">to me</span>
+                      <span className="text-sm text-gray-500">{t("to me")}</span>
                       <button className="p-0.5 hover:bg-gray-100 rounded transition-colors">
                         <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
                       </button>
@@ -210,7 +213,7 @@ export default function EmailTemplateViewModal({
               <div className="px-6 py-6">
                 <div className="prose prose-sm max-w-none">
                   <div className="whitespace-pre-wrap text-gray-800 leading-relaxed text-sm">
-                    {emailTemplate.bodyContent}
+                    {t(emailTemplate.bodyContent)}
                   </div>
                 </div>
               </div>

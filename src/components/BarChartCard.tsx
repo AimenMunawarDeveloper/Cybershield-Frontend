@@ -10,12 +10,13 @@ import {
   TrendingUp,
   UserCheck,
 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface BarChartCardProps {
   userRole?: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
 }
 
-const getRoleBasedData = (role: string) => {
+const getRoleBasedData = (role: string, t: any) => {
   switch (role) {
     case "system_admin":
       return {
@@ -29,24 +30,24 @@ const getRoleBasedData = (role: string) => {
           { name: "Week 7", value: 640 },
           { name: "Week 8", value: 590 },
         ],
-        title: "Platform Activity",
-        subtitle: "Total user engagement across all organizations",
+        title: t("Platform Activity"),
+        subtitle: t("Total user engagement across all organizations"),
         metrics: [
           {
             icon: Users,
-            label: "Total Users",
+            label: t("Total Users"),
             value: "8,430",
             color: "var(--neon-blue)",
           },
           {
             icon: Shield,
-            label: "Active Campaigns",
+            label: t("Active Campaigns"),
             value: "47",
             color: "var(--neon-blue)",
           },
           {
             icon: Target,
-            label: "Phishing Tests",
+            label: t("Phishing Tests"),
             value: "1,247",
             color: "var(--neon-blue)",
           },
@@ -70,24 +71,24 @@ const getRoleBasedData = (role: string) => {
           { name: "Week 7", value: 87 },
           { name: "Week 8", value: 91 },
         ],
-        title: "Organization Activity",
-        subtitle: "Your institution's user engagement",
+        title: t("Organization Activity"),
+        subtitle: t("Your institution's user engagement"),
         metrics: [
           {
             icon: Users,
-            label: "Org Users",
+            label: t("Org Users"),
             value: "342",
             color: "var(--neon-blue)",
           },
           {
             icon: UserCheck,
-            label: "Active Users",
+            label: t("Active Users"),
             value: "285",
             color: "var(--neon-blue)",
           },
           {
             icon: Shield,
-            label: "Campaigns",
+            label: t("Campaigns"),
             value: "5",
             color: "var(--neon-blue)",
           },
@@ -111,30 +112,30 @@ const getRoleBasedData = (role: string) => {
           { name: "Week 7", value: 5 },
           { name: "Week 8", value: 7 },
         ],
-        title: "Your Learning Progress",
-        subtitle: "Courses completed each week",
+        title: t("Your Learning Progress"),
+        subtitle: t("Courses completed each week"),
         metrics: [
           {
             icon: BookOpen,
-            label: "Courses",
+            label: t("Courses"),
             value: "8/15",
             color: "var(--neon-blue)",
           },
           {
             icon: Award,
-            label: "Badges",
+            label: t("Badges"),
             value: "8",
             color: "var(--neon-blue)",
           },
           {
             icon: Shield,
-            label: "Tests Passed",
+            label: t("Tests Passed"),
             value: "12/15",
             color: "var(--neon-blue)",
           },
           {
             icon: TrendingUp,
-            label: "Streak",
+            label: t("Streak"),
             value: "7 days",
             color: "var(--neon-blue)",
           },
@@ -228,7 +229,8 @@ const getRoleBasedData = (role: string) => {
 export default function BarChartCard({
   userRole = "non_affiliated",
 }: BarChartCardProps) {
-  const { chartData, title, subtitle, metrics } = getRoleBasedData(userRole);
+  const { t } = useTranslation();
+  const { chartData, title, subtitle, metrics } = getRoleBasedData(userRole, t);
   return (
     <div className="dashboard-card rounded-lg p-6 relative overflow-hidden">
       {/* Bar Chart Section */}

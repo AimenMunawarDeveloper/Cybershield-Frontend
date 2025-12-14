@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Mail, FileText, Globe } from "lucide-react";
+import { X, Mail, FileText } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CreateEmailCampaignModalProps {
   isOpen: boolean;
@@ -16,7 +17,6 @@ interface EmailCampaignData {
   sentTo: string;
   subject: string;
   bodyContent: string;
-  language?: string;
 }
 
 export default function CreateEmailCampaignModal({
@@ -26,12 +26,12 @@ export default function CreateEmailCampaignModal({
   isLoading = false,
   initialData,
 }: CreateEmailCampaignModalProps) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<EmailCampaignData>({
     sentBy: "",
     sentTo: "",
     subject: "",
     bodyContent: "",
-    language: "en",
   });
 
 
@@ -42,7 +42,6 @@ export default function CreateEmailCampaignModal({
         sentTo: initialData.sentTo || prev.sentTo,
         subject: initialData.subject || prev.subject,
         bodyContent: initialData.bodyContent || prev.bodyContent,
-        language: initialData.language || prev.language || "en",
       }));
     } else if (!isOpen) {
  
@@ -51,7 +50,6 @@ export default function CreateEmailCampaignModal({
         sentTo: "",
         subject: "",
         bodyContent: "",
-        language: "en",
       });
     }
   }, [isOpen, initialData]);
@@ -62,7 +60,7 @@ export default function CreateEmailCampaignModal({
     if (isLoading) return;
 
     if (!formData.sentBy || !formData.sentTo || !formData.subject || !formData.bodyContent) {
-      alert("Please fill in all required fields.");
+      alert(t("Please fill in all required fields."));
       return;
     }
 
@@ -74,7 +72,6 @@ export default function CreateEmailCampaignModal({
       sentTo: "",
       subject: "",
       bodyContent: "",
-      language: "en",
     });
   };
 
@@ -84,7 +81,7 @@ export default function CreateEmailCampaignModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Send Email</h2>
+          <h2 className="text-xl font-bold text-white">{t("Send Email")}</h2>
           <button
             onClick={onClose}
             disabled={isLoading}
@@ -98,7 +95,7 @@ export default function CreateEmailCampaignModal({
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
-              Sent By <span className="text-red-400">*</span>
+              {t("Sent By")} <span className="text-red-400">*</span>
             </label>
             <input
               type="email"
@@ -107,7 +104,7 @@ export default function CreateEmailCampaignModal({
                 setFormData((prev) => ({ ...prev, sentBy: e.target.value }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="sender@example.com"
+              placeholder={t("sender@example.com")}
               required
               disabled={isLoading}
             />
@@ -116,7 +113,7 @@ export default function CreateEmailCampaignModal({
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
-              Sent To <span className="text-red-400">*</span>
+              {t("Sent To")} <span className="text-red-400">*</span>
             </label>
             <textarea
               value={formData.sentTo}
@@ -124,20 +121,20 @@ export default function CreateEmailCampaignModal({
                 setFormData((prev) => ({ ...prev, sentTo: e.target.value }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="recipient@example.com, recipient2@example.com, recipient3@example.com"
+              placeholder={t("recipient@example.com, recipient2@example.com, recipient3@example.com")}
               rows={3}
               required
               disabled={isLoading}
             />
             <p className="text-xs text-[var(--medium-grey)] mt-1">
-              💡 Separate multiple email addresses with commas for bulk sending
+              💡 {t("Separate multiple email addresses with commas for bulk sending")}
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
-              Subject <span className="text-red-400">*</span>
+              {t("Subject")} <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -146,7 +143,7 @@ export default function CreateEmailCampaignModal({
                 setFormData((prev) => ({ ...prev, subject: e.target.value }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="Enter email subject"
+              placeholder={t("Enter email subject")}
               required
               disabled={isLoading}
             />
@@ -156,7 +153,7 @@ export default function CreateEmailCampaignModal({
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <FileText className="w-4 h-4 inline mr-2" />
-              Body <span className="text-red-400">*</span>
+              {t("Body")} <span className="text-red-400">*</span>
             </label>
             <textarea
               value={formData.bodyContent}
@@ -167,32 +164,11 @@ export default function CreateEmailCampaignModal({
                 }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="Enter email body content"
+              placeholder={t("Enter email body content")}
               rows={8}
               required
               disabled={isLoading}
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Globe className="w-4 h-4 inline mr-2" />
-              Language
-            </label>
-            <select
-              value={formData.language || "en"}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  language: e.target.value,
-                }))
-              }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white focus:border-[var(--neon-blue)] focus:outline-none"
-              disabled={isLoading}
-            >
-              <option value="en">English</option>
-              <option value="ur">Urdu</option>
-            </select>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
@@ -202,7 +178,7 @@ export default function CreateEmailCampaignModal({
               disabled={isLoading}
               className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t("Cancel")}
             </button>
             <button
               type="submit"
@@ -212,10 +188,10 @@ export default function CreateEmailCampaignModal({
               {isLoading ? (
                 <>
                   <span className="animate-spin">⏳</span>
-                  Sending...
+                  {t("Sending...")}
                 </>
               ) : (
-                "Send Email"
+                t("Send Email")
               )}
             </button>
           </div>

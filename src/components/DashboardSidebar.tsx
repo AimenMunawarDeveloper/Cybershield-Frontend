@@ -35,6 +35,7 @@ import {
   SidebarMenuBadge,
 } from "@/components/ui/sidebar";
 import { ApiClient } from "@/lib/api";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // This is sample data.
 const data = {
@@ -114,6 +115,7 @@ export function DashboardSidebar({
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -152,7 +154,7 @@ export function DashboardSidebar({
       </SidebarHeader>
       <SidebarContent className="bg-[var(--navy-blue-light)]">
         <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("Platform")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.navMain.map((item, index) => (
@@ -161,13 +163,13 @@ export function DashboardSidebar({
                     <SidebarMenuButton
                       asChild
                       isActive={pathname === item.url}
-                      tooltip={item.title}
+                      tooltip={t(item.title)}
                     >
                       <Link href={item.url}>
                         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                           <item.icon className="w-4 h-4 text-white" />
                         </div>
-                        <span>{item.title}</span>
+                        <span>{t(item.title)}</span>
                         {item.badge && (
                           <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
                         )}
@@ -189,13 +191,13 @@ export function DashboardSidebar({
                             isActive={
                               pathname === "/dashboard/organizations-management"
                             }
-                            tooltip="Organizations Management"
+                            tooltip={t("Organizations Management")}
                           >
                             <Link href="/dashboard/organizations-management">
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                                 <Building2 className="w-4 h-4 text-white" />
                               </div>
-                              <span>Organizations</span>
+                              <span>{t("Organizations")}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -212,13 +214,13 @@ export function DashboardSidebar({
                             isActive={
                               pathname === "/dashboard/organization-management"
                             }
-                            tooltip="Organization Management"
+                            tooltip={t("Organization Management")}
                           >
                             <Link href="/dashboard/organization-management">
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                                 <Building className="w-4 h-4 text-white" />
                               </div>
-                              <span>Organization</span>
+                              <span>{t("Organization")}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -231,7 +233,7 @@ export function DashboardSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Support</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("Support")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.support.map((item) => (
@@ -239,13 +241,13 @@ export function DashboardSidebar({
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.url}
-                    tooltip={item.title}
+                    tooltip={t(item.title)}
                   >
                     <Link href={item.url}>
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                         <item.icon className="w-4 h-4 text-white" />
                       </div>
-                      <span>{item.title}</span>
+                      <span>{t(item.title)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

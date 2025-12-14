@@ -8,23 +8,24 @@ import {
   Target,
   Award,
 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface DataTableProps {
   userRole?: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
 }
 
-const getRoleBasedData = (role: string) => {
+const getRoleBasedData = (role: string, t: any) => {
   switch (role) {
     case "system_admin":
       return {
-        title: "Organizations",
-        subtitle: "24 organizations managed",
+        title: t("Organizations"),
+        subtitle: t("24 organizations managed"),
         data: [
           {
             id: 1,
             item: {
               icon: "NUST",
-              name: "National University of Sciences & Technology",
+              name: t("National University of Sciences & Technology"),
               iconColor: "bg-blue-500",
             },
             members: [
@@ -33,14 +34,14 @@ const getRoleBasedData = (role: string) => {
               { name: "C", color: "bg-yellow-500" },
               { name: "D", color: "bg-red-500" },
             ],
-            metric: "2,847 users",
+            metric: t("2,847 users"),
             completion: 85,
           },
           {
             id: 2,
             item: {
               icon: "UET",
-              name: "University of Engineering & Technology",
+              name: t("University of Engineering & Technology"),
               iconColor: "bg-purple-500",
             },
             members: [
@@ -48,21 +49,21 @@ const getRoleBasedData = (role: string) => {
               { name: "F", color: "bg-pink-500" },
               { name: "G", color: "bg-teal-500" },
             ],
-            metric: "1,923 users",
+            metric: t("1,923 users"),
             completion: 72,
           },
         ],
       };
     case "client_admin":
       return {
-        title: "User Groups",
-        subtitle: "5 groups in your organization",
+        title: t("User Groups"),
+        subtitle: t("5 groups in your organization"),
         data: [
           {
             id: 1,
             item: {
               icon: "CS",
-              name: "Computer Science Department",
+              name: t("Computer Science Department"),
               iconColor: "bg-blue-500",
             },
             members: [
@@ -71,35 +72,35 @@ const getRoleBasedData = (role: string) => {
               { name: "C", color: "bg-yellow-500" },
               { name: "D", color: "bg-red-500" },
             ],
-            metric: "142 students",
+            metric: t("142 students"),
             completion: 78,
           },
           {
             id: 2,
             item: {
               icon: "EE",
-              name: "Electrical Engineering",
+              name: t("Electrical Engineering"),
               iconColor: "bg-purple-500",
             },
             members: [
               { name: "E", color: "bg-indigo-500" },
               { name: "F", color: "bg-pink-500" },
             ],
-            metric: "98 students",
+            metric: t("98 students"),
             completion: 65,
           },
         ],
       };
     case "affiliated":
       return {
-        title: "Your Courses",
-        subtitle: "8 courses completed",
+        title: t("Your Courses"),
+        subtitle: t("8 courses completed"),
         data: [
           {
             id: 1,
             item: {
               icon: "🛡️",
-              name: "Email Phishing Awareness",
+              name: t("Email Phishing Awareness"),
               iconColor: "bg-green-500",
             },
             members: [
@@ -107,29 +108,29 @@ const getRoleBasedData = (role: string) => {
               { name: "✓", color: "bg-green-500" },
               { name: "✓", color: "bg-green-500" },
             ],
-            metric: "100% score",
+            metric: t("100% score"),
             completion: 100,
           },
           {
             id: 2,
             item: {
               icon: "📱",
-              name: "WhatsApp Security",
+              name: t("WhatsApp Security"),
               iconColor: "bg-blue-500",
             },
             members: [
               { name: "✓", color: "bg-green-500" },
               { name: "✓", color: "bg-green-500" },
             ],
-            metric: "95% score",
+            metric: t("95% score"),
             completion: 95,
           },
         ],
       };
     case "non_affiliated":
       return {
-        title: "Available Courses",
-        subtitle: "3 courses completed",
+        title: t("Available Courses"),
+        subtitle: t("3 courses completed"),
         data: [
           {
             id: 1,
@@ -160,32 +161,32 @@ const getRoleBasedData = (role: string) => {
       };
     default:
       return {
-        title: "Available Courses",
-        subtitle: "3 courses completed",
+        title: t("Available Courses"),
+        subtitle: t("3 courses completed"),
         data: [
           {
             id: 1,
             item: {
               icon: "🛡️",
-              name: "Basic Cybersecurity Fundamentals",
+              name: t("Basic Cybersecurity Fundamentals"),
               iconColor: "bg-green-500",
             },
             members: [
               { name: "✓", color: "bg-green-500" },
               { name: "✓", color: "bg-green-500" },
             ],
-            metric: "92% score",
+            metric: t("92% score"),
             completion: 92,
           },
           {
             id: 2,
             item: {
               icon: "📧",
-              name: "Email Security Basics",
+              name: t("Email Security Basics"),
               iconColor: "bg-blue-500",
             },
             members: [{ name: "✓", color: "bg-green-500" }],
-            metric: "85% score",
+            metric: t("85% score"),
             completion: 85,
           },
         ],
@@ -196,7 +197,8 @@ const getRoleBasedData = (role: string) => {
 export default function DataTable({
   userRole = "non_affiliated",
 }: DataTableProps) {
-  const { title, subtitle, data } = getRoleBasedData(userRole);
+  const { t } = useTranslation();
+  const { title, subtitle, data } = getRoleBasedData(userRole, t);
   return (
     <div className="dashboard-card rounded-lg p-6">
       {/* Header */}
