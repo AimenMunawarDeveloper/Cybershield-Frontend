@@ -9,6 +9,8 @@ import {
 } from "@clerk/nextjs";
 import Link from "next/link";
 import { Bell, Search } from "lucide-react";
+import LanguageToggle from "@/components/LanguageToggle";
+import { useTranslation } from "@/hooks/useTranslation";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -31,6 +33,7 @@ interface TopBarProps {
 function UserGreeting() {
   const { user } = useUser();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const { t } = useTranslation();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -57,12 +60,12 @@ function UserGreeting() {
     });
   };
 
-  const firstName = user?.firstName || "User";
+  const firstName = t(user?.firstName || "User");
 
   return (
     <div className="flex flex-col">
       <span className="text-lg font-semibold text-white">
-        Hello {firstName}
+        {t("Hello")} {firstName}
       </span>
       <span className="text-sm text-[var(--medium-grey)]">
         {formatTime(currentTime)} • {formatDate(currentTime)}
@@ -74,13 +77,14 @@ function UserGreeting() {
 // Component for search bar
 function SearchBar() {
   const [searchQuery, setSearchQuery] = useState("");
+  const { t } = useTranslation();
 
   return (
     <div className="relative">
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--medium-grey)]" />
       <Input
         type="text"
-        placeholder="Search..."
+        placeholder={t("Search...")}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)]"
@@ -98,6 +102,7 @@ export default function TopBar({
   const isAuthPage =
     pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
   const { isLoaded } = useAuth();
+  const { t } = useTranslation();
 
   // Don't render TopBar on dashboard pages when variant is "main" since it will be handled by dashboard layout
   if (variant === "main" && isDashboardPage) return null;
@@ -169,7 +174,7 @@ export default function TopBar({
                         : "text-white hover:text-[var(--neon-blue)]"
                     }`}
                   >
-                    Sign In
+                    {t("Sign In")}
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
@@ -179,12 +184,15 @@ export default function TopBar({
                     asChild
                     className="bg-[var(--neon-blue)] text-[var(--navy-blue)] rounded-md font-medium text-sm h-8 px-4 cursor-pointer flex items-center hover:bg-[var(--electric-blue)] transition-colors"
                   >
-                    <Link href="/sign-up">Sign Up</Link>
+                    <Link href="/sign-up">{t("Sign Up")}</Link>
                   </Button>
                 </NavigationMenuLink>
               </NavigationMenuItem>
             </SignedOut>
             <SignedIn>
+              <NavigationMenuItem>
+                <LanguageToggle />
+              </NavigationMenuItem>
               <NavigationMenuItem>
                 <Button
                   variant="ghost"

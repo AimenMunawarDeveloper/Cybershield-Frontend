@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ApiClient } from "@/lib/api";
 import Link from "next/link";
 import NetworkBackground from "@/components/NetworkBackground";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Organization {
   _id: string;
@@ -18,6 +19,7 @@ interface Organization {
 }
 
 export default function SystemAdminPanel() {
+  const { t, preTranslate, language } = useTranslation();
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -25,6 +27,7 @@ export default function SystemAdminPanel() {
   const [error, setError] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [translationReady, setTranslationReady] = useState(false);
   const [syncResult, setSyncResult] = useState<{
     error?: string;
     results?: {
@@ -53,6 +56,60 @@ export default function SystemAdminPanel() {
     error: "",
   });
 
+  // Pre-translate static strings
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      const staticStrings = [
+        "Organizations Management",
+        "Manage all organizations in the system",
+        "Create Organization",
+        "Organization Name",
+        "Enter organization name",
+        "Description",
+        "Enter description (optional)",
+        "Cancel",
+        "Invite Client Admin",
+        "Email Address",
+        "Enter email address",
+        "Select Organization",
+        "Select...",
+        "Send Invite",
+        "Actions",
+        "Sync Users from Clerk",
+        "Organizations",
+        "Total Users",
+        "Active Users",
+        "Client Admins",
+        "Actions",
+        "Invite Admin",
+        "Loading organizations...",
+        "No organizations found",
+        "Create an organization to get started.",
+        "Create your first organization",
+        "Failed to fetch organizations",
+        "Organization created successfully",
+        "Failed to create organization",
+        "Invitation sent successfully",
+        "Failed to send invitation",
+        "Syncing users from Clerk...",
+        "User sync completed",
+        "User sync failed",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
   useEffect(() => {
     if (isLoaded && user) {
       fetchOrganizations();
@@ -79,11 +136,22 @@ export default function SystemAdminPanel() {
       setLoading(true);
       const apiClient = new ApiClient(getToken);
       const data = await apiClient.getOrganizations();
+      
+      // Pre-translate dynamic organization data
+      if (language === "ur") {
+        const dynamicStrings = data.organizations.flatMap((org: Organization) => [
+          org.name,
+          org.description || "",
+        ]).filter(Boolean);
+        
+        await preTranslate(dynamicStrings);
+      }
+      
       setOrganizations(data.organizations);
       setError(null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to fetch organizations"
+        err instanceof Error ? err.message : t("Failed to fetch organizations")
       );
     } finally {
       setLoading(false);
@@ -121,7 +189,7 @@ export default function SystemAdminPanel() {
         ...prev,
         submitting: false,
         error:
-          err instanceof Error ? err.message : "Failed to create organization",
+          err instanceof Error ? err.message : t("Failed to create organization"),
       }));
     }
   };
@@ -132,7 +200,7 @@ export default function SystemAdminPanel() {
     if (!inviteForm.orgId) {
       setInviteForm((prev) => ({
         ...prev,
-        error: "Please select an organization",
+        error: t("Please select an organization"),
       }));
       return;
     }
@@ -168,7 +236,7 @@ export default function SystemAdminPanel() {
         ...prev,
         submitting: false,
         error:
-          err instanceof Error ? err.message : "Failed to invite client admin",
+          err instanceof Error ? err.message : t("Failed to invite client admin"),
       }));
     }
   };
@@ -181,17 +249,22 @@ export default function SystemAdminPanel() {
       setSyncResult(result);
     } catch (err) {
       setSyncResult({
-        error: err instanceof Error ? err.message : "Sync failed",
+        error: err instanceof Error ? err.message : t("Sync failed"),
       });
     } finally {
       setSyncing(false);
     }
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || !translationReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">
+            {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -200,15 +273,15 @@ export default function SystemAdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">{t("Access Denied")}</h1>
           <p className="text-[var(--medium-grey)] mb-4">
-            Please sign in to access this page.
+            {t("Please sign in to access this page.")}
           </p>
           <Link
             href="/dashboard"
             className="text-[var(--neon-blue)] hover:text-white transition-colors"
           >
-            ← Back to Dashboard
+            {t("← Back to Dashboard")}
           </Link>
         </div>
       </div>
@@ -234,10 +307,10 @@ export default function SystemAdminPanel() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-white">
-                Organizations Management
+                {t("Organizations Management")}
               </h1>
               <p className="text-[var(--medium-grey)] text-lg">
-                Manage organizations and invite client administrators
+                {t("Manage organizations and invite client administrators")}
               </p>
             </div>
           </div>
@@ -252,7 +325,7 @@ export default function SystemAdminPanel() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-white group-hover:text-[var(--neon-blue)] transition-colors duration-300">
-              Create New Organization
+              {t("Create New Organization")}
             </h2>
           </div>
 
@@ -260,7 +333,7 @@ export default function SystemAdminPanel() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-white mb-3">
-                  Organization Name *
+                  {t("Organization Name")} *
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -279,14 +352,14 @@ export default function SystemAdminPanel() {
                       }))
                     }
                     className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
-                    placeholder="University Name"
+                    placeholder={t("University Name")}
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-white mb-3">
-                  Description (Optional)
+                  {t("Description (Optional)")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -304,7 +377,7 @@ export default function SystemAdminPanel() {
                       }))
                     }
                     className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
-                    placeholder="Brief description of the organization"
+                    placeholder={t("Brief description of the organization")}
                   />
                 </div>
               </div>
@@ -320,14 +393,14 @@ export default function SystemAdminPanel() {
                   <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Creating Organization...
+                  {t("Creating Organization...")}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  Create Organization
+                  {t("Create Organization")}
                 </>
               )}
             </button>
@@ -341,10 +414,10 @@ export default function SystemAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-[var(--success-green)] font-semibold">
-                    Organization created successfully!
+                    {t("Organization created successfully!")}
                   </p>
                   <p className="text-[var(--success-green)]/80 text-sm">
-                    The organization has been added to the system and is ready for use.
+                    {t("The organization has been added to the system and is ready for use.")}
                   </p>
                 </div>
               </div>
@@ -359,7 +432,7 @@ export default function SystemAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-[var(--crimson-red)] font-semibold">
-                    Failed to create organization
+                    {t("Failed to create organization")}
                   </p>
                   <p className="text-[var(--crimson-red)]/80 text-sm">
                     {createOrgForm.error}
@@ -379,7 +452,7 @@ export default function SystemAdminPanel() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-white group-hover:text-[var(--electric-blue)] transition-colors duration-300">
-              Invite Client Administrator
+              {t("Invite Client Administrator")}
             </h2>
           </div>
 
@@ -387,7 +460,7 @@ export default function SystemAdminPanel() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-semibold text-white mb-3">
-                  Email Address
+                  {t("Email Address")}
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -406,14 +479,14 @@ export default function SystemAdminPanel() {
                       }))
                     }
                     className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--electric-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--electric-blue)]/50 focus:shadow-[0_0_20px_rgba(79,195,247,0.3)]"
-                    placeholder="admin@university.edu"
+                    placeholder={t("admin@university.edu")}
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-white mb-3">
-                  Organization
+                  {t("Organization")}
                 </label>
                 <div className="relative dropdown-container">
                   {dropdownOpen && (
@@ -429,7 +502,7 @@ export default function SystemAdminPanel() {
                             }}
                             className="w-full px-4 py-3 text-right text-white hover:bg-[var(--electric-blue)] transition-all duration-200 flex items-center justify-between"
                           >
-                            <span>{org.name}</span>
+                            <span>{t(org.name)}</span>
                             <svg className="w-4 h-4 text-[var(--medium-grey)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
@@ -448,8 +521,8 @@ export default function SystemAdminPanel() {
                   >
                     <span className="text-left">
                       {inviteForm.orgId 
-                        ? organizations.find(org => org._id === inviteForm.orgId)?.name 
-                        : "Select organization"
+                        ? t(organizations.find(org => org._id === inviteForm.orgId)?.name || "")
+                        : t("Select organization")
                       }
                     </span>
                     <div className="flex items-center gap-2">
@@ -467,7 +540,7 @@ export default function SystemAdminPanel() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    No organizations available. Create one first.
+                    {t("No organizations available. Create one first.")}
                   </p>
                 )}
               </div>
@@ -483,14 +556,14 @@ export default function SystemAdminPanel() {
                   <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Sending Invitation...
+                  {t("Sending Invitation...")}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  Send Invitation
+                  {t("Send Invitation")}
                 </>
               )}
             </button>
@@ -504,10 +577,10 @@ export default function SystemAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-[var(--success-green)] font-semibold">
-                    Invitation sent successfully!
+                    {t("Invitation sent successfully!")}
                   </p>
                   <p className="text-[var(--success-green)]/80 text-sm">
-                    The client admin will receive an email invitation to join the organization.
+                    {t("The client admin will receive an email invitation to join the organization.")}
                   </p>
                 </div>
               </div>
@@ -522,7 +595,7 @@ export default function SystemAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-[var(--crimson-red)] font-semibold">
-                    Failed to send invitation
+                    {t("Failed to send invitation")}
                   </p>
                   <p className="text-[var(--crimson-red)]/80 text-sm">
                     {inviteForm.error}
@@ -545,9 +618,9 @@ export default function SystemAdminPanel() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">Organizations</h2>
+                <h2 className="text-3xl font-bold text-white">{t("Organizations")}</h2>
                 <p className="text-[var(--medium-grey)] text-lg">
-                  Manage and view all organizations ({organizations.length})
+                  {t("Manage and view all organizations")} ({organizations.length})
                 </p>
               </div>
             </div>
@@ -559,7 +632,7 @@ export default function SystemAdminPanel() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
-              Refresh
+              {t("Refresh")}
             </button>
           </div>
 
@@ -568,8 +641,8 @@ export default function SystemAdminPanel() {
               <div className="flex flex-col items-center gap-6">
                 <div className="w-12 h-12 border-4 border-[var(--neon-blue)] border-t-transparent rounded-full animate-spin"></div>
                 <div className="text-center">
-                  <p className="text-xl font-semibold text-white mb-2">Loading organizations...</p>
-                  <p className="text-[var(--medium-grey)]">Please wait while we fetch the data</p>
+                  <p className="text-xl font-semibold text-white mb-2">{t("Loading organizations...")}</p>
+                  <p className="text-[var(--medium-grey)]">{t("Please wait while we fetch the data")}</p>
                 </div>
               </div>
             </div>
@@ -584,7 +657,7 @@ export default function SystemAdminPanel() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-[var(--crimson-red)] mb-2">Error Loading Organizations</h3>
+                  <h3 className="text-xl font-bold text-[var(--crimson-red)] mb-2">{t("Error Loading Organizations")}</h3>
                   <p className="text-[var(--crimson-red)]/80">{error}</p>
                 </div>
               </div>
@@ -603,7 +676,7 @@ export default function SystemAdminPanel() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                           </svg>
                         </div>
-                        Organization
+                        {t("Organization")}
                       </div>
                     </th>
                     <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/4">
@@ -613,7 +686,7 @@ export default function SystemAdminPanel() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                         </div>
-                        Description
+                        {t("Description")}
                       </div>
                     </th>
                     <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
@@ -623,7 +696,7 @@ export default function SystemAdminPanel() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                           </svg>
                         </div>
-                        Total
+                        {t("Total")}
                       </div>
                     </th>
                     <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
@@ -633,7 +706,7 @@ export default function SystemAdminPanel() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
-                        Active
+                        {t("Active")}
                       </div>
                     </th>
                     <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
@@ -643,7 +716,7 @@ export default function SystemAdminPanel() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
                         </div>
-                        Invited
+                        {t("Invited")}
                       </div>
                     </th>
                     <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
@@ -653,7 +726,7 @@ export default function SystemAdminPanel() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
                         </div>
-                        Created
+                        {t("Created")}
                       </div>
                     </th>
                   </tr>
@@ -673,10 +746,10 @@ export default function SystemAdminPanel() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="text-sm font-bold text-white group-hover:text-[var(--neon-blue)] transition-colors duration-300 truncate">
-                              {org.name}
+                              {t(org.name)}
                             </div>
                             <div className="text-xs text-[var(--medium-grey)]">
-                              {org.clientAdminIds.length} admin(s)
+                              {org.clientAdminIds.length} {t("admin(s)")}
                             </div>
                           </div>
                         </div>
@@ -685,11 +758,11 @@ export default function SystemAdminPanel() {
                         <div className="text-xs text-white max-w-xs">
                           {org.description ? (
                             <div className="bg-[var(--navy-blue-lighter)]/30 rounded-lg p-2 border border-[var(--border)]/30">
-                              <p className="text-white text-xs truncate">{org.description}</p>
+                              <p className="text-white text-xs truncate">{t(org.description)}</p>
                             </div>
                           ) : (
                             <span className="text-[var(--medium-grey)] italic text-xs">
-                              No description
+                              {t("No description")}
                             </span>
                           )}
                         </div>
@@ -740,9 +813,9 @@ export default function SystemAdminPanel() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-white mb-3">No organizations found</p>
+                      <p className="text-2xl font-bold text-white mb-3">{t("No organizations found")}</p>
                       <p className="text-[var(--medium-grey)] text-lg">
-                        Create an organization by using the form above to get started.
+                        {t("Create an organization by using the form above to get started.")}
                       </p>
                     </div>
                   </div>

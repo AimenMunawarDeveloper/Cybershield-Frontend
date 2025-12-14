@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ApiClient } from "@/lib/api";
 import Link from "next/link";
 import NetworkBackground from "@/components/NetworkBackground";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface User {
   _id: string;
@@ -30,6 +31,7 @@ interface BulkInviteResult {
 }
 
 export default function ClientAdminPanel() {
+  const { t, preTranslate, language } = useTranslation();
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -38,6 +40,7 @@ export default function ClientAdminPanel() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"users" | "invites">("users");
+  const [translationReady, setTranslationReady] = useState(false);
 
   // Single invite form
   const [inviteForm, setInviteForm] = useState({
@@ -58,6 +61,62 @@ export default function ClientAdminPanel() {
 
   // Email list for bulk invite
   const [emailList, setEmailList] = useState<string[]>([]);
+
+  // Pre-translate static strings
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      const staticStrings = [
+        "Organization Management",
+        "Manage users and invitations in your organization",
+        "Invite User",
+        "Email Address",
+        "Enter email address",
+        "Send Invitation",
+        "Bulk Invite Users",
+        "Paste email addresses (one per line)",
+        "Send Bulk Invitations",
+        "Users",
+        "Pending Invites",
+        "Name",
+        "Email",
+        "Role",
+        "Status",
+        "Groups",
+        "Points",
+        "Risk Score",
+        "Actions",
+        "Cancel",
+        "Loading...",
+        "No users found",
+        "Invite users to get started.",
+        "No pending invitations",
+        "All invitations have been accepted.",
+        "Failed to fetch users",
+        "Invitation sent successfully",
+        "Failed to send invitation",
+        "Bulk invitations sent successfully",
+        "Failed to send bulk invitations",
+        "invited",
+        "active",
+        "suspended",
+        "User",
+        "Client Admin",
+        "System Admin",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -80,7 +139,7 @@ export default function ClientAdminPanel() {
       const profileData = await apiClient.getUserProfile();
       setProfile(profileData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch profile");
+      setError(err instanceof Error ? err.message : t("Failed to fetch profile"));
     }
   };
 
@@ -91,10 +150,23 @@ export default function ClientAdminPanel() {
       setLoading(true);
       const apiClient = new ApiClient(getToken);
       const data = await apiClient.getOrgUsers(profile.orgId);
+      
+      // Pre-translate dynamic user data
+      if (language === "ur") {
+        const dynamicStrings = data.users.flatMap((user: User) => [
+          user.displayName,
+          user.role,
+          user.status,
+          ...(user.groups || []),
+        ]).filter(Boolean);
+        
+        await preTranslate(dynamicStrings);
+      }
+      
       setUsers(data.users);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to fetch users");
+      setError(err instanceof Error ? err.message : t("Failed to fetch users"));
     } finally {
       setLoading(false);
     }
@@ -106,6 +178,17 @@ export default function ClientAdminPanel() {
     try {
       const apiClient = new ApiClient(getToken);
       const data = await apiClient.getInviteStatus(profile.orgId);
+      
+      // Pre-translate dynamic invite data
+      if (language === "ur") {
+        const dynamicStrings = data.users.flatMap((user: User) => [
+          user.displayName,
+          user.status,
+        ]).filter(Boolean);
+        
+        await preTranslate(dynamicStrings);
+      }
+      
       setInvites(data.users);
     } catch (err) {
       console.error("Failed to fetch invites:", err);
@@ -146,7 +229,7 @@ export default function ClientAdminPanel() {
       setInviteForm((prev) => ({
         ...prev,
         submitting: false,
-        error: err instanceof Error ? err.message : "Failed to send invitation",
+        error: err instanceof Error ? err.message : t("Failed to send invitation"),
       }));
     }
   };
@@ -186,7 +269,7 @@ export default function ClientAdminPanel() {
     if (emailList.length === 0) {
       setBulkInviteForm((prev) => ({
         ...prev,
-        error: "Please enter at least one email address.",
+        error: t("Please enter at least one email address."),
       }));
       return;
     }
@@ -227,15 +310,20 @@ export default function ClientAdminPanel() {
         error:
           err instanceof Error
             ? err.message
-            : "Failed to send bulk invitations",
+            : t("Failed to send bulk invitations"),
       }));
     }
   };
 
-  if (!isLoaded) {
+  if (!isLoaded || !translationReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        Loading...
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">
+            {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -244,15 +332,15 @@ export default function ClientAdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">{t("Access Denied")}</h1>
           <p className="text-[var(--medium-grey)] mb-4">
-            Please sign in to access this page.
+            {t("Please sign in to access this page.")}
           </p>
           <Link
             href="/dashboard"
             className="text-[var(--neon-blue)] hover:text-white transition-colors"
           >
-            ← Back to Dashboard
+            {t("← Back to Dashboard")}
           </Link>
         </div>
       </div>
@@ -263,15 +351,15 @@ export default function ClientAdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
+          <h1 className="text-2xl font-bold text-white mb-4">{t("Access Denied")}</h1>
           <p className="text-[var(--medium-grey)] mb-4">
-            This page is only accessible to Client Administrators.
+            {t("This page is only accessible to Client Administrators.")}
           </p>
           <Link
             href="/dashboard"
             className="text-[var(--neon-blue)] hover:text-white transition-colors"
           >
-            ← Back to Dashboard
+            {t("← Back to Dashboard")}
           </Link>
         </div>
       </div>
@@ -297,10 +385,10 @@ export default function ClientAdminPanel() {
             </div>
             <div>
               <h1 className="text-4xl font-bold text-white">
-            Organization Management
+            {t("Organization Management")}
           </h1>
               <p className="text-[var(--medium-grey)] text-lg">
-            Manage users and send invitations for your organization
+            {t("Manage users and send invitations for your organization")}
           </p>
             </div>
           </div>
@@ -315,14 +403,14 @@ export default function ClientAdminPanel() {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-white group-hover:text-[var(--neon-blue)] transition-colors duration-300">
-              Invite Single User
+              {t("Invite Single User")}
             </h2>
           </div>
 
           <form onSubmit={handleSingleInvite} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-white mb-3">
-                Email Address *
+                {t("Email Address")} *
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -338,7 +426,7 @@ export default function ClientAdminPanel() {
                     setInviteForm((prev) => ({ ...prev, email: e.target.value }))
                   }
                   className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
-                  placeholder="student@university.edu"
+                  placeholder={t("student@university.edu")}
                 />
               </div>
             </div>
@@ -350,8 +438,7 @@ export default function ClientAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    <span className="font-semibold text-white">Note:</span> The display name will be automatically set
-                    from the user&apos;s Clerk profile when they sign up.
+                    <span className="font-semibold text-white">{t("Note:")}</span> {t("The display name will be automatically set from the user's Clerk profile when they sign up.")}
                   </p>
                 </div>
               </div>
@@ -367,14 +454,14 @@ export default function ClientAdminPanel() {
                   <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Sending...
+                  {t("Sending...")}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  Send Invitation
+                  {t("Send Invitation")}
                 </>
               )}
             </button>
@@ -388,10 +475,10 @@ export default function ClientAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-[var(--success-green)] font-semibold">
-                    Invitation sent successfully!
+                    {t("Invitation sent successfully!")}
                   </p>
                   <p className="text-[var(--success-green)]/80 text-sm">
-                    The user will receive an email invitation to join your organization.
+                    {t("The user will receive an email invitation to join your organization.")}
                   </p>
                 </div>
               </div>
@@ -406,7 +493,7 @@ export default function ClientAdminPanel() {
                 </svg>
                 <div>
                   <p className="text-[var(--crimson-red)] font-semibold">
-                    Failed to send invitation
+                    {t("Failed to send invitation")}
                   </p>
                   <p className="text-[var(--crimson-red)]/80 text-sm">
                     {inviteForm.error}
@@ -427,10 +514,10 @@ export default function ClientAdminPanel() {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white group-hover:text-[var(--electric-blue)] transition-colors duration-300">
-                Bulk Invite Users
+                {t("Bulk Invite Users")}
               </h2>
               <p className="text-[var(--medium-grey)] text-sm">
-                Send invitations to multiple users at once
+                {t("Send invitations to multiple users at once")}
               </p>
             </div>
           </div>
@@ -438,7 +525,7 @@ export default function ClientAdminPanel() {
           <form onSubmit={handleBulkInvite} className="space-y-6">
             <div>
               <label className="block text-sm font-semibold text-white mb-3">
-                Email Addresses
+                {t("Email Addresses")}
               </label>
               <div className="relative">
                 <div className="absolute top-3 left-3 flex items-center pointer-events-none">
@@ -463,7 +550,7 @@ student4@university.edu, student5@university.edu`}
                 />
               </div>
               <p className="text-xs text-[var(--medium-grey)] mt-2">
-                Enter email addresses separated by commas or new lines. Display names will be set automatically from Clerk profiles.
+                {t("Enter email addresses separated by commas or new lines. Display names will be set automatically from Clerk profiles.")}
               </p>
             </div>
 
@@ -475,7 +562,7 @@ student4@university.edu, student5@university.edu`}
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <span className="text-sm font-semibold text-white">
-                    Emails to invite ({emailList.length})
+                    {t("Emails to invite")} ({emailList.length})
                   </span>
                 </div>
                 <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 ${emailList.length > 6 ? 'max-h-32 overflow-y-auto' : ''}`}>
@@ -513,14 +600,14 @@ student4@university.edu, student5@university.edu`}
                   <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Sending Invitations...
+                  {t("Sending Invitations...")}
                 </>
               ) : (
                 <>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
-                  Send Bulk Invitations {emailList.length > 0 && `(${emailList.length})`}
+                  {t("Send Bulk Invitations")} {emailList.length > 0 && `(${emailList.length})`}
                 </>
               )}
             </button>
@@ -534,19 +621,19 @@ student4@university.edu, student5@university.edu`}
                 </svg>
                 <div className="flex-1">
                   <p className="text-[var(--success-green)] font-semibold mb-2">
-                    Bulk invitation completed!
+                    {t("Bulk invitation completed!")}
                   </p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-[var(--success-green)] rounded-full animate-pulse"></div>
                       <span className="text-[var(--success-green)]/80">
-                        Successful: {bulkInviteForm.result.successful}
+                        {t("Successful")}: {bulkInviteForm.result.successful}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-[var(--crimson-red)] rounded-full animate-pulse"></div>
                       <span className="text-[var(--crimson-red)]/80">
-                        Failed: {bulkInviteForm.result.failed}
+                        {t("Failed")}: {bulkInviteForm.result.failed}
                       </span>
                     </div>
                   </div>
@@ -563,7 +650,7 @@ student4@university.edu, student5@university.edu`}
                 </svg>
                 <div>
                   <p className="text-[var(--crimson-red)] font-semibold">
-                    Failed to send bulk invitations
+                    {t("Failed to send bulk invitations")}
                   </p>
                   <p className="text-[var(--crimson-red)]/80 text-sm">
                     {bulkInviteForm.error}
@@ -589,7 +676,7 @@ student4@university.edu, student5@university.edu`}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                 </svg>
-                All Users
+                {t("All Users")}
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   activeTab === "users"
                     ? "bg-[var(--neon-blue)]/20 text-[var(--neon-blue)]"
@@ -609,7 +696,7 @@ student4@university.edu, student5@university.edu`}
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Pending Invites
+                {t("Pending Invites")}
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   activeTab === "invites"
                     ? "bg-[var(--neon-blue)]/20 text-[var(--neon-blue)]"
@@ -640,7 +727,7 @@ student4@university.edu, student5@university.edu`}
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div>
-                    <p className="text-[var(--crimson-red)] font-semibold">Error loading data</p>
+                    <p className="text-[var(--crimson-red)] font-semibold">{t("Error loading data")}</p>
                     <p className="text-[var(--crimson-red)]/80 text-sm">{error}</p>
                   </div>
                 </div>
@@ -657,7 +744,7 @@ student4@university.edu, student5@university.edu`}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                          User
+                          {t("User")}
                         </div>
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
@@ -665,7 +752,7 @@ student4@university.edu, student5@university.edu`}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
-                        Status
+                        {t("Status")}
                         </div>
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
@@ -673,7 +760,7 @@ student4@university.edu, student5@university.edu`}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                           </svg>
-                        Groups
+                        {t("Groups")}
                         </div>
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
@@ -681,7 +768,7 @@ student4@university.edu, student5@university.edu`}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                           </svg>
-                        Points
+                        {t("Points")}
                         </div>
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
@@ -689,7 +776,7 @@ student4@university.edu, student5@university.edu`}
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                           </svg>
-                        Created
+                        {t("Created")}
                         </div>
                       </th>
                     </tr>
@@ -709,7 +796,7 @@ student4@university.edu, student5@university.edu`}
                             </div>
                             <div>
                               <div className="text-sm font-semibold text-white">
-                            {user.displayName}
+                            {t(user.displayName)}
                           </div>
                           <div className="text-sm text-[var(--medium-grey)]">
                             {user.email}
@@ -727,7 +814,7 @@ student4@university.edu, student5@university.edu`}
                                 : "bg-[var(--crimson-red)]/20 text-[var(--crimson-red)] border border-[var(--crimson-red)]/30"
                             }`}
                           >
-                            {user.status}
+                            {t(user.status)}
                           </span>
                         </td>
                         <td className="px-6 py-5 whitespace-nowrap text-sm text-white">
@@ -738,7 +825,7 @@ student4@university.edu, student5@university.edu`}
                                   key={index}
                                   className="px-2 py-1 bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] text-xs rounded-md border border-[var(--neon-blue)]/30"
                                 >
-                                  {group}
+                                  {t(group)}
                                 </span>
                               ))}
                             </div>
@@ -767,12 +854,12 @@ student4@university.edu, student5@university.edu`}
                       </div>
                       <div>
                         <p className="text-lg font-semibold text-white mb-1">
-                          {activeTab === "users" ? "No users found" : "No pending invites"}
+                          {activeTab === "users" ? t("No users found") : t("No pending invites")}
                         </p>
                         <p className="text-[var(--medium-grey)]">
                     {activeTab === "users"
-                            ? "Start by inviting users to your organization." 
-                            : "All invitations have been accepted or there are no pending invites."}
+                            ? t("Start by inviting users to your organization.") 
+                            : t("All invitations have been accepted or there are no pending invites.")}
                         </p>
                       </div>
                     </div>

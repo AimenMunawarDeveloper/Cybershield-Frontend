@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Campaign {
   _id: string;
@@ -50,19 +51,21 @@ interface Campaign {
 }
 
 export default function WhatsAppPhishingPage() {
+  const { t, preTranslate, isTranslating, language } = useTranslation();
   const { getToken } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTemplatePreview, setSelectedTemplatePreview] = useState<{title: string; content: string} | null>(null);
+  const [translationReady, setTranslationReady] = useState(false);
 
   const fetchCampaigns = useCallback(async () => {
     try {
       setError(null);
       const token = await getToken();
       if (!token) {
-        setError("Authentication required. Please log in again.");
+        setError(t("Authentication required. Please log in again."));
         setCampaigns([]);
         setLoading(false);
         return;
@@ -80,16 +83,16 @@ export default function WhatsAppPhishingPage() {
       // Check if response is ok
       if (!response.ok) {
         if (response.status === 401) {
-          setError("Session expired. Please log in again.");
+          setError(t("Session expired. Please log in again."));
           localStorage.removeItem("token");
         } else if (response.status === 404) {
           setError(
-            "API endpoint not found. Please check server configuration."
+            t("API endpoint not found. Please check server configuration.")
           );
         } else if (response.status >= 500) {
-          setError("Server error. Please try again later.");
+          setError(t("Server error. Please try again later."));
         } else {
-          setError(`Request failed with status: ${response.status}`);
+          setError(t(`Request failed with status: ${response.status}`));
         }
         setCampaigns([]);
         setLoading(false);
@@ -100,7 +103,7 @@ export default function WhatsAppPhishingPage() {
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         setError(
-          "Server returned invalid response format. Please check server logs."
+          t("Server returned invalid response format. Please check server logs.")
         );
         setCampaigns([]);
         setLoading(false);
@@ -110,10 +113,23 @@ export default function WhatsAppPhishingPage() {
       const data = await response.json();
 
       if (data.success && data.data && data.data.campaigns) {
-        setCampaigns(data.data.campaigns);
+        const campaignsData = data.data.campaigns;
+        
+        // Pre-translate dynamic campaign data
+        if (language === "ur") {
+          const dynamicStrings = campaignsData.flatMap((campaign: Campaign) => [
+            campaign.name,
+            campaign.description,
+            campaign.status,
+          ]).filter(Boolean);
+          
+          await preTranslate(dynamicStrings);
+        }
+        
+        setCampaigns(campaignsData);
         setError(null);
       } else {
-        setError("Invalid response format from server.");
+        setError(t("Invalid response format from server."));
         setCampaigns([]);
       }
     } catch (error) {
@@ -122,17 +138,17 @@ export default function WhatsAppPhishingPage() {
       // Handle specific error types
       if (error instanceof SyntaxError) {
         setError(
-          "Server returned invalid JSON. Please check server configuration."
+          t("Server returned invalid JSON. Please check server configuration.")
         );
       } else if (
         error instanceof TypeError &&
         error.message.includes("fetch")
       ) {
         setError(
-          "Unable to connect to server. Please check if the backend is running."
+          t("Unable to connect to server. Please check if the backend is running.")
         );
       } else {
-        setError("An unexpected error occurred while fetching campaigns.");
+        setError(t("An unexpected error occurred while fetching campaigns."));
       }
 
       setCampaigns([]);
@@ -140,6 +156,88 @@ export default function WhatsAppPhishingPage() {
       setLoading(false);
     }
   }, [getToken]);
+
+  // Pre-translate static strings when language changes
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page
+      const staticStrings = [
+        // Hero section
+        "WhatsApp Phishing Simulation",
+        "Create and manage realistic WhatsApp phishing campaigns to test your organization's security awareness.",
+        "Realistic Scenarios",
+        "Security Training",
+        "Safe Testing",
+        "New Campaign",
+        
+        // Features section
+        "Phishing Simulation Features",
+        "Multi-Vector Phishing Campaigns",
+        "Test your users with realistic WhatsApp phishing scenarios including fake prize notifications, verification requests, and urgent messages.",
+        "Campaign Management",
+        "Track campaign performance, user interactions, and generate detailed reports to measure security awareness improvements.",
+        "Why us?",
+        "Best platform in the world for Security Awareness Training",
+        
+        // Templates section
+        "Phishing Message Templates",
+        "Banking Verification",
+        "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
+        "Financial",
+        "Lottery Prize",
+        "Test how users respond to prize-winning notifications and lottery scams that request personal information.",
+        "Prize",
+        "Job Interview",
+        "Create realistic job offer messages to evaluate how well users can identify employment-related phishing attempts.",
+        "Employment",
+        "Package Delivery",
+        "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
+        "Delivery",
+        "View",
+        "Use",
+        "Use This Template",
+        
+        // Campaign status
+        "Start Now",
+        "Start Campaign",
+        "Targets",
+        "Sent",
+        "Delivered",
+        "Read",
+        "draft",
+        "scheduled",
+        "running",
+        "completed",
+        "paused",
+        "cancelled",
+        
+        // Error/loading messages
+        "Authentication required. Please log in again.",
+        "Session expired. Please log in again.",
+        "API endpoint not found. Please check server configuration.",
+        "Server error. Please try again later.",
+        "Server returned invalid response format. Please check server logs.",
+        "Invalid response format from server.",
+        "Server returned invalid JSON. Please check server configuration.",
+        "Network error. Please check your internet connection.",
+        "Loading campaigns...",
+        "No campaigns yet",
+        "Create your first WhatsApp phishing campaign to get started.",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
 
   useEffect(() => {
     fetchCampaigns();
@@ -188,7 +286,6 @@ export default function WhatsAppPhishingPage() {
       phoneNumber: string;
     }>;
     scheduleDate?: string;
-    language?: string;
   }) => {
     console.log("handleCreateCampaign called with:", campaignData);
 
@@ -196,7 +293,7 @@ export default function WhatsAppPhishingPage() {
       const token = await getToken();
       if (!token) {
         console.log("No token found");
-        setError("Authentication required. Please log in again.");
+        setError(t("Authentication required. Please log in again."));
         return;
       }
 
@@ -213,13 +310,13 @@ export default function WhatsAppPhishingPage() {
           messageTemplate: !!campaignData.messageTemplate,
           landingPageUrl: !!campaignData.landingPageUrl,
         });
-        setError("Please fill in all required fields.");
+        setError(t("Please fill in all required fields."));
         return;
       }
 
       if (!campaignData.manualUsers || campaignData.manualUsers.length === 0) {
         console.log("No manual users found:", campaignData.manualUsers);
-        setError("Please add at least one target user.");
+        setError(t("Please add at least one target user."));
         return;
       }
 
@@ -253,12 +350,12 @@ export default function WhatsAppPhishingPage() {
         setError(null);
       } else {
         setError(
-          responseData.message || "Failed to create campaign. Please try again."
+          responseData.message || t("Failed to create campaign. Please try again.")
         );
       }
     } catch (error) {
       console.error("Failed to create campaign:", error);
-      setError("Failed to create campaign. Please try again.");
+      setError(t("Failed to create campaign. Please try again."));
     }
   };
 
@@ -266,7 +363,7 @@ export default function WhatsAppPhishingPage() {
     try {
       const token = await getToken();
       if (!token) {
-        setError("Authentication required. Please log in again.");
+        setError(t("Authentication required. Please log in again."));
         return;
       }
 
@@ -292,14 +389,28 @@ export default function WhatsAppPhishingPage() {
         setError(null);
       } else {
         setError(
-          responseData.message || "Failed to start campaign. Please try again."
+          responseData.message || t("Failed to start campaign. Please try again.")
         );
       }
     } catch (error) {
       console.error("Failed to start campaign:", error);
-      setError("Failed to start campaign. Please try again.");
+      setError(t("Failed to start campaign. Please try again."));
     }
   };
+
+  // Show loading state while translating or fetching data
+  if (!translationReady || loading) {
+    return (
+      <div className="flex flex-1 items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">
+            {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -316,31 +427,30 @@ export default function WhatsAppPhishingPage() {
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
                   <MessageSquare className="w-8 h-8 text-white" />
-                </div>
               </div>
-              
+            </div>
+
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
-                WhatsApp Phishing
-                <span className="block text-[var(--neon-blue)] mt-1">Awareness Training</span>
-              </h1>
+                {t("WhatsApp Phishing")}
+                <span className="block text-[var(--neon-blue)] mt-1">{t("Awareness Training")}</span>
+                </h1>
               
               <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
-                Protect your organization by training users to identify and respond to phishing messages. 
-                Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.
+                {t("Protect your organization by training users to identify and respond to phishing messages. Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Shield className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">Realistic Scenarios</span>
-                </div>
+                  <span className="text-white text-xs">{t("Realistic Scenarios")}</span>
+              </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <AlertTriangle className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">Security Training</span>
+                  <span className="text-white text-xs">{t("Security Training")}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Lock className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">Safe Testing</span>
+                  <span className="text-white text-xs">{t("Safe Testing")}</span>
                 </div>
               </div>
             </div>
@@ -350,7 +460,7 @@ export default function WhatsAppPhishingPage() {
         {/* Phishing Simulation Features */}
         <div className="relative z-10 mb-8">
           <h2 className="text-3xl font-bold text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
-            Phishing Simulation Features
+            {t("Phishing Simulation Features")}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Template Library */}
@@ -363,12 +473,11 @@ export default function WhatsAppPhishingPage() {
                   <FileText className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-white">
-                  Template Library
+                  {t("Template Library")}
                 </h3>
               </div>
               <p className="text-[var(--medium-grey)] text-sm">
-                Template library with AI-generated variants for realistic
-                phishing messages and landing pages.
+                {t("Template library with AI-generated variants for realistic phishing messages and landing pages.")}
               </p>
             </div>
             <div
@@ -380,12 +489,11 @@ export default function WhatsAppPhishingPage() {
                   <BarChart3 className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-white">
-                  Telemetry Capture
+                  {t("Telemetry Capture")}
                 </h3>
               </div>
               <p className="text-[var(--medium-grey)] text-sm">
-                Track deliveries, clicks, submissions, call outcomes, and
-                time-to-respond for comprehensive campaign analytics.
+                {t("Track deliveries, clicks, submissions, call outcomes, and time-to-respond for comprehensive campaign analytics.")}
               </p>
             </div>
 
@@ -399,13 +507,11 @@ export default function WhatsAppPhishingPage() {
                   <Clock className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-white">
-                  Campaign Scheduling
+                  {t("Campaign Scheduling")}
                 </h3>
               </div>
               <p className="text-[var(--medium-grey)] text-sm">
-                Schedule campaigns according to date and time. Monitor all
-                activities including deliveries, openings, clicks, and
-                data-entry attempts.
+                {t("Schedule campaigns according to date and time. Monitor all activities including deliveries, openings, clicks, and data-entry attempts.")}
               </p>
             </div>
           </div>
@@ -414,7 +520,7 @@ export default function WhatsAppPhishingPage() {
         {/* Multi-Vector Phishing Campaigns */}
         <div className="relative z-10 mb-8">
           <h2 className="text-3xl font-bold text-white text-center mb-8">
-            Multi-Vector Phishing Campaigns
+            {t("Multi-Vector Phishing Campaigns")}
           </h2>
           <div className="dashboard-card rounded-lg p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
@@ -428,24 +534,19 @@ export default function WhatsAppPhishingPage() {
               </div>
               <div className="space-y-4">
                 <p className="text-white">
-                  CyberShield supports multi-vector campaigns including email,
-                  WhatsApp/smishing, and browser-based voice/vishing to create
-                  comprehensive security awareness training.
+                  {t("CyberShield supports multi-vector campaigns including email, WhatsApp/smishing, and browser-based voice/vishing to create comprehensive security awareness training.")}
                 </p>
                 <ul className="space-y-3 text-white">
                   <li className="flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 text-[var(--neon-blue)] mt-1 flex-shrink-0" />
                     <span>
-                      Campaigns are scoped by organizations or groups, ensuring
-                      targeted delivery to registered users only.
+                      {t("Campaigns are scoped by organizations or groups, ensuring targeted delivery to registered users only.")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
                     <CheckCircle2 className="w-5 h-5 text-[var(--neon-blue)] mt-1 flex-shrink-0" />
                     <span>
-                      Analytics provide per-campaign summaries including
-                      submission attempts, time-to-click, and time-to-report
-                      metrics.
+                      {t("Analytics provide per-campaign summaries including submission attempts, time-to-click, and time-to-report metrics.")}
                     </span>
                   </li>
                 </ul>
@@ -457,31 +558,26 @@ export default function WhatsAppPhishingPage() {
         {/* Campaign Management */}
         <div className="relative z-10 mb-8">
           <h2 className="text-3xl font-bold text-white text-center mb-8">
-            Campaign Management
+            {t("Campaign Management")}
           </h2>
           <div className="dashboard-card rounded-lg p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4 text-white">
                 <p>
-                  Create and schedule WhatsApp phishing campaigns for targeted
-                  groups within your organization. Campaigns track all
-                  activities including deliveries, openings, clicks, data-entry
-                  attempts, and outcomes.
+                  {t("Create and schedule WhatsApp phishing campaigns for targeted groups within your organization. Campaigns track all activities including deliveries, openings, clicks, data-entry attempts, and outcomes.")}
                 </p>
                 <p>
-                  The system limits targets to registered users of authorized
-                  organizations/groups only and provides comprehensive analytics
-                  for campaign evaluation.
+                  {t("The system limits targets to registered users of authorized organizations/groups only and provides comprehensive analytics for campaign evaluation.")}
                 </p>
               </div>
               <div className="space-y-3">
                 {[
-                  "Template library with AI-generated variants",
-                  "Campaign scheduling by date and time",
-                  "Telemetry capture and analytics",
-                  "Organization and group scoping",
-                  "Exportable campaign reports",
-                  "Landing page creation for information capture",
+                  t("Template library with AI-generated variants"),
+                  t("Campaign scheduling by date and time"),
+                  t("Telemetry capture and analytics"),
+                  t("Organization and group scoping"),
+                  t("Exportable campaign reports"),
+                  t("Landing page creation for information capture"),
                 ].map((service, index) => (
                   <div
                     key={index}
@@ -501,7 +597,7 @@ export default function WhatsAppPhishingPage() {
           <div className="flex justify-center mb-8">
             <div className="bg-gradient-to-r from-[var(--neon-blue)] to-[var(--electric-blue)] px-8 py-3 rounded-full">
               <h2 className="text-2xl font-bold text-[var(--navy-blue)]">
-                Why us?
+                {t("Why us?")}
               </h2>
             </div>
           </div>
@@ -514,11 +610,10 @@ export default function WhatsAppPhishingPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Template Library
+                    {t("Template Library")}
                   </h3>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    AI-generated variants for realistic phishing messages and
-                    landing pages
+                    {t("AI-generated variants for realistic phishing messages and landing pages")}
                   </p>
                 </div>
               </div>
@@ -532,11 +627,10 @@ export default function WhatsAppPhishingPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Telemetry Capture
+                    {t("Telemetry Capture")}
                   </h3>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    Track deliveries, clicks, submissions, and time-to-respond
-                    metrics
+                    {t("Track deliveries, clicks, submissions, and time-to-respond metrics")}
                   </p>
                 </div>
               </div>
@@ -550,11 +644,10 @@ export default function WhatsAppPhishingPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Campaign Analytics
+                    {t("Campaign Analytics")}
                   </h3>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    Per-campaign summaries with submission attempts and
-                    time-to-report data
+                    {t("Per-campaign summaries with submission attempts and time-to-report data")}
                   </p>
                 </div>
               </div>
@@ -568,11 +661,10 @@ export default function WhatsAppPhishingPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Organization Scoping
+                    {t("Organization Scoping")}
                   </h3>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    Campaigns scoped by organizations or groups for targeted
-                    delivery
+                    {t("Campaigns scoped by organizations or groups for targeted delivery")}
                   </p>
                 </div>
               </div>
@@ -586,10 +678,10 @@ export default function WhatsAppPhishingPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Scheduled Campaigns
+                    {t("Scheduled Campaigns")}
                   </h3>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    Schedule campaigns by date and time with automated execution
+                    {t("Schedule campaigns by date and time with automated execution")}
                   </p>
                 </div>
               </div>
@@ -603,11 +695,10 @@ export default function WhatsAppPhishingPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Exportable Reports
+                    {t("Exportable Reports")}
                   </h3>
                   <p className="text-sm text-[var(--medium-grey)]">
-                    Export campaign data in CSV/PDF formats for audits and
-                    reviews
+                    {t("Export campaign data in CSV/PDF formats for audits and reviews")}
                   </p>
                 </div>
               </div>
@@ -620,10 +711,10 @@ export default function WhatsAppPhishingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                Phishing Message Templates
+                {t("Phishing Message Templates")}
               </h2>
               <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
-                Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.
+                {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
 
@@ -632,46 +723,46 @@ export default function WhatsAppPhishingPage() {
               {[
                 {
                   id: "banking",
-                  title: "Banking Verification",
-                  description: "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
+                  title: t("Banking Verification"),
+                  description: t("Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts."),
                   image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: "Financial",
-                  messageTemplate: `Your UBL account will be blocked within 24 hours due to incomplete verification.
+                  category: t("Financial"),
+                  messageTemplate: t(`Your UBL account will be blocked within 24 hours due to incomplete verification.
 Click the link below to verify now:
 🔗 ubl-verification-pk.com/login
 
-Helpline: +92-301-1234567`,
+Helpline: +92-301-1234567`),
                 },
                 {
                   id: "lottery",
-                  title: "Lottery Prize",
-                  description: "Test how users respond to prize-winning notifications and lottery scams that request personal information.",
+                  title: t("Lottery Prize"),
+                  description: t("Test how users respond to prize-winning notifications and lottery scams that request personal information."),
                   image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: "Prize",
-                  messageTemplate: `You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
+                  category: t("Prize"),
+                  messageTemplate: t(`You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
 Please send your CNIC number and JazzCash number to claim your prize!
-📞 Contact: 0345-9876543`,
+📞 Contact: 0345-9876543`),
                 },
                 {
                   id: "job",
-                  title: "Job Interview",
-                  description: "Create realistic job offer messages to evaluate how well users can identify employment-related phishing attempts.",
+                  title: t("Job Interview"),
+                  description: t("Create realistic job offer messages to evaluate how well users can identify employment-related phishing attempts."),
                   image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: "Employment",
-                  messageTemplate: `You have been shortlisted for a job interview.
+                  category: t("Employment"),
+                  messageTemplate: t(`You have been shortlisted for a job interview.
 Please pay Rs. 2000 for form verification to confirm your slot.
 Send via Easypaisa: 0333-7654321
-Form link: nestle-careerpk.com`,
+Form link: nestle-careerpk.com`),
                 },
                 {
                   id: "delivery",
-                  title: "Package Delivery",
-                  description: "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
+                  title: t("Package Delivery"),
+                  description: t("Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams."),
                   image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: "Delivery",
-                  messageTemplate: `Your parcel is held due to incorrect address.
+                  category: t("Delivery"),
+                  messageTemplate: t(`Your parcel is held due to incorrect address.
 Please click below to update details and pay Rs. 150 handling charges.
-🔗 tcs-tracking-pk.net`,
+🔗 tcs-tracking-pk.net`),
                 },
               ].map((template) => (
                 <div
@@ -730,14 +821,14 @@ Please click below to update details and pay Rs. 150 handling charges.
                         onClick={() => setSelectedTemplatePreview({ title: template.title, content: template.messageTemplate })}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       >
-                        <span>View</span>
+                        <span>{t("View")}</span>
                         <Send className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setShowCreateModal(true)}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       >
-                        <span>Use</span>
+                        <span>{t("Use")}</span>
                         <MessageSquare className="w-4 h-4" />
                       </button>
                     </div>
@@ -760,10 +851,10 @@ Please click below to update details and pay Rs. 150 handling charges.
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  WhatsApp Phishing Campaigns
+                  {t("WhatsApp Phishing Campaigns")}
                 </h1>
                 <p className="text-[var(--medium-grey)] text-sm">
-                  Create and manage phishing awareness campaigns
+                  {t("Create and manage phishing awareness campaigns")}
                 </p>
               </div>
             </div>
@@ -772,7 +863,7 @@ Please click below to update details and pay Rs. 150 handling charges.
               className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:opacity-90 transition-opacity"
             >
               <Plus className="w-4 h-4" />
-              New Campaign
+              {t("New Campaign")}
             </button>
           </div>
         </div>
@@ -792,7 +883,7 @@ Please click below to update details and pay Rs. 150 handling charges.
             <div className="flex items-center justify-between">
               <div className="text-left">
                 <p className="text-xs text-[var(--medium-grey)]">
-                  Total Campaigns
+                  {t("Total Campaigns")}
                 </p>
                 <p className="text-lg font-bold text-white">
                   {campaigns.length}
@@ -808,7 +899,7 @@ Please click below to update details and pay Rs. 150 handling charges.
             <div className="flex items-center justify-between">
               <div className="text-left">
                 <p className="text-xs text-[var(--medium-grey)]">
-                  Active Campaigns
+                  {t("Active Campaigns")}
                 </p>
                 <p className="text-lg font-bold text-white">
                   {campaigns.filter((c) => c.status === "running").length}
@@ -824,7 +915,7 @@ Please click below to update details and pay Rs. 150 handling charges.
             <div className="flex items-center justify-between">
               <div className="text-left">
                 <p className="text-xs text-[var(--medium-grey)]">
-                  Total Targets
+                  {t("Total Targets")}
                 </p>
                 <p className="text-lg font-bold text-white">
                   {campaigns.reduce((sum, c) => sum + c.targetUsers.length, 0)}
@@ -839,7 +930,7 @@ Please click below to update details and pay Rs. 150 handling charges.
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">Completed</p>
+                <p className="text-xs text-[var(--medium-grey)]">{t("Completed")}</p>
                 <p className="text-lg font-bold text-white">
                   {campaigns.filter((c) => c.status === "completed").length}
                 </p>
@@ -856,28 +947,27 @@ Please click below to update details and pay Rs. 150 handling charges.
           <div className="dashboard-card rounded-lg p-6">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-white mb-2">
-                Recent Campaigns
+                {t("Recent Campaigns")}
               </h3>
               <p className="text-sm text-[var(--medium-grey)]">
-                Manage your WhatsApp phishing awareness campaigns
+                {t("Manage your WhatsApp phishing awareness campaigns")}
               </p>
             </div>
 
             {loading ? (
               <div className="text-center py-8">
                 <div className="text-[var(--medium-grey)]">
-                  Loading campaigns...
+                  {t("Loading campaigns...")}
                 </div>
               </div>
             ) : campaigns.length === 0 ? (
               <div className="text-center py-12">
                 <MessageSquare className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-white mb-2">
-                  No campaigns yet
+                  {t("No campaigns yet")}
                 </h3>
                 <p className="text-sm text-[var(--medium-grey)]">
-                  WhatsApp phishing campaigns will appear here once they are
-                  created
+                  {t("WhatsApp phishing campaigns will appear here once they are created")}
                 </p>
               </div>
             ) : (
@@ -894,10 +984,10 @@ Please click below to update details and pay Rs. 150 handling charges.
                         </div>
                         <div>
                           <h4 className="text-sm font-semibold text-white">
-                            {campaign.name}
+                            {t(campaign.name)}
                           </h4>
                           <p className="text-xs text-[var(--medium-grey)]">
-                            {campaign.description}
+                            {t(campaign.description)}
                           </p>
                         </div>
                       </div>
@@ -907,7 +997,7 @@ Please click below to update details and pay Rs. 150 handling charges.
                             campaign.status
                           )}`}
                         >
-                          {campaign.status}
+                          {t(campaign.status)}
                         </span>
                         <button className="p-1 text-[var(--medium-grey)] hover:text-white transition-colors">
                           <svg
@@ -929,25 +1019,25 @@ Please click below to update details and pay Rs. 150 handling charges.
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs mb-3">
                       <div>
-                        <p className="text-[var(--medium-grey)]">Targets</p>
+                        <p className="text-[var(--medium-grey)]">{t("Targets")}</p>
                         <p className="text-white font-semibold">
                           {campaign.targetUsers.length}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">Sent</p>
+                        <p className="text-[var(--medium-grey)]">{t("Sent")}</p>
                         <p className="text-white font-semibold">
                           {campaign.stats.totalSent}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">Delivered</p>
+                        <p className="text-[var(--medium-grey)]">{t("Delivered")}</p>
                         <p className="text-white font-semibold">
                           {campaign.stats.totalDelivered}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">Read</p>
+                        <p className="text-[var(--medium-grey)]">{t("Read")}</p>
                         <p className="text-white font-semibold">
                           {campaign.stats.totalRead}
                         </p>
@@ -962,7 +1052,7 @@ Please click below to update details and pay Rs. 150 handling charges.
                           className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
                         >
                           <Play className="w-3 h-3" />
-                          Start Now
+                          {t("Start Now")}
                         </button>
                       )}
                       {campaign.status === "draft" && (
@@ -971,7 +1061,7 @@ Please click below to update details and pay Rs. 150 handling charges.
                           className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
                         >
                           <Play className="w-3 h-3" />
-                          Start Campaign
+                          {t("Start Campaign")}
                         </button>
                       )}
                     </div>
@@ -988,7 +1078,7 @@ Please click below to update details and pay Rs. 150 handling charges.
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-[var(--navy-blue)] rounded-2xl p-6 max-w-2xl w-full border border-[var(--neon-blue)]/30">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">{selectedTemplatePreview.title}</h3>
+              <h3 className="text-xl font-bold text-white">{t(selectedTemplatePreview.title)}</h3>
               <button
                 onClick={() => setSelectedTemplatePreview(null)}
                 className="text-[var(--medium-grey)] hover:text-white transition-colors"
@@ -999,7 +1089,7 @@ Please click below to update details and pay Rs. 150 handling charges.
               </button>
             </div>
             <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 mb-4">
-              <p className="text-white whitespace-pre-wrap font-mono text-sm">{selectedTemplatePreview.content}</p>
+              <p className="text-white whitespace-pre-wrap font-mono text-sm">{t(selectedTemplatePreview.content)}</p>
             </div>
             <button
               onClick={() => {
@@ -1008,7 +1098,7 @@ Please click below to update details and pay Rs. 150 handling charges.
               }}
               className="w-full px-4 py-3 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold"
             >
-              Use This Template
+              {t("Use This Template")}
             </button>
           </div>
         </div>

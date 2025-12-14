@@ -10,6 +10,7 @@ import BarChartCard from "@/components/BarChartCard";
 import DataTable from "@/components/DataTable";
 import ActivityFeed from "@/components/ActivityFeed";
 import FloatingChat from "@/components/FloatingChat";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface UserProfile {
   _id: string;
@@ -28,19 +29,89 @@ export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t, preTranslate, language } = useTranslation();
+  const [translationReady, setTranslationReady] = useState(false);
 
   const fetchUserProfile = useCallback(async () => {
     try {
       const apiClient = new ApiClient(getToken);
       const profileData = await apiClient.getUserProfile();
       console.log("Profile data received:", profileData);
+      
+      // Pre-translate dynamic profile data
+      if (language === "ur") {
+        const dynamicStrings = [
+          profileData.displayName,
+          profileData.orgName,
+          profileData.role,
+        ].filter(Boolean);
+        
+        await preTranslate(dynamicStrings);
+      }
+      
       setProfile(profileData);
     } catch (err) {
       console.error("Failed to fetch user profile:", err);
     } finally {
       setLoading(false);
     }
-  }, [getToken]);
+  }, [getToken, language, preTranslate]);
+
+  // Pre-translate static strings
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      const staticStrings = [
+        // Metrics
+        "Total Organizations",
+        "Total Users",
+        "Active Campaigns",
+        "Avg Risk Score",
+        "Training Completion",
+        "Your Progress",
+        "Average across users",
+        "Overall completion rate",
+        "Courses completed",
+        "Security Awareness",
+        "Total Tests",
+        "Tests Passed",
+        "Avg Badges",
+        "Your Badges",
+        
+        // Welcome messages
+        "Welcome back, Admin",
+        "Monitor platform-wide security awareness",
+        "Glad to see you again!",
+        "Track organization-wide user security performance",
+        "Keep learning!",
+        "Complete courses and improve your security awareness",
+        "Track your organization performance",
+        "Build your security awareness skills",
+        
+        // Section titles
+        "User Activity Overview",
+        "Your Learning Progress",
+        
+        // Growth indicators
+        "(+15%) increase this month",
+        "(+3) courses this month",
+        
+        // Loading/error states
+        "Loading...",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
 
   useEffect(() => {
     if (isLoaded && !user) {
@@ -63,25 +134,25 @@ export default function DashboardPage() {
       case "system_admin":
         return {
           metric1: {
-            label: "Total Organizations",
+            label: t("Total Organizations"),
             value: "24",
             change: "+12%",
             icon: "building",
           },
           metric2: {
-            label: "Total Users",
+            label: t("Total Users"),
             value: "8,430",
             change: "+18%",
             icon: "users",
           },
           metric3: {
-            label: "Active Campaigns",
+            label: t("Active Campaigns"),
             value: "47",
             change: "+5%",
             icon: "shield",
           },
           metric4: {
-            label: "Avg Risk Score",
+            label: t("Avg Risk Score"),
             value: "6.8/10",
             change: "-0.5",
             icon: "chart",
@@ -90,25 +161,25 @@ export default function DashboardPage() {
       case "client_admin":
         return {
           metric1: {
-            label: "Organization Users",
+            label: t("Organization Users"),
             value: "342",
             change: "+8%",
             icon: "users",
           },
           metric2: {
-            label: "Active Users",
+            label: t("Active Users"),
             value: "285",
             change: "+3%",
             icon: "user-check",
           },
           metric3: {
-            label: "Active Campaigns",
+            label: t("Active Campaigns"),
             value: "5",
             change: "+2",
             icon: "shield",
           },
           metric4: {
-            label: "Avg Risk Score",
+            label: t("Avg Risk Score"),
             value: "7.2/10",
             change: "-0.3",
             icon: "chart",
@@ -117,25 +188,25 @@ export default function DashboardPage() {
       case "affiliated":
         return {
           metric1: {
-            label: "Courses Completed",
+            label: t("Courses Completed"),
             value: "8/15",
             change: "+2",
             icon: "book",
           },
           metric2: {
-            label: "Your Points",
+            label: t("Your Points"),
             value: profile.points?.toString() || "450",
             change: "+35",
             icon: "star",
           },
           metric3: {
-            label: "Risk Score",
+            label: t("Risk Score"),
             value: `${profile.riskScore || "3.5"}/10`,
             change: "-0.8",
             icon: "shield-check",
           },
           metric4: {
-            label: "Certificates",
+            label: t("Certificates"),
             value: "5",
             change: "+1",
             icon: "award",
@@ -144,25 +215,25 @@ export default function DashboardPage() {
       case "non_affiliated":
         return {
           metric1: {
-            label: "Courses Completed",
+            label: t("Courses Completed"),
             value: "3/10",
             change: "+1",
             icon: "book",
           },
           metric2: {
-            label: "Your Points",
+            label: t("Your Points"),
             value: profile.points?.toString() || "180",
             change: "+20",
             icon: "star",
           },
           metric3: {
-            label: "Risk Score",
+            label: t("Risk Score"),
             value: `${profile.riskScore || "5.2"}/10`,
             change: "-0.5",
             icon: "shield-check",
           },
           metric4: {
-            label: "Certificates",
+            label: t("Certificates"),
             value: "2",
             change: "+1",
             icon: "award",
@@ -174,46 +245,51 @@ export default function DashboardPage() {
   };
 
   const getWelcomeMessage = () => {
-    if (!profile) return { greeting: "Welcome back", name: "User" };
+    if (!profile) return { greeting: t("Welcome back"), name: t("User") };
 
-    const firstName = profile.displayName?.split(" ")[0] || "User";
+    const firstName = t(profile.displayName?.split(" ")[0] || "User");
 
     switch (profile.role) {
       case "system_admin":
         return {
-          greeting: "Welcome back, Admin",
+          greeting: t("Welcome back, Admin"),
           name: firstName,
-          subtitle: "Monitor platform-wide security awareness",
-          action: "Review system analytics",
+          subtitle: t("Monitor platform-wide security awareness"),
+          action: t("Review system analytics"),
         };
       case "client_admin":
         return {
-          greeting: `Welcome back, ${profile.orgName || "Organization"} Admin`,
+          greeting: `${t("Welcome back")}, ${t(profile.orgName || "Organization")} ${t("Admin")}`,
           name: firstName,
-          subtitle: "Manage your institution's cybersecurity training",
-          action: "Review organization reports",
+          subtitle: t("Manage your institution's cybersecurity training"),
+          action: t("Review organization reports"),
         };
       case "affiliated":
         return {
-          greeting: "Welcome back",
+          greeting: t("Welcome back"),
           name: firstName,
-          subtitle: "Continue your cybersecurity awareness journey",
-          action: "Resume your training",
+          subtitle: t("Continue your cybersecurity awareness journey"),
+          action: t("Resume your training"),
         };
       case "non_affiliated":
         return {
-          greeting: "Welcome back",
+          greeting: t("Welcome back"),
           name: firstName,
-          subtitle: "Continue building your cyber resilience",
-          action: "Explore available courses",
+          subtitle: t("Continue building your cyber resilience"),
+          action: t("Explore available courses"),
         };
     }
   };
 
-  if (!isLoaded || loading) {
+  if (!isLoaded || loading || !translationReady) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="flex flex-1 items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">
+            {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
+          </p>
+        </div>
       </div>
     );
   }
@@ -407,7 +483,7 @@ export default function DashboardPage() {
                   {welcomeMsg?.name}
                 </h2>
                 <p className="text-sm text-[var(--medium-grey)] mb-1">
-                  Glad to see you again!
+                  {t("Glad to see you again!")}
                 </p>
                 <p className="text-sm text-[var(--medium-grey)] mb-6">
                   {welcomeMsg?.subtitle}
@@ -439,14 +515,14 @@ export default function DashboardPage() {
                 <h3 className="text-lg font-semibold text-white">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
-                    ? "Training Completion"
-                    : "Your Progress"}
+                    ? t("Training Completion")
+                    : t("Your Progress")}
                 </h3>
                 <p className="text-xs text-[var(--medium-grey)]">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
-                    ? "Average across users"
-                    : "Overall completion rate"}
+                    ? t("Average across users")
+                    : t("Overall completion rate")}
                 </p>
               </div>
               <div className="flex flex-col items-center mb-6">
@@ -474,7 +550,7 @@ export default function DashboardPage() {
                       : "85%"}
                   </p>
                   <p className="text-xs text-[var(--medium-grey)]">
-                    Courses completed
+                    {t("Courses completed")}
                   </p>
                 </div>
               </div>
@@ -486,7 +562,7 @@ export default function DashboardPage() {
             <div className="dashboard-card rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-white">
-                  Security Awareness
+                  {t("Security Awareness")}
                 </h3>
                 <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center">
                   <svg
@@ -513,8 +589,8 @@ export default function DashboardPage() {
                     <p className="text-xs text-[var(--medium-grey)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
-                        ? "Total Tests"
-                        : "Tests Passed"}
+                        ? t("Total Tests")
+                        : t("Tests Passed")}
                     </p>
                     <p className="text-lg font-bold text-white">
                       {profile?.role === "system_admin"
@@ -530,8 +606,8 @@ export default function DashboardPage() {
                     <p className="text-xs text-[var(--medium-grey)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
-                        ? "Avg Badges"
-                        : "Your Badges"}
+                        ? t("Avg Badges")
+                        : t("Your Badges")}
                     </p>
                     <p className="text-lg font-bold text-white">
                       {profile?.role === "affiliated"
@@ -577,14 +653,14 @@ export default function DashboardPage() {
               <h3 className="text-lg font-semibold text-white">
                 {profile?.role === "system_admin" ||
                 profile?.role === "client_admin"
-                  ? "User Activity Overview"
-                  : "Your Learning Progress"}
+                  ? t("User Activity Overview")
+                  : t("Your Learning Progress")}
               </h3>
               <p className="text-xs text-[var(--success-green)]">
                 {profile?.role === "system_admin" ||
                 profile?.role === "client_admin"
-                  ? "(+15%) increase this month"
-                  : "(+3) courses this month"}
+                  ? t("(+15%) increase this month")
+                  : t("(+3) courses this month")}
               </p>
             </div>
             <AreaChart userRole={profile?.role} />

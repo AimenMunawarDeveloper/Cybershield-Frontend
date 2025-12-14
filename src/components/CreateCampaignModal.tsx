@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X, Users, MessageSquare, Calendar, Link, Plus, Globe } from "lucide-react";
+import { X, Users, MessageSquare, Calendar, Link, Plus } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CreateCampaignModalProps {
   isOpen: boolean;
@@ -16,7 +17,6 @@ interface CampaignData {
   landingPageUrl: string;
   targetUserIds: string[];
   scheduleDate?: string;
-  language?: string;
 }
 
 interface User {
@@ -27,37 +27,37 @@ interface User {
   phoneNumber: string;
 }
 
-const phishingTemplates = [
+const getPhishingTemplates = (t: (text: string) => string) => [
   {
     id: "banking",
-    name: "Banking Verification",
-    template: `Your UBL account will be blocked within 24 hours due to incomplete verification.
+    name: t("Banking Verification"),
+    template: t(`Your UBL account will be blocked within 24 hours due to incomplete verification.
 Click the link below to verify now:
 🔗 ubl-verification-pk.com/login
 
-Helpline: +92-301-1234567`,
+Helpline: +92-301-1234567`),
   },
   {
     id: "lottery",
-    name: "Lottery Prize",
-    template: `You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
+    name: t("Lottery Prize"),
+    template: t(`You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
 Please send your CNIC number and JazzCash number to claim your prize!
-📞 Contact: 0345-9876543`,
+📞 Contact: 0345-9876543`),
   },
   {
     id: "job",
-    name: "Job Interview",
-    template: `You have been shortlisted for a job interview.
+    name: t("Job Interview"),
+    template: t(`You have been shortlisted for a job interview.
 Please pay Rs. 2000 for form verification to confirm your slot.
 Send via Easypaisa: 0333-7654321
-Form link: nestle-careerpk.com`,
+Form link: nestle-careerpk.com`),
   },
   {
     id: "delivery",
-    name: "Package Delivery",
-    template: `Your parcel is held due to incorrect address.
+    name: t("Package Delivery"),
+    template: t(`Your parcel is held due to incorrect address.
 Please click below to update details and pay Rs. 150 handling charges.
-🔗 tcs-tracking-pk.net`,
+🔗 tcs-tracking-pk.net`),
   },
 ];
 
@@ -66,6 +66,8 @@ export default function CreateCampaignModal({
   onClose,
   onSubmit,
 }: CreateCampaignModalProps) {
+  const { t } = useTranslation();
+  const phishingTemplates = getPhishingTemplates(t);
   const [formData, setFormData] = useState<CampaignData>({
     name: "",
     description: "",
@@ -73,7 +75,6 @@ export default function CreateCampaignModal({
     landingPageUrl: "",
     targetUserIds: [],
     scheduleDate: "",
-    language: "en",
   });
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [manualUsers, setManualUsers] = useState<User[]>([]);
@@ -96,14 +97,14 @@ export default function CreateCampaignModal({
     ) {
       console.log("Form validation failed - missing required fields");
       alert(
-        "Please fill in all required fields including selecting a template."
+        t("Please fill in all required fields including selecting a template.")
       );
       return;
     }
 
     if (manualUsers.length === 0) {
       console.log("Form validation failed - no users added");
-      alert("Please add at least one target user.");
+      alert(t("Please add at least one target user."));
       return;
     }
 
@@ -126,7 +127,6 @@ export default function CreateCampaignModal({
       landingPageUrl: "",
       targetUserIds: [],
       scheduleDate: "",
-      language: "en",
     });
     setSelectedTemplate("");
     setManualUsers([]);
@@ -163,8 +163,8 @@ export default function CreateCampaignModal({
       setFormData((prev) => ({
         ...prev,
         messageTemplate: template.template,
-        name: template.name + " Campaign",
-        description: `Security awareness campaign using ${template.name.toLowerCase()} phishing simulation`,
+        name: template.name + " " + t("Campaign"),
+        description: t(`Security awareness campaign using ${template.name.toLowerCase()} phishing simulation`),
       }));
     }
   };
@@ -175,7 +175,7 @@ export default function CreateCampaignModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Create New Campaign</h2>
+          <h2 className="text-xl font-bold text-white">{t("Create New Campaign")}</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors"
@@ -188,12 +188,12 @@ export default function CreateCampaignModal({
           <div>
             <label className="block text-sm font-medium text-white mb-3">
               <MessageSquare className="w-4 h-4 inline mr-2" />
-              Choose Phishing Template{" "}
+              {t("Choose Phishing Template")}{" "}
               {!selectedTemplate && <span className="text-red-400">*</span>}
             </label>
             {!selectedTemplate && (
               <div className="mb-3 p-2 bg-red-900 bg-opacity-20 border border-red-500 rounded text-red-300 text-sm">
-                Please select a phishing template to continue.
+                {t("Please select a phishing template to continue.")}
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -220,7 +220,7 @@ export default function CreateCampaignModal({
           </div>
           <div>
             <label className="block text-sm font-medium text-white mb-2">
-              Campaign Name
+              {t("Campaign Name")}
             </label>
             <input
               type="text"
@@ -229,13 +229,13 @@ export default function CreateCampaignModal({
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="Enter campaign name"
+              placeholder={t("Enter campaign name")}
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-white mb-2">
-              Description
+              {t("Description")}
             </label>
             <textarea
               value={formData.description}
@@ -246,14 +246,14 @@ export default function CreateCampaignModal({
                 }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="Describe the campaign purpose"
+              placeholder={t("Describe the campaign purpose")}
               rows={3}
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-white mb-2">
-              Message Template
+              {t("Message Template")}
             </label>
             <textarea
               value={formData.messageTemplate}
@@ -264,7 +264,7 @@ export default function CreateCampaignModal({
                 }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="Enter the phishing simulation message"
+              placeholder={t("Enter the phishing simulation message")}
               rows={6}
               required
             />
@@ -272,7 +272,7 @@ export default function CreateCampaignModal({
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <Link className="w-4 h-4 inline mr-2" />
-              Landing Page URL
+              {t("Landing Page URL")}
             </label>
             <input
               type="url"
@@ -284,14 +284,14 @@ export default function CreateCampaignModal({
                 }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="https://your-domain.com/verify"
+              placeholder={t("https://your-domain.com/verify")}
               required
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-white mb-3">
               <Users className="w-4 h-4 inline mr-2" />
-              Target Users ({manualUsers.length} selected)
+              {t("Target Users")} ({manualUsers.length} {t("selected")})
             </label>
             <div className="mb-4">
               <button
@@ -300,7 +300,7 @@ export default function CreateCampaignModal({
                 className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
-                Add User
+                {t("Add User")}
               </button>
             </div>
             {showAddUserForm && (
@@ -308,26 +308,26 @@ export default function CreateCampaignModal({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
                     <label className="block text-xs text-[var(--medium-grey)] mb-1">
-                      Full Name
+                      {t("Full Name")}
                     </label>
                     <input
                       type="text"
                       value={newUserName}
                       onChange={(e) => setNewUserName(e.target.value)}
                       className="w-full px-3 py-2 bg-[var(--navy-blue)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
-                      placeholder="Enter full name"
+                      placeholder={t("Enter full name")}
                     />
                   </div>
                   <div>
                     <label className="block text-xs text-[var(--medium-grey)] mb-1">
-                      Phone Number
+                      {t("Phone Number")}
                     </label>
                     <input
                       type="tel"
                       value={newUserPhone}
                       onChange={(e) => setNewUserPhone(e.target.value)}
                       className="w-full px-3 py-2 bg-[var(--navy-blue)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
-                      placeholder="+923001234567"
+                      placeholder={t("+923001234567")}
                     />
                   </div>
                 </div>
@@ -337,7 +337,7 @@ export default function CreateCampaignModal({
                     onClick={handleAddUser}
                     className="px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
                   >
-                    Add
+                    {t("Add")}
                   </button>
                   <button
                     type="button"
@@ -348,7 +348,7 @@ export default function CreateCampaignModal({
                     }}
                     className="px-3 py-1 text-[var(--medium-grey)] hover:text-white transition-colors text-sm"
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                 </div>
               </div>
@@ -357,7 +357,7 @@ export default function CreateCampaignModal({
               <div className="text-center py-8 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--medium-grey)]">
                 <Users className="w-12 h-12 text-[var(--medium-grey)] mx-auto mb-2" />
                 <div className="text-[var(--medium-grey)] text-sm">
-                  No users added yet. Click &quot;Add User&quot; to get started.
+                  {t('No users added yet. Click "Add User" to get started.')}
                 </div>
               </div>
             ) : (
@@ -369,7 +369,7 @@ export default function CreateCampaignModal({
                   >
                     <div>
                       <div className="text-sm font-medium text-white">
-                        {user.firstName} {user.lastName}
+                        {t(user.firstName)} {t(user.lastName)}
                       </div>
                       <div className="text-xs text-[var(--medium-grey)]">
                         {user.phoneNumber}
@@ -390,7 +390,7 @@ export default function CreateCampaignModal({
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               <Calendar className="w-4 h-4 inline mr-2" />
-              Schedule Date (Optional)
+              {t("Schedule Date (Optional)")}
             </label>
             <input
               type="datetime-local"
@@ -404,39 +404,20 @@ export default function CreateCampaignModal({
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Globe className="w-4 h-4 inline mr-2" />
-              Language
-            </label>
-            <select
-              value={formData.language || "en"}
-              onChange={(e) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  language: e.target.value,
-                }))
-              }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white focus:border-[var(--neon-blue)] focus:outline-none"
-            >
-              <option value="en">English</option>
-              <option value="ur">Urdu</option>
-            </select>
-          </div>
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
               className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors"
             >
-              Cancel
+              {t("Cancel")}
             </button>
             <button
               type="submit"
               onClick={() => console.log("Create Campaign button clicked!")}
               className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
             >
-              Create Campaign
+              {t("Create Campaign")}
             </button>
           </div>
         </form>
