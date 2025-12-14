@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Users, MessageSquare, Calendar, Link, Plus } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -66,7 +66,7 @@ export default function CreateCampaignModal({
   onClose,
   onSubmit,
 }: CreateCampaignModalProps) {
-  const { t } = useTranslation();
+  const { t, tAsync, language } = useTranslation();
   const phishingTemplates = getPhishingTemplates(t);
   const [formData, setFormData] = useState<CampaignData>({
     name: "",
@@ -81,6 +81,19 @@ export default function CreateCampaignModal({
   const [newUserName, setNewUserName] = useState("");
   const [newUserPhone, setNewUserPhone] = useState("");
   const [showAddUserForm, setShowAddUserForm] = useState(false);
+
+  // Clear selected template when language changes (forces re-selection in new language)
+  useEffect(() => {
+    if (selectedTemplate) {
+      setSelectedTemplate("");
+      setFormData((prev) => ({
+        ...prev,
+        name: "",
+        description: "",
+        messageTemplate: "",
+      }));
+    }
+  }, [language]); // Re-run when language changes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,15 +169,23 @@ export default function CreateCampaignModal({
     setManualUsers((prev) => prev.filter((user) => user._id !== userId));
   };
 
-  const handleTemplateSelect = (templateId: string) => {
+  const handleTemplateSelect = async (templateId: string) => {
     const template = phishingTemplates.find((t) => t.id === templateId);
     if (template) {
       setSelectedTemplate(templateId);
+      
+      // Wait for all translations to complete before updating form
+      const [translatedTemplate, translatedCampaignWord, translatedDescription] = await Promise.all([
+        tAsync(template.template),
+        tAsync("Campaign"),
+        tAsync(`Security awareness campaign using ${template.name.toLowerCase()} phishing simulation`)
+      ]);
+      
       setFormData((prev) => ({
         ...prev,
-        messageTemplate: template.template,
-        name: template.name + " " + t("Campaign"),
-        description: t(`Security awareness campaign using ${template.name.toLowerCase()} phishing simulation`),
+        messageTemplate: translatedTemplate,
+        name: template.name + " " + translatedCampaignWord,
+        description: translatedDescription,
       }));
     }
   };
