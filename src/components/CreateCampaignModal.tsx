@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Users, MessageSquare, Calendar, Link, Plus } from "lucide-react";
+import { X, Users, MessageSquare, Calendar, Link, Plus, Globe } from "lucide-react";
 
 interface CreateCampaignModalProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ interface CampaignData {
   landingPageUrl: string;
   targetUserIds: string[];
   scheduleDate?: string;
+  language?: string;
 }
 
 interface User {
@@ -72,6 +73,7 @@ export default function CreateCampaignModal({
     landingPageUrl: "",
     targetUserIds: [],
     scheduleDate: "",
+    language: "en",
   });
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [manualUsers, setManualUsers] = useState<User[]>([]);
@@ -124,6 +126,7 @@ export default function CreateCampaignModal({
       landingPageUrl: "",
       targetUserIds: [],
       scheduleDate: "",
+      language: "en",
     });
     setSelectedTemplate("");
     setManualUsers([]);
@@ -400,6 +403,25 @@ export default function CreateCampaignModal({
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              <Globe className="w-4 h-4 inline mr-2" />
+              Language
+            </label>
+            <select
+              value={formData.language || "en"}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  language: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white focus:border-[var(--neon-blue)] focus:outline-none"
+            >
+              <option value="en">English</option>
+              <option value="ur">Urdu</option>
+            </select>
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <button
