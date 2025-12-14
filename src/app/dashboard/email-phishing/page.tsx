@@ -34,6 +34,7 @@ export default function EmailPhishingPage() {
     sentTo: string;
     subject: string;
     bodyContent: string;
+    language?: string;
   }) => {
     setIsLoading(true);
     setMessage(null);
@@ -51,6 +52,7 @@ export default function EmailPhishingPage() {
           sentTo: emailData.sentTo,
           subject: emailData.subject,
           bodyContent: emailData.bodyContent,
+          language: emailData.language || "en",
         }),
       });
 

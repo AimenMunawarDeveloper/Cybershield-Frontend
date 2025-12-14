@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Mail, FileText } from "lucide-react";
+import { X, Mail, FileText, Globe } from "lucide-react";
 
 interface CreateEmailCampaignModalProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ interface EmailCampaignData {
   sentTo: string;
   subject: string;
   bodyContent: string;
+  language?: string;
 }
 
 export default function CreateEmailCampaignModal({
@@ -30,6 +31,7 @@ export default function CreateEmailCampaignModal({
     sentTo: "",
     subject: "",
     bodyContent: "",
+    language: "en",
   });
 
 
@@ -40,6 +42,7 @@ export default function CreateEmailCampaignModal({
         sentTo: initialData.sentTo || prev.sentTo,
         subject: initialData.subject || prev.subject,
         bodyContent: initialData.bodyContent || prev.bodyContent,
+        language: initialData.language || prev.language || "en",
       }));
     } else if (!isOpen) {
  
@@ -48,6 +51,7 @@ export default function CreateEmailCampaignModal({
         sentTo: "",
         subject: "",
         bodyContent: "",
+        language: "en",
       });
     }
   }, [isOpen, initialData]);
@@ -70,6 +74,7 @@ export default function CreateEmailCampaignModal({
       sentTo: "",
       subject: "",
       bodyContent: "",
+      language: "en",
     });
   };
 
@@ -164,6 +169,27 @@ export default function CreateEmailCampaignModal({
               required
               disabled={isLoading}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              <Globe className="w-4 h-4 inline mr-2" />
+              Language
+            </label>
+            <select
+              value={formData.language || "en"}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  language: e.target.value,
+                }))
+              }
+              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white focus:border-[var(--neon-blue)] focus:outline-none"
+              disabled={isLoading}
+            >
+              <option value="en">English</option>
+              <option value="ur">Urdu</option>
+            </select>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

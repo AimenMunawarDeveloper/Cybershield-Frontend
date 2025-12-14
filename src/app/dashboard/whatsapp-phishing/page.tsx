@@ -185,6 +185,7 @@ export default function WhatsAppPhishingPage() {
       phoneNumber: string;
     }>;
     scheduleDate?: string;
+    language?: string;
   }) => {
     console.log("handleCreateCampaign called with:", campaignData);
 
@@ -233,7 +234,10 @@ export default function WhatsAppPhishingPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(campaignData),
+        body: JSON.stringify({
+          ...campaignData,
+          language: campaignData.language || "en",
+        }),
       });
 
       const responseData = await response.json();
