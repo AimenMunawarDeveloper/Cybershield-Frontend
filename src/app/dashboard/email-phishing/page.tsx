@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Mail, Send, Shield, AlertTriangle, Lock, Globe, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
 
@@ -13,7 +14,8 @@ interface EmailTemplateContent {
 }
 
 interface PhishingTemplate {
-  id: string;
+  _id?: string;
+  id?: string;
   title: string;
   description: string;
   image: string;
@@ -32,14 +34,45 @@ interface EmailRecord {
 }
 
 export default function EmailPhishingPage() {
+  const { getToken } = useAuth();
   const [showModal, setShowModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<PhishingTemplate | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [initialEmailData, setInitialEmailData] = useState<Partial<EmailTemplateContent> | null>(null);
+  const [templates, setTemplates] = useState<PhishingTemplate[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [emails, setEmails] = useState<EmailRecord[]>([]);
   const [loadingEmails, setLoadingEmails] = useState(true);
+
+  // Fetch templates from MongoDB
+  const fetchTemplates = async () => {
+    try {
+      setLoadingTemplates(true);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+      
+      const response = await fetch(`${backendUrl}/api/email-templates`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        console.log("✅ Templates fetched successfully:", result.data.templates?.length || 0);
+        setTemplates(result.data.templates || []);
+      } else {
+        console.error("❌ Failed to fetch templates:", result.message);
+      }
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
 
   // Fetch emails from database
   const fetchEmails = async () => {
@@ -66,10 +99,6 @@ export default function EmailPhishingPage() {
     }
   };
 
-  useEffect(() => {
-    fetchEmails();
-  }, []);
-
   // Format date to local time
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -84,48 +113,47 @@ export default function EmailPhishingPage() {
     });
   };
 
+  useEffect(() => {
+    fetchTemplates();
+    fetchEmails();
+  }, []);
+
   const handleSendEmail = async (emailData: {
     sentBy: string;
     sentTo: string;
     subject: string;
     bodyContent: string;
-    language?: string;
   }) => {
     setIsLoading(true);
     setMessage(null);
 
     try {
+      const token = await getToken();
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+      
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       
       const response = await fetch(`${backendUrl}/api/email-campaigns/send`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({
           sentBy: emailData.sentBy,
           sentTo: emailData.sentTo,
           subject: emailData.subject,
           bodyContent: emailData.bodyContent,
-          language: emailData.language || "en",
         }),
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
-        const recipientCount = result.data?.total || 1;
-        const successCount = result.data?.successful || 1;
-        const failCount = result.data?.failed || 0;
-        
-        if (recipientCount > 1) {
-          setMessage({ 
-            type: "success", 
-            text: `Bulk email sent! ${successCount} successful, ${failCount} failed out of ${recipientCount} recipients.` 
-          });
-        } else {
-          setMessage({ type: "success", text: `Email sent successfully to ${emailData.sentTo}!` });
-        }
+        setMessage({ type: "success", text: `Email sent successfully to ${emailData.sentTo}!` });
         setShowModal(false);
         // Refresh email list after sending
         fetchEmails();
@@ -157,138 +185,6 @@ export default function EmailPhishingPage() {
     setShowModal(true);
   };
 
-  const phishingTemplates: PhishingTemplate[] = [
-    {
-      id: "1",
-      title: "Banking Verification",
-      description: "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      category: "Financial",
-      emailTemplate: {
-        subject: "URGENT: Account Verification Required - Action Needed Within 24 Hours",
-        bodyContent: `Dear Valued Customer,
-
-Your account requires immediate verification due to suspicious activity detected on your account.
-
-To prevent your account from being temporarily suspended, please verify your account details by clicking the link below:
-
-🔗 https://ubl-verification-pk.com/verify-account
-
-This is a time-sensitive matter. Failure to verify within 24 hours will result in your account being blocked for security purposes.
-
-Important Security Notice:
-- Never share your password or PIN with anyone
-- Our security team will NEVER ask for your full password
-- Always check the sender's email address
-
-For assistance, please contact our helpline: +92-301-1234567
-
-Thank you for your immediate attention to this matter.
-
-UBL Security Team
-United Bank Limited`
-      }
-    },
-    {
-      id: "2",
-      title: "Account Security Alert",
-      description: "Test how users respond to urgent security notifications and password reset requests from seemingly legitimate sources.",
-      image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      category: "Security",
-      emailTemplate: {
-        subject: "Security Alert: Unusual Login Activity Detected",
-        bodyContent: `Hello,
-
-We detected a new sign-in to your account from an unrecognized device.
-
-Location: Moscow, Russia
-Device: Windows PC
-Time: Today at 2:34 AM
-
-If this was you, no action is needed. However, if you don't recognize this activity:
-
-[SECURE YOUR ACCOUNT NOW] → Reset Password
-
-This link will expire in 24 hours for security reasons.
-
-If you didn't make this change, please secure your account immediately by clicking the link above and changing your password.
-
-Need help? Contact support immediately.
-
-Stay secure,
-Account Security Team`
-      }
-    },
-    {
-      id: "3",
-      title: "Package Delivery",
-      description: "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      category: "Delivery",
-      emailTemplate: {
-        subject: "Package Delivery Update - Action Required",
-        bodyContent: `Dear Customer,
-
-Your package (Tracking #: TCS-789456123) is currently being held at our distribution center due to an incorrect or incomplete address.
-
-To ensure timely delivery, please update your delivery information by clicking the link below:
-
-📦 Update Delivery Address
-
-You will need to:
-1. Verify your contact information
-2. Confirm your delivery address
-3. Pay a handling fee of Rs. 150 (refundable upon successful delivery)
-
-IMPORTANT: Please complete this process within 48 hours to avoid package return to sender.
-
-If you have any questions, please contact our customer service team.
-
-Thank you for your cooperation.
-
-TCS Courier Services
-www.tcs-tracking-pk.net`
-      }
-    },
-    {
-      id: "4",
-      title: "Job Opportunity",
-      description: "Create realistic job offer emails to evaluate how well users can identify employment-related phishing attempts.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      category: "Employment",
-      emailTemplate: {
-        subject: "Congratulations! You've Been Shortlisted for Interview",
-        bodyContent: `Dear Candidate,
-
-We are pleased to inform you that after reviewing your application, you have been shortlisted for the position of Senior Marketing Manager at Nestlé Pakistan.
-
-Interview Details:
-📅 Date: [To be scheduled after confirmation]
-⏰ Time: 10:00 AM - 12:00 PM
-📍 Location: Nestlé Headquarters, Lahore
-
-To confirm your interview slot, please complete the following steps:
-
-1. Pay a non-refundable application processing fee of Rs. 2,000
-   - Via Easypaisa: 0333-7654321
-   - Please mention "Interview Fee - [Your Name]" in the transaction
-
-2. Fill out the interview form at: nestle-careerpk.com/interview-form
-
-3. Send your payment confirmation receipt to this email address
-
-This fee covers administrative costs and is standard procedure for all shortlisted candidates.
-
-Please note: Your interview slot will only be confirmed upon receipt of payment and form submission.
-
-We look forward to meeting you!
-
-Best regards,
-Nestlé HR Recruitment Team
-Nestlé Pakistan Limited`
-      }
-    },
-  ];
 
   return (
     <>
@@ -347,9 +243,19 @@ Nestlé Pakistan Limited`
 
             {/* Template Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {phishingTemplates.map((template) => (
-                <div
-                  key={template.id}
+              {loadingTemplates ? (
+                <div className="col-span-full text-center py-12">
+                  <div className="text-[var(--medium-grey)]">Loading templates...</div>
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
+                  <p className="text-[var(--medium-grey)]">No templates available. Please seed the database first.</p>
+                </div>
+              ) : (
+                templates.map((template) => (
+                  <div
+                    key={template._id || template.id}
                   className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
                 >
                   {/* Image with enhanced styling */}
@@ -423,7 +329,8 @@ Nestlé Pakistan Limited`
                   {/* Animated glow effect on hover */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[var(--neon-blue)]/0 via-[var(--neon-blue)]/10 to-[var(--neon-blue)]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
 
             {/* Send Email Section */}
