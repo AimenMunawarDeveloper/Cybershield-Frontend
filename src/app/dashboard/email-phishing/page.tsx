@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Mail, Send, Shield, AlertTriangle, Lock, Globe } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Send, Shield, AlertTriangle, Lock, Globe, CheckCircle2, XCircle, Clock } from "lucide-react";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
 
@@ -21,6 +21,16 @@ interface PhishingTemplate {
   emailTemplate: EmailTemplateContent;
 }
 
+interface EmailRecord {
+  _id: string;
+  sentBy: string;
+  sentTo: string;
+  subject: string;
+  status: "sent" | "failed";
+  createdAt: string;
+  error?: string;
+}
+
 export default function EmailPhishingPage() {
   const [showModal, setShowModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
@@ -28,6 +38,51 @@ export default function EmailPhishingPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [initialEmailData, setInitialEmailData] = useState<Partial<EmailTemplateContent> | null>(null);
+  const [emails, setEmails] = useState<EmailRecord[]>([]);
+  const [loadingEmails, setLoadingEmails] = useState(true);
+
+  // Fetch emails from database
+  const fetchEmails = async () => {
+    try {
+      setLoadingEmails(true);
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+      
+      const response = await fetch(`${backendUrl}/api/email-campaigns?limit=5`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setEmails(result.data.emails || []);
+      }
+    } catch (error) {
+      console.error("Error fetching emails:", error);
+    } finally {
+      setLoadingEmails(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmails();
+  }, []);
+
+  // Format date to local time
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
 
   const handleSendEmail = async (emailData: {
     sentBy: string;
@@ -57,8 +112,21 @@ export default function EmailPhishingPage() {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setMessage({ type: "success", text: `Email sent successfully to ${emailData.sentTo}!` });
+        const recipientCount = result.data?.total || 1;
+        const successCount = result.data?.successful || 1;
+        const failCount = result.data?.failed || 0;
+        
+        if (recipientCount > 1) {
+          setMessage({ 
+            type: "success", 
+            text: `Bulk email sent! ${successCount} successful, ${failCount} failed out of ${recipientCount} recipients.` 
+          });
+        } else {
+          setMessage({ type: "success", text: `Email sent successfully to ${emailData.sentTo}!` });
+        }
         setShowModal(false);
+        // Refresh email list after sending
+        fetchEmails();
       } else {
         setMessage({ type: "error", text: result.message || "Failed to send email" });
       }
@@ -401,17 +469,83 @@ Nestlé Pakistan Limited`
                   </div>
                 )}
 
-                {/* Send Email Card */}
+                {/* Email History */}
                 <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-6 border border-[var(--medium-grey)] border-opacity-20">
-                  <div className="text-center py-8">
-                    <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                      Send Test Email
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">
+                      Email History
                     </h3>
-                    <p className="text-sm text-[var(--medium-grey)] mb-6">
-                      Click the button above to send a test email
-                    </p>
+                    <button
+                      onClick={fetchEmails}
+                      disabled={loadingEmails}
+                      className="text-sm text-[var(--neon-blue)] hover:text-[var(--neon-blue-dark)] transition-colors disabled:opacity-50"
+                    >
+                      {loadingEmails ? "Refreshing..." : "Refresh"}
+                    </button>
                   </div>
+
+                  {loadingEmails ? (
+                    <div className="text-center py-8">
+                      <div className="text-[var(--medium-grey)]">Loading emails...</div>
+                    </div>
+                  ) : emails.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
+                      <p className="text-sm text-[var(--medium-grey)]">
+                        No emails sent yet. Send your first email above!
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {emails.map((email) => (
+                        <div
+                          key={email._id}
+                          className="bg-[var(--navy-blue)] rounded-lg p-4 border border-[var(--medium-grey)] border-opacity-20 hover:border-[var(--neon-blue)] transition-colors"
+                        >
+                          <div className="flex items-start gap-3">
+                            {email.status === "sent" ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-2">
+                                <p className="text-white font-semibold truncate">
+                                  {email.subject}
+                                </p>
+                                <span
+                                  className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
+                                    email.status === "sent"
+                                      ? "bg-green-900/30 text-green-400 border border-green-500/30"
+                                      : "bg-red-900/30 text-red-400 border border-red-500/30"
+                                  }`}
+                                >
+                                  {email.status === "sent" ? "Sent" : "Failed"}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-sm text-[var(--medium-grey)] truncate">
+                                  <span className="text-white">To:</span> {email.sentTo}
+                                </p>
+                                <p className="text-xs text-[var(--medium-grey)] truncate">
+                                  <span className="text-white">From:</span> {email.sentBy}
+                                </p>
+                                <div className="flex items-center gap-1 text-xs text-[var(--medium-grey)] mt-2">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{formatDate(email.createdAt)}</span>
+                                </div>
+                              </div>
+                              {email.error && (
+                                <p className="text-xs text-red-400 mt-2">
+                                  {email.error}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

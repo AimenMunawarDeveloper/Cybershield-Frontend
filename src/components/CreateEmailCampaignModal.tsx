@@ -113,17 +113,20 @@ export default function CreateEmailCampaignModal({
               <Mail className="w-4 h-4 inline mr-2" />
               Sent To <span className="text-red-400">*</span>
             </label>
-            <input
-              type="email"
+            <textarea
               value={formData.sentTo}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, sentTo: e.target.value }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder="recipient@example.com"
+              placeholder="recipient@example.com, recipient2@example.com, recipient3@example.com"
+              rows={3}
               required
               disabled={isLoading}
             />
+            <p className="text-xs text-[var(--medium-grey)] mt-1">
+              💡 Separate multiple email addresses with commas for bulk sending
+            </p>
           </div>
 
           <div>

@@ -13,6 +13,8 @@ import {
   Shield,
   TrendingUp,
   CheckCircle2,
+  Send,
+  Lock,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
@@ -53,6 +55,7 @@ export default function WhatsAppPhishingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedTemplatePreview, setSelectedTemplatePreview] = useState<{title: string; content: string} | null>(null);
 
   const fetchCampaigns = useCallback(async () => {
     try {
@@ -301,40 +304,40 @@ export default function WhatsAppPhishingPage() {
         <div className="blurred-background"></div>
 
         {/* Hero Section */}
-        <div className="relative z-10 mb-8">
-          <div
-            className="relative rounded-lg overflow-hidden min-h-[70vh] flex items-center"
-            style={{ backgroundColor: "var(--white)" }}
-          >
-            {/* White overlay for brightness */}
-            <div className="absolute inset-0 bg-white"></div>
-
-            {/* Illustration - larger and centered */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative w-full max-w-2xl md:max-w-4xl h-80 md:h-[28rem]">
-                <Image
-                  src="/Images/1.png"
-                  alt="WhatsApp Phishing Services"
-                  fill
-                  className="object-contain"
-                  priority
-                />
+        <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden mb-8">
+          <div className="blurred-background"></div>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
+                  <MessageSquare className="w-8 h-8 text-white" />
+                </div>
               </div>
-            </div>
-
-            {/* Content */}
-            <div className="relative z-10 p-8 md:p-12 text-center w-full">
-              {/* Text overlay background for better visibility - more transparent and taller */}
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[200%] bg-white/20 backdrop-blur-[3px]"></div>
-              <div className="relative z-20">
-                <h1 className="text-4xl md:text-5xl font-bold text-[var(--navy-blue)] mb-4 drop-shadow-lg">
-                  WhatsApp Phishing Simulation Campaigns
-                </h1>
-                <p className="text-lg text-[var(--navy-blue)]/90 max-w-3xl mx-auto drop-shadow-md">
-                  Multi-vector phishing simulation campaigns via
-                  WhatsApp/smishing. Create, schedule, and execute campaigns
-                  with telemetry capture and analytics.
-                </p>
+              
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+                WhatsApp Phishing
+                <span className="block text-[var(--neon-blue)] mt-1">Awareness Training</span>
+              </h1>
+              
+              <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+                Protect your organization by training users to identify and respond to phishing messages. 
+                Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.
+              </p>
+              
+              <div className="flex flex-wrap justify-center gap-3 mt-6">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                  <Shield className="w-4 h-4 text-[var(--neon-blue)]" />
+                  <span className="text-white text-xs">Realistic Scenarios</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                  <AlertTriangle className="w-4 h-4 text-[var(--neon-blue)]" />
+                  <span className="text-white text-xs">Security Training</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                  <Lock className="w-4 h-4 text-[var(--neon-blue)]" />
+                  <span className="text-white text-xs">Safe Testing</span>
+                </div>
               </div>
             </div>
           </div>
@@ -608,6 +611,142 @@ export default function WhatsAppPhishingPage() {
           </div>
         </div>
 
+        {/* Phishing Templates Section */}
+        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4 mb-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                Phishing Message Templates
+              </h2>
+              <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
+                Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.
+              </p>
+            </div>
+
+            {/* Template Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {[
+                {
+                  id: "banking",
+                  title: "Banking Verification",
+                  description: "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
+                  image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                  category: "Financial",
+                  messageTemplate: `Your UBL account will be blocked within 24 hours due to incomplete verification.
+Click the link below to verify now:
+🔗 ubl-verification-pk.com/login
+
+Helpline: +92-301-1234567`,
+                },
+                {
+                  id: "lottery",
+                  title: "Lottery Prize",
+                  description: "Test how users respond to prize-winning notifications and lottery scams that request personal information.",
+                  image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                  category: "Prize",
+                  messageTemplate: `You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
+Please send your CNIC number and JazzCash number to claim your prize!
+📞 Contact: 0345-9876543`,
+                },
+                {
+                  id: "job",
+                  title: "Job Interview",
+                  description: "Create realistic job offer messages to evaluate how well users can identify employment-related phishing attempts.",
+                  image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                  category: "Employment",
+                  messageTemplate: `You have been shortlisted for a job interview.
+Please pay Rs. 2000 for form verification to confirm your slot.
+Send via Easypaisa: 0333-7654321
+Form link: nestle-careerpk.com`,
+                },
+                {
+                  id: "delivery",
+                  title: "Package Delivery",
+                  description: "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
+                  image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                  category: "Delivery",
+                  messageTemplate: `Your parcel is held due to incorrect address.
+Please click below to update details and pay Rs. 150 handling charges.
+🔗 tcs-tracking-pk.net`,
+                },
+              ].map((template) => (
+                <div
+                  key={template.id}
+                  className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
+                >
+                  {/* Image with enhanced styling */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={template.image}
+                      alt={template.title}
+                      className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
+                      }}
+                    />
+                    {/* Enhanced gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--navy-blue)] via-black/40 to-transparent"></div>
+                    
+                    {/* Category Badge with glow */}
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1.5 bg-[var(--neon-blue)] text-white text-xs font-semibold rounded-full shadow-lg shadow-[var(--neon-blue)]/50 backdrop-blur-sm">
+                        {template.category}
+                      </span>
+                    </div>
+
+                    {/* Icon overlay */}
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="w-10 h-10 bg-[var(--neon-blue)]/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg">
+                        <MessageSquare className="w-5 h-5 text-white" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 flex flex-col flex-1">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="w-10 h-10 bg-[var(--neon-blue)]/20 rounded-lg flex items-center justify-center group-hover:bg-[var(--neon-blue)]/30 transition-colors">
+                        <MessageSquare className="w-5 h-5 text-[var(--neon-blue)]" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                          {template.title}
+                        </h3>
+                      </div>
+                    </div>
+                    
+                    <p className="text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
+                      {template.description}
+                    </p>
+
+                    {/* Action Buttons */}
+                    <div className="w-full mt-auto flex gap-2">
+                      <button
+                        onClick={() => setSelectedTemplatePreview({ title: template.title, content: template.messageTemplate })}
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                      >
+                        <span>View</span>
+                        <Send className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                      >
+                        <span>Use</span>
+                        <MessageSquare className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Animated glow effect on hover */}
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[var(--neon-blue)]/0 via-[var(--neon-blue)]/10 to-[var(--neon-blue)]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Page Header */}
         <div className="relative z-10">
           <div className="flex items-center justify-between mb-2">
@@ -839,6 +978,37 @@ export default function WhatsAppPhishingPage() {
           </div>
         </div>
       </div>
+
+      {/* Template Preview Modal */}
+      {selectedTemplatePreview && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[var(--navy-blue)] rounded-2xl p-6 max-w-2xl w-full border border-[var(--neon-blue)]/30">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-white">{selectedTemplatePreview.title}</h3>
+              <button
+                onClick={() => setSelectedTemplatePreview(null)}
+                className="text-[var(--medium-grey)] hover:text-white transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 mb-4">
+              <p className="text-white whitespace-pre-wrap font-mono text-sm">{selectedTemplatePreview.content}</p>
+            </div>
+            <button
+              onClick={() => {
+                setSelectedTemplatePreview(null);
+                setShowCreateModal(true);
+              }}
+              className="w-full px-4 py-3 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold"
+            >
+              Use This Template
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Create Campaign Modal */}
       <CreateCampaignModal
