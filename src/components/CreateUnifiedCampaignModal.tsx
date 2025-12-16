@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Users, Plus, Trash2, Mail, MessageSquare, Calendar, Zap } from "lucide-react";
+import { X, Users, Plus, Trash2, Mail, MessageSquare, Calendar, Zap, FileText } from "lucide-react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ApiClient } from "@/lib/api";
@@ -73,6 +73,14 @@ export default function CreateUnifiedCampaignModal({
   const [emailBody, setEmailBody] = useState("");
   const [emailLandingPage, setEmailLandingPage] = useState("");
   
+  // Templates
+  const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
+  const [whatsappTemplates, setWhatsappTemplates] = useState<any[]>([]);
+  const [emailTemplatesLoading, setEmailTemplatesLoading] = useState(false);
+  const [whatsappTemplatesLoading, setWhatsappTemplatesLoading] = useState(false);
+  const [showEmailTemplateSelector, setShowEmailTemplateSelector] = useState(false);
+  const [showWhatsappTemplateSelector, setShowWhatsappTemplateSelector] = useState(false);
+  
   // Fetch all users from database
   useEffect(() => {
     if (isLoaded && user && isOpen) {
@@ -91,6 +99,69 @@ export default function CreateUnifiedCampaignModal({
       fetchUsers();
     }
   }, [isLoaded, user, isOpen, getToken]);
+
+  // Fetch templates
+  useEffect(() => {
+    if (isOpen) {
+      const fetchTemplates = async () => {
+        try {
+          const token = await getToken();
+          if (!token) return;
+
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+          // Fetch email templates
+          if (emailEnabled) {
+            setEmailTemplatesLoading(true);
+            try {
+              const emailResponse = await fetch(`${API_BASE_URL}/email-templates`, {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              if (emailResponse.ok) {
+                const emailData = await emailResponse.json();
+                if (emailData.success && emailData.data?.templates) {
+                  setEmailTemplates(emailData.data.templates);
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching email templates:", error);
+            } finally {
+              setEmailTemplatesLoading(false);
+            }
+          }
+
+          // Fetch WhatsApp templates
+          if (whatsappEnabled) {
+            setWhatsappTemplatesLoading(true);
+            try {
+              const whatsappResponse = await fetch(`${API_BASE_URL}/whatsapp-templates`, {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              if (whatsappResponse.ok) {
+                const whatsappData = await whatsappResponse.json();
+                if (whatsappData.success && whatsappData.data?.templates) {
+                  setWhatsappTemplates(whatsappData.data.templates);
+                }
+              }
+            } catch (error) {
+              console.error("Error fetching WhatsApp templates:", error);
+            } finally {
+              setWhatsappTemplatesLoading(false);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching templates:", error);
+        }
+      };
+      fetchTemplates();
+    }
+  }, [isOpen, emailEnabled, whatsappEnabled, getToken]);
 
   // Reset form
   const resetForm = () => {
@@ -112,6 +183,8 @@ export default function CreateUnifiedCampaignModal({
     setEmailSubject("");
     setEmailBody("");
     setEmailLandingPage("");
+    setShowEmailTemplateSelector(false);
+    setShowWhatsappTemplateSelector(false);
     setError(null);
   };
   
@@ -603,6 +676,59 @@ export default function CreateUnifiedCampaignModal({
                       className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white opacity-75 cursor-not-allowed"
                     />
                   </div>
+
+                  {/* Email Template Selection */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm text-white font-medium">
+                        {t("Email Template")}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowEmailTemplateSelector(!showEmailTemplateSelector)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                      >
+                        <FileText className="w-4 h-4" />
+                        {showEmailTemplateSelector ? t("Hide Templates") : t("Choose Template")}
+                      </button>
+                    </div>
+                    
+                    {showEmailTemplateSelector && (
+                      <div className="mb-4 p-4 bg-[var(--navy-blue-light)] rounded-lg border border-[var(--medium-grey)]/30 max-h-64 overflow-y-auto">
+                        {emailTemplatesLoading ? (
+                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                            {t("Loading templates...")}
+                          </div>
+                        ) : emailTemplates.length === 0 ? (
+                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                            {t("No templates available")}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-2">
+                            {emailTemplates.map((template) => (
+                              <button
+                                key={template._id || template.id}
+                                type="button"
+                                onClick={() => {
+                                  setEmailSubject(template.emailTemplate?.subject || "");
+                                  setEmailBody(template.emailTemplate?.bodyContent || "");
+                                  setShowEmailTemplateSelector(false);
+                                }}
+                                className="p-3 text-left bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 hover:border-[var(--neon-blue)] transition-colors"
+                              >
+                                <div className="text-white font-medium text-sm mb-1">
+                                  {template.title}
+                                </div>
+                                <div className="text-[var(--medium-grey)] text-xs line-clamp-2">
+                                  {template.description}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   
                   <input
                     type="text"
@@ -639,6 +765,58 @@ export default function CreateUnifiedCampaignModal({
                     <h3 className="text-lg font-semibold text-white">
                       {t("WhatsApp Configuration")}
                     </h3>
+                  </div>
+
+                  {/* WhatsApp Template Selection */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm text-white font-medium">
+                        {t("WhatsApp Template")}
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowWhatsappTemplateSelector(!showWhatsappTemplateSelector)}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                      >
+                        <FileText className="w-4 h-4" />
+                        {showWhatsappTemplateSelector ? t("Hide Templates") : t("Choose Template")}
+                      </button>
+                    </div>
+                    
+                    {showWhatsappTemplateSelector && (
+                      <div className="mb-4 p-4 bg-[var(--navy-blue-light)] rounded-lg border border-[var(--medium-grey)]/30 max-h-64 overflow-y-auto">
+                        {whatsappTemplatesLoading ? (
+                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                            {t("Loading templates...")}
+                          </div>
+                        ) : whatsappTemplates.length === 0 ? (
+                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                            {t("No templates available")}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 gap-2">
+                            {whatsappTemplates.map((template) => (
+                              <button
+                                key={template._id || template.id}
+                                type="button"
+                                onClick={() => {
+                                  setWhatsappMessage(template.messageTemplate || "");
+                                  setShowWhatsappTemplateSelector(false);
+                                }}
+                                className="p-3 text-left bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 hover:border-green-500 transition-colors"
+                              >
+                                <div className="text-white font-medium text-sm mb-1">
+                                  {template.title}
+                                </div>
+                                <div className="text-[var(--medium-grey)] text-xs line-clamp-2">
+                                  {template.description}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
                   <textarea

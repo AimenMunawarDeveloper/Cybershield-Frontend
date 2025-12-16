@@ -61,6 +61,13 @@ export default function WhatsAppPhishingPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTemplatePreview, setSelectedTemplatePreview] = useState<{title: string; content: string} | null>(null);
+  const [selectedTemplateForModal, setSelectedTemplateForModal] = useState<{
+    _id?: string;
+    title: string;
+    description: string;
+    messageTemplate: string;
+    category?: string;
+  } | null>(null);
   const [translationReady, setTranslationReady] = useState(false);
 
   const fetchCampaigns = useCallback(async () => {
@@ -848,8 +855,8 @@ export default function WhatsAppPhishingPage() {
                       </button>
                       <button
                         onClick={() => {
-                          // Store the selected template for the modal
-                          setSelectedTemplatePreview({ title: template.title, content: template.messageTemplate });
+                          // Store the full template data for the modal
+                          setSelectedTemplateForModal(template);
                           setShowCreateModal(true);
                         }}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
@@ -1120,6 +1127,13 @@ export default function WhatsAppPhishingPage() {
             </div>
             <button
               onClick={() => {
+                // Find the template from the templates array
+                const template = templates.find(
+                  (t) => t.title === selectedTemplatePreview.title
+                );
+                if (template) {
+                  setSelectedTemplateForModal(template);
+                }
                 setSelectedTemplatePreview(null);
                 setShowCreateModal(true);
               }}
@@ -1134,8 +1148,12 @@ export default function WhatsAppPhishingPage() {
       {/* Create Campaign Modal */}
       <CreateCampaignModal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setSelectedTemplateForModal(null);
+        }}
         onSubmit={handleCreateCampaign}
+        initialTemplate={selectedTemplateForModal}
       />
     </>
   );
