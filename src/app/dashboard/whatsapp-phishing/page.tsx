@@ -55,7 +55,9 @@ export default function WhatsAppPhishingPage() {
   const { t, preTranslate, isTranslating, language } = useTranslation();
   const { getToken } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedTemplatePreview, setSelectedTemplatePreview] = useState<{title: string; content: string} | null>(null);
@@ -240,9 +242,65 @@ export default function WhatsAppPhishingPage() {
     preTranslatePageContent();
   }, [language, preTranslate]);
 
+  const fetchTemplates = useCallback(async () => {
+    try {
+      setTemplatesLoading(true);
+      const token = await getToken();
+      if (!token) {
+        setTemplates([]);
+        setTemplatesLoading(false);
+        return;
+      }
+
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+      const response = await fetch(`${API_BASE_URL}/whatsapp-templates`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.error("Failed to fetch templates:", response.status);
+        setTemplates([]);
+        setTemplatesLoading(false);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.data && data.data.templates) {
+        const templatesData = data.data.templates;
+        
+        // Pre-translate template data if needed
+        if (language === "ur") {
+          const dynamicStrings = templatesData.flatMap((template: any) => [
+            template.title,
+            template.description,
+            template.category,
+            template.messageTemplate,
+          ]).filter(Boolean);
+          
+          await preTranslate(dynamicStrings);
+        }
+        
+        setTemplates(templatesData);
+      } else {
+        setTemplates([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch templates:", error);
+      setTemplates([]);
+    } finally {
+      setTemplatesLoading(false);
+    }
+  }, [getToken, language, preTranslate]);
+
   useEffect(() => {
     fetchCampaigns();
-  }, [fetchCampaigns]);
+    fetchTemplates();
+  }, [fetchCampaigns, fetchTemplates]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -337,7 +395,6 @@ export default function WhatsAppPhishingPage() {
         },
         body: JSON.stringify({
           ...campaignData,
-          language: campaignData.language || "en",
         }),
       });
 
@@ -400,7 +457,7 @@ export default function WhatsAppPhishingPage() {
   };
 
   // Show loading state while translating or fetching data
-  if (!translationReady || loading) {
+  if (!translationReady || loading || templatesLoading) {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
@@ -722,60 +779,23 @@ export default function WhatsAppPhishingPage() {
 
             {/* Template Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {[
-                {
-                  id: "banking",
-                  title: t("Banking Verification"),
-                  description: t("Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts."),
-                  image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: t("Financial"),
-                  messageTemplate: t(`Your UBL account will be blocked within 24 hours due to incomplete verification.
-Click the link below to verify now:
-🔗 ubl-verification-pk.com/login
-
-Helpline: +92-301-1234567`),
-                },
-                {
-                  id: "lottery",
-                  title: t("Lottery Prize"),
-                  description: t("Test how users respond to prize-winning notifications and lottery scams that request personal information."),
-                  image: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: t("Prize"),
-                  messageTemplate: t(`You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
-Please send your CNIC number and JazzCash number to claim your prize!
-📞 Contact: 0345-9876543`),
-                },
-                {
-                  id: "job",
-                  title: t("Job Interview"),
-                  description: t("Create realistic job offer messages to evaluate how well users can identify employment-related phishing attempts."),
-                  image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: t("Employment"),
-                  messageTemplate: t(`You have been shortlisted for a job interview.
-Please pay Rs. 2000 for form verification to confirm your slot.
-Send via Easypaisa: 0333-7654321
-Form link: nestle-careerpk.com`),
-                },
-                {
-                  id: "delivery",
-                  title: t("Package Delivery"),
-                  description: t("Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams."),
-                  image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                  category: t("Delivery"),
-                  messageTemplate: t(`Your parcel is held due to incorrect address.
-Please click below to update details and pay Rs. 150 handling charges.
-🔗 tcs-tracking-pk.net`),
-                },
-              ].map((template) => (
+              {templates.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <p className="text-[var(--medium-grey)]">
+                    {t("No templates available. Please seed the database first.")}
+                  </p>
+                </div>
+              ) : (
+                templates.map((template) => (
                 <div
-                  key={template.id}
+                  key={template._id || template.id}
                   className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
                 >
                   {/* Image with enhanced styling */}
                   <div className="relative h-48 overflow-hidden">
                     <img
                       src={template.image}
-                      alt={template.title}
+                      alt={t(template.title)}
                       className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
@@ -788,7 +808,7 @@ Please click below to update details and pay Rs. 150 handling charges.
                     {/* Category Badge with glow */}
                     <div className="absolute top-4 left-4">
                       <span className="px-3 py-1.5 bg-[var(--neon-blue)] text-white text-xs font-semibold rounded-full shadow-lg shadow-[var(--neon-blue)]/50 backdrop-blur-sm">
-                        {template.category}
+                        {t(template.category)}
                       </span>
                     </div>
 
@@ -808,13 +828,13 @@ Please click below to update details and pay Rs. 150 handling charges.
                       </div>
                       <div className="flex-1">
                         <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
-                          {template.title}
+                          {t(template.title)}
                         </h3>
                       </div>
                     </div>
                     
                     <p className="text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
-                      {template.description}
+                      {t(template.description)}
                     </p>
 
                     {/* Action Buttons */}
@@ -827,7 +847,11 @@ Please click below to update details and pay Rs. 150 handling charges.
                         <Send className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => setShowCreateModal(true)}
+                        onClick={() => {
+                          // Store the selected template for the modal
+                          setSelectedTemplatePreview({ title: template.title, content: template.messageTemplate });
+                          setShowCreateModal(true);
+                        }}
                         className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
                       >
                         <span>{t("Use")}</span>
@@ -839,7 +863,8 @@ Please click below to update details and pay Rs. 150 handling charges.
                   {/* Animated glow effect on hover */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[var(--neon-blue)]/0 via-[var(--neon-blue)]/10 to-[var(--neon-blue)]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                 </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
