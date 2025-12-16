@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@clerk/nextjs";
 import CreateUnifiedCampaignModal from "@/components/CreateUnifiedCampaignModal";
 import CampaignDetailModal from "@/components/CampaignDetailModal";
+import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface CampaignTarget {
@@ -155,7 +156,9 @@ export default function SimulationsPage() {
         "Email",
         "WhatsApp",
         "Both Channels",
-        "targets",
+        "Targets",
+        "Sent",
+        "Scheduled",
         "View Details",
         "Start",
         "Pause",
@@ -254,7 +257,7 @@ export default function SimulationsPage() {
       case "running":
         return "bg-green-500/20 text-green-400 border-green-500/30";
       case "completed":
-        return "bg-purple-500/20 text-purple-400 border-purple-500/30";
+        return "bg-[var(--electric-blue)]/20 text-[var(--electric-blue)] border-[var(--electric-blue)]/30";
       case "paused":
         return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
       case "cancelled":
@@ -308,30 +311,31 @@ export default function SimulationsPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
+      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+        <NetworkBackground />
         {/* Hero Section */}
         <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
           <div className="blurred-background"></div>
-
+          
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center space-y-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-[var(--neon-blue)] to-purple-500 rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
+                <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
                   <Zap className="w-8 h-8 text-white" />
                 </div>
               </div>
-
+              
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
                 {t("Campaign Simulations")}
                 <span className="block text-[var(--neon-blue)] mt-1">
                   {t("Unified Multi-Channel Security Training")}
                 </span>
               </h1>
-
+              
               <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
                 {t("Create and manage comprehensive phishing campaigns across WhatsApp and Email channels simultaneously.")}
               </p>
-
+              
               <div className="flex flex-wrap justify-center gap-3 mt-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <MessageSquare className="w-4 h-4 text-[var(--neon-blue)]" />
@@ -363,7 +367,7 @@ export default function SimulationsPage() {
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-purple-500 text-white rounded-xl hover:from-purple-500 hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-xl hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
               >
                 <Plus className="w-5 h-5" />
                 {t("Create Campaign")}
@@ -392,7 +396,7 @@ export default function SimulationsPage() {
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-xl hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
                 >
                   <Plus className="w-5 h-5" />
                   {t("Create Campaign")}
@@ -403,148 +407,153 @@ export default function SimulationsPage() {
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign._id}
-                    className="group bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl p-6 border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20"
+                    className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
                   >
                     {/* Campaign Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
-                          {campaign.name}
-                        </h3>
-                        <p className="text-sm text-[var(--medium-grey)] line-clamp-2">
-                          {campaign.description}
-                        </p>
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                            {campaign.name}
+                          </h3>
+                          <p className="text-sm text-[var(--medium-grey)] line-clamp-2">
+                            {campaign.description}
+                          </p>
+                        </div>
+                        <div className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(campaign.status)}`}>
+                          {getStatusIcon(campaign.status)}
+                          {t(campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1))}
+                        </div>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(campaign.status)}`}>
-                        {getStatusIcon(campaign.status)}
-                        {t(campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1))}
-                      </div>
-                    </div>
 
-                    {/* Channel Badges */}
-                    <div className="flex gap-2 mb-4">
-                      {campaign.emailConfig.enabled && (
-                        <div className="flex items-center gap-1 px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs border border-blue-500/30">
-                          <Mail className="w-3 h-3" />
-                          {t("Email")}
+                      {/* Channel Badges */}
+                      <div className="flex gap-2 mb-4">
+                        {campaign.emailConfig.enabled && (
+                          <div className="flex items-center gap-1 px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs border border-blue-500/30">
+                            <Mail className="w-3 h-3" />
+                            {t("Email")}
+                          </div>
+                        )}
+                        {campaign.whatsappConfig.enabled && (
+                          <div className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-lg text-xs border border-green-500/30">
+                            <MessageSquare className="w-3 h-3" />
+                            {t("WhatsApp")}
+                          </div>
+                        )}
+                        {campaign.emailConfig.enabled && campaign.whatsappConfig.enabled && (
+                          <div className="flex items-center gap-1 px-3 py-1 bg-[var(--electric-blue)]/20 text-[var(--electric-blue)] rounded-lg text-xs border border-[var(--electric-blue)]/30">
+                            <Zap className="w-3 h-3" />
+                            {t("Both Channels")}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stats */}
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-[var(--navy-blue)] rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Users className="w-4 h-4 text-[var(--neon-blue)]" />
+                            <span className="text-xs text-[var(--medium-grey)]">{t("Targets")}</span>
+                          </div>
+                          <p className="text-xl font-bold text-white">
+                            {campaign.targetUsers.length}
+                          </p>
+                        </div>
+                        <div className="bg-[var(--navy-blue)] rounded-lg p-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            <span className="text-xs text-[var(--medium-grey)]">{t("Sent")}</span>
+                          </div>
+                          <p className="text-xl font-bold text-white">
+                            {(campaign.stats.totalEmailSent || 0) + (campaign.stats.totalWhatsappSent || 0)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Dates */}
+                      {campaign.scheduleDate && (
+                        <div className="flex items-center gap-2 text-xs text-[var(--medium-grey)] mb-4">
+                          <Clock className="w-3 h-3" />
+                          <span>{t("Scheduled")}: {formatDate(campaign.scheduleDate)}</span>
                         </div>
                       )}
-                      {campaign.whatsappConfig.enabled && (
-                        <div className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-lg text-xs border border-green-500/30">
-                          <MessageSquare className="w-3 h-3" />
-                          {t("WhatsApp")}
-                        </div>
-                      )}
-                      {campaign.emailConfig.enabled && campaign.whatsappConfig.enabled && (
-                        <div className="flex items-center gap-1 px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-xs border border-purple-500/30">
-                          <Zap className="w-3 h-3" />
-                          {t("Both Channels")}
-                        </div>
-                      )}
+
+                      {/* Action Buttons */}
+                      <div className="w-full mt-auto flex gap-2 flex-wrap">
+                        <button
+                          onClick={() => {
+                            setSelectedCampaign(campaign);
+                            setShowDetailModal(true);
+                          }}
+                          className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          {t("View Details")}
+                        </button>
+
+                        {campaign.status === "draft" || campaign.status === "scheduled" ? (
+                          <>
+                            <button
+                              onClick={() => handleCampaignAction(campaign._id, "start")}
+                              disabled={actionLoading === campaign._id}
+                              className="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Play className="w-4 h-4" />
+                              {t("Start")}
+                            </button>
+                            <button
+                              onClick={() => handleCampaignAction(campaign._id, "delete")}
+                              disabled={actionLoading === campaign._id}
+                              className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              {t("Delete")}
+                            </button>
+                          </>
+                        ) : campaign.status === "running" ? (
+                          <>
+                            <button
+                              onClick={() => handleCampaignAction(campaign._id, "pause")}
+                              disabled={actionLoading === campaign._id}
+                              className="px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl hover:from-yellow-600 hover:to-yellow-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Pause className="w-4 h-4" />
+                              {t("Pause")}
+                            </button>
+                            <button
+                              onClick={() => handleCampaignAction(campaign._id, "cancel")}
+                              disabled={actionLoading === campaign._id}
+                              className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Ban className="w-4 h-4" />
+                              {t("Cancel")}
+                            </button>
+                          </>
+                        ) : campaign.status === "paused" ? (
+                          <>
+                            <button
+                              onClick={() => handleCampaignAction(campaign._id, "resume")}
+                              disabled={actionLoading === campaign._id}
+                              className="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Play className="w-4 h-4" />
+                              {t("Resume")}
+                            </button>
+                            <button
+                              onClick={() => handleCampaignAction(campaign._id, "cancel")}
+                              disabled={actionLoading === campaign._id}
+                              className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                              <Ban className="w-4 h-4" />
+                              {t("Cancel")}
+                            </button>
+                          </>
+                        ) : null}
+                      </div>
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div className="bg-[var(--navy-blue)] rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <Users className="w-4 h-4 text-[var(--neon-blue)]" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Targets")}</span>
-                        </div>
-                        <p className="text-xl font-bold text-white">
-                          {campaign.targetUsers.length}
-                        </p>
-                      </div>
-                      <div className="bg-[var(--navy-blue)] rounded-lg p-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <CheckCircle2 className="w-4 h-4 text-green-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Sent")}</span>
-                        </div>
-                        <p className="text-xl font-bold text-white">
-                          {(campaign.stats.totalEmailSent || 0) + (campaign.stats.totalWhatsappSent || 0)}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Dates */}
-                    {campaign.scheduleDate && (
-                      <div className="flex items-center gap-2 text-xs text-[var(--medium-grey)] mb-4">
-                        <Clock className="w-3 h-3" />
-                        <span>{t("Scheduled")}: {formatDate(campaign.scheduleDate)}</span>
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-2 flex-wrap">
-                      <button
-                        onClick={() => {
-                          setSelectedCampaign(campaign);
-                          setShowDetailModal(true);
-                        }}
-                        className="flex-1 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors flex items-center justify-center gap-2 text-sm"
-                      >
-                        <Eye className="w-4 h-4" />
-                        {t("View Details")}
-                      </button>
-
-                      {campaign.status === "draft" || campaign.status === "scheduled" ? (
-                        <>
-                          <button
-                            onClick={() => handleCampaignAction(campaign._id, "start")}
-                            disabled={actionLoading === campaign._id}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                          >
-                            <Play className="w-4 h-4" />
-                            {t("Start")}
-                          </button>
-                          <button
-                            onClick={() => handleCampaignAction(campaign._id, "delete")}
-                            disabled={actionLoading === campaign._id}
-                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            {t("Delete")}
-                          </button>
-                        </>
-                      ) : campaign.status === "running" ? (
-                        <>
-                          <button
-                            onClick={() => handleCampaignAction(campaign._id, "pause")}
-                            disabled={actionLoading === campaign._id}
-                            className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                          >
-                            <Pause className="w-4 h-4" />
-                            {t("Pause")}
-                          </button>
-                          <button
-                            onClick={() => handleCampaignAction(campaign._id, "cancel")}
-                            disabled={actionLoading === campaign._id}
-                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                          >
-                            <Ban className="w-4 h-4" />
-                            {t("Cancel")}
-                          </button>
-                        </>
-                      ) : campaign.status === "paused" ? (
-                        <>
-                          <button
-                            onClick={() => handleCampaignAction(campaign._id, "resume")}
-                            disabled={actionLoading === campaign._id}
-                            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                          >
-                            <Play className="w-4 h-4" />
-                            {t("Resume")}
-                          </button>
-                          <button
-                            onClick={() => handleCampaignAction(campaign._id, "cancel")}
-                            disabled={actionLoading === campaign._id}
-                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
-                          >
-                            <Ban className="w-4 h-4" />
-                            {t("Cancel")}
-                          </button>
-                        </>
-                      ) : null}
-                    </div>
+                    {/* Animated glow effect on hover */}
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[var(--neon-blue)]/0 via-[var(--neon-blue)]/10 to-[var(--neon-blue)]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                   </div>
                 ))}
               </div>

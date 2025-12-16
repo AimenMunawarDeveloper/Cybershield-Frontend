@@ -5,6 +5,7 @@ import { Mail, Send, Shield, AlertTriangle, Lock, Globe, CheckCircle2, XCircle, 
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
+import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface EmailTemplateContent {
@@ -313,7 +314,8 @@ export default function EmailPhishingPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
+      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+        <NetworkBackground />
         {/* Hero Section */}
         <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
           <div className="blurred-background"></div>

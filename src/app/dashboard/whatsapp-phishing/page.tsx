@@ -19,6 +19,7 @@ import {
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
+import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface Campaign {
@@ -415,6 +416,7 @@ export default function WhatsAppPhishingPage() {
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
+        <NetworkBackground />
         {/* Blurred background element */}
         <div className="blurred-background"></div>
 
