@@ -192,6 +192,28 @@ export class ApiClient {
     
     return response.json();
   }
+
+  async getAllUsers(page = 1, limit = 1000, status?: string) {
+    const headers = await this.getAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (status) params.append('status', status);
+    
+    const response = await fetch(`${API_BASE_URL}/users/all?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to fetch all users');
+    }
+    
+    return response.json();
+  }
 }
 
 // Hook to create API client with Clerk token
