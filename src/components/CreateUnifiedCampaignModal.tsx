@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { X, Users, Plus, Trash2, Mail, MessageSquare, Calendar, Zap } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ApiClient } from "@/lib/api";
+import UserSelector from "@/components/UserSelector";
 
 interface CreateUnifiedCampaignModalProps {
   isOpen: boolean;
@@ -19,6 +21,12 @@ interface ManualUser {
   phoneNumber?: string;
 }
 
+interface User {
+  _id: string;
+  email: string;
+  displayName: string;
+}
+
 export default function CreateUnifiedCampaignModal({
   isOpen,
   onClose,
@@ -26,6 +34,7 @@ export default function CreateUnifiedCampaignModal({
 }: CreateUnifiedCampaignModalProps) {
   const { t } = useTranslation();
   const { getToken } = useAuth();
+  const { user, isLoaded } = useUser();
   
   // Form state
   const [step, setStep] = useState(1);
@@ -41,7 +50,12 @@ export default function CreateUnifiedCampaignModal({
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [emailEnabled, setEmailEnabled] = useState(false);
   
-  // Target users
+  // Target users - UserSelector for Email, Manual for WhatsApp
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  
+  // Manual users for WhatsApp
   const [manualUsers, setManualUsers] = useState<ManualUser[]>([]);
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [newUserFirstName, setNewUserFirstName] = useState("");
@@ -54,11 +68,30 @@ export default function CreateUnifiedCampaignModal({
   const [whatsappLandingPage, setWhatsappLandingPage] = useState("");
   
   // Email config
+  const HARDCODED_SENDER_EMAIL = "hadiaali90500@gmail.com";
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
-  const [emailSender, setEmailSender] = useState("");
   const [emailLandingPage, setEmailLandingPage] = useState("");
   
+  // Fetch all users from database
+  useEffect(() => {
+    if (isLoaded && user && isOpen) {
+      const fetchUsers = async () => {
+        try {
+          setLoadingUsers(true);
+          const apiClient = new ApiClient(getToken);
+          const data = await apiClient.getAllUsers(1, 1000); // Fetch up to 1000 users
+          setAllUsers(data.users || []);
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        } finally {
+          setLoadingUsers(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [isLoaded, user, isOpen, getToken]);
+
   // Reset form
   const resetForm = () => {
     setStep(1);
@@ -67,12 +100,17 @@ export default function CreateUnifiedCampaignModal({
     setScheduleDate("");
     setWhatsappEnabled(false);
     setEmailEnabled(false);
+    setSelectedUsers([]);
     setManualUsers([]);
+    setShowAddUserForm(false);
+    setNewUserFirstName("");
+    setNewUserLastName("");
+    setNewUserEmail("");
+    setNewUserPhone("");
     setWhatsappMessage("");
     setWhatsappLandingPage("");
     setEmailSubject("");
     setEmailBody("");
-    setEmailSender("");
     setEmailLandingPage("");
     setError(null);
   };
@@ -114,8 +152,14 @@ export default function CreateUnifiedCampaignModal({
       return;
     }
     
-    if (manualUsers.length === 0) {
-      setError(t("Please add at least one target user"));
+    // Validate users based on enabled channels
+    if (emailEnabled && selectedUsers.length === 0) {
+      setError(t("Please select at least one user for email campaign"));
+      return;
+    }
+    
+    if (whatsappEnabled && manualUsers.length === 0) {
+      setError(t("Please add at least one user for WhatsApp campaign"));
       return;
     }
     
@@ -124,7 +168,7 @@ export default function CreateUnifiedCampaignModal({
       return;
     }
     
-    if (emailEnabled && (!emailSubject || !emailBody || !emailSender)) {
+    if (emailEnabled && (!emailSubject || !emailBody)) {
       setError(t("Please fill in Email configuration"));
       return;
     }
@@ -154,15 +198,16 @@ export default function CreateUnifiedCampaignModal({
           enabled: true,
           subject: emailSubject,
           bodyContent: emailBody,
-          senderEmail: emailSender,
+          senderEmail: HARDCODED_SENDER_EMAIL,
           landingPageUrl: emailLandingPage,
         } : { enabled: false },
-        manualUsers: manualUsers.map(user => ({
+        targetUserIds: emailEnabled ? selectedUsers.map(user => user._id) : [],
+        manualUsers: whatsappEnabled ? manualUsers.map(user => ({
           firstName: user.firstName,
           lastName: user.lastName,
           email: user.email || "",
           phoneNumber: user.phoneNumber || "",
-        })),
+        })) : [],
       };
       
       const response = await fetch(`${API_BASE_URL}/campaigns`, {
@@ -203,8 +248,12 @@ export default function CreateUnifiedCampaignModal({
     }
     
     if (step === 2) {
-      if (manualUsers.length === 0) {
-        setError(t("Please add at least one target user"));
+      if (emailEnabled && selectedUsers.length === 0) {
+        setError(t("Please select at least one user for email campaign"));
+        return;
+      }
+      if (whatsappEnabled && manualUsers.length === 0) {
+        setError(t("Please add at least one user for WhatsApp campaign"));
         return;
       }
     }
@@ -357,119 +406,177 @@ export default function CreateUnifiedCampaignModal({
           {/* Step 2: Target Users */}
           {step === 2 && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">
-                  {t("Target Users")} ({manualUsers.length})
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => setShowAddUserForm(!showAddUserForm)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t("Add User")}
-                </button>
-              </div>
-              
-              {showAddUserForm && (
-                <div className="p-4 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      value={newUserFirstName}
-                      onChange={(e) => setNewUserFirstName(e.target.value)}
-                      className="px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                      placeholder={t("First Name")}
-                    />
-                    <input
-                      type="text"
-                      value={newUserLastName}
-                      onChange={(e) => setNewUserLastName(e.target.value)}
-                      className="px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                      placeholder={t("Last Name")}
+              {/* Email User Selection */}
+              {emailEnabled && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail className="w-5 h-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">
+                      {t("Email Users")} ({selectedUsers.length} {t("selected")})
+                    </h3>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-white mb-2 font-medium">
+                      {t("Select Users for Email")} *
+                    </label>
+                    <UserSelector
+                      selectedUsers={selectedUsers}
+                      onUsersChange={setSelectedUsers}
+                      allUsers={allUsers}
+                      isLoading={loadingUsers}
+                      disabled={loading}
                     />
                   </div>
                   
-                  {emailEnabled && (
-                    <input
-                      type="email"
-                      value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                      placeholder={t("Email Address")}
-                    />
+                  {selectedUsers.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm text-[var(--medium-grey)] mb-2">
+                        {t("Selected users for email campaign")}:
+                      </p>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {selectedUsers.map((user) => (
+                          <div
+                            key={user._id}
+                            className="flex items-center justify-between p-3 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/20"
+                          >
+                            <div>
+                              <p className="text-white font-medium">
+                                {user.displayName || user.email}
+                              </p>
+                              <p className="text-sm text-[var(--medium-grey)] mt-1">
+                                {user.email}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  
-                  {whatsappEnabled && (
-                    <input
-                      type="tel"
-                      value={newUserPhone}
-                      onChange={(e) => setNewUserPhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                      placeholder={t("Phone Number")}
-                    />
-                  )}
-                  
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={handleAddUser}
-                      className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                    >
-                      {t("Add")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowAddUserForm(false);
-                        setNewUserFirstName("");
-                        setNewUserLastName("");
-                        setNewUserEmail("");
-                        setNewUserPhone("");
-                      }}
-                      className="px-4 py-2 bg-[var(--navy-blue-light)] text-white rounded hover:bg-[var(--navy-blue)] transition-colors"
-                    >
-                      {t("Cancel")}
-                    </button>
-                  </div>
                 </div>
               )}
               
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {manualUsers.map((user) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center justify-between p-3 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/20"
-                  >
-                    <div>
-                      <p className="text-white font-medium">
-                        {user.firstName} {user.lastName}
-                      </p>
-                      <div className="flex gap-3 text-sm text-[var(--medium-grey)] mt-1">
-                        {user.email && (
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {user.email}
-                          </span>
-                        )}
-                        {user.phoneNumber && (
-                          <span className="flex items-center gap-1">
-                            <MessageSquare className="w-3 h-3" />
-                            {user.phoneNumber}
-                          </span>
-                        )}
-                      </div>
+              {/* WhatsApp User Selection */}
+              {whatsappEnabled && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="w-5 h-5 text-green-400" />
+                      <h3 className="text-lg font-semibold text-white">
+                        {t("WhatsApp Users")} ({manualUsers.length})
+                      </h3>
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleRemoveUser(user.id)}
-                      className="text-red-400 hover:text-red-300 transition-colors"
+                      onClick={() => setShowAddUserForm(!showAddUserForm)}
+                      className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Plus className="w-4 h-4" />
+                      {t("Add User")}
                     </button>
                   </div>
-                ))}
-              </div>
+                  
+                  {showAddUserForm && (
+                    <div className="p-4 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 space-y-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <input
+                          type="text"
+                          value={newUserFirstName}
+                          onChange={(e) => setNewUserFirstName(e.target.value)}
+                          className="px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          placeholder={t("First Name")}
+                        />
+                        <input
+                          type="text"
+                          value={newUserLastName}
+                          onChange={(e) => setNewUserLastName(e.target.value)}
+                          className="px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          placeholder={t("Last Name")}
+                        />
+                      </div>
+                      
+                      {emailEnabled && (
+                        <input
+                          type="email"
+                          value={newUserEmail}
+                          onChange={(e) => setNewUserEmail(e.target.value)}
+                          className="w-full px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          placeholder={t("Email Address")}
+                        />
+                      )}
+                      
+                      {whatsappEnabled && (
+                        <input
+                          type="tel"
+                          value={newUserPhone}
+                          onChange={(e) => setNewUserPhone(e.target.value)}
+                          className="w-full px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          placeholder={t("Phone Number")}
+                        />
+                      )}
+                      
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleAddUser}
+                          className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                        >
+                          {t("Add")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAddUserForm(false);
+                            setNewUserFirstName("");
+                            setNewUserLastName("");
+                            setNewUserEmail("");
+                            setNewUserPhone("");
+                          }}
+                          className="px-4 py-2 bg-[var(--navy-blue-light)] text-white rounded hover:bg-[var(--navy-blue)] transition-colors"
+                        >
+                          {t("Cancel")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {manualUsers.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center justify-between p-3 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/20"
+                      >
+                        <div>
+                          <p className="text-white font-medium">
+                            {user.firstName} {user.lastName}
+                          </p>
+                          <div className="flex gap-3 text-sm text-[var(--medium-grey)] mt-1">
+                            {user.email && (
+                              <span className="flex items-center gap-1">
+                                <Mail className="w-3 h-3" />
+                                {user.email}
+                              </span>
+                            )}
+                            {user.phoneNumber && (
+                              <span className="flex items-center gap-1">
+                                <MessageSquare className="w-3 h-3" />
+                                {user.phoneNumber}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveUser(user.id)}
+                          className="text-red-400 hover:text-red-300 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           
@@ -485,14 +592,17 @@ export default function CreateUnifiedCampaignModal({
                     </h3>
                   </div>
                   
-                  <input
-                    type="email"
-                    value={emailSender}
-                    onChange={(e) => setEmailSender(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                    placeholder={t("Sender Email")}
-                    required={emailEnabled}
-                  />
+                  <div>
+                    <label className="block text-sm text-[var(--medium-grey)] mb-2">
+                      {t("Sender Email")}
+                    </label>
+                    <input
+                      type="email"
+                      value={HARDCODED_SENDER_EMAIL}
+                      readOnly
+                      className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white opacity-75 cursor-not-allowed"
+                    />
+                  </div>
                   
                   <input
                     type="text"

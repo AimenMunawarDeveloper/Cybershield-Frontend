@@ -53,7 +53,7 @@ const data = {
       badge: "12",
     },
     {
-      title: "Phishing Simulations",
+      title: "Campaigns",
       url: "/dashboard/simulations",
       icon: AlertTriangle,
       badge: "3",

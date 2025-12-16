@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { X, Mail, FileText } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useUser, useAuth } from "@clerk/nextjs";
+import { ApiClient } from "@/lib/api";
+import UserSelector from "@/components/UserSelector";
 
 interface CreateEmailCampaignModalProps {
   isOpen: boolean;
@@ -19,6 +22,12 @@ interface EmailCampaignData {
   bodyContent: string;
 }
 
+interface User {
+  _id: string;
+  email: string;
+  displayName: string;
+}
+
 export default function CreateEmailCampaignModal({
   isOpen,
   onClose,
@@ -27,32 +36,76 @@ export default function CreateEmailCampaignModal({
   initialData,
 }: CreateEmailCampaignModalProps) {
   const { t } = useTranslation();
+  const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
+  const HARDCODED_SENDER_EMAIL = "hadiaali90500@gmail.com";
+  
   const [formData, setFormData] = useState<EmailCampaignData>({
-    sentBy: "",
+    sentBy: HARDCODED_SENDER_EMAIL,
     sentTo: "",
     subject: "",
     bodyContent: "",
   });
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
 
+
+  // Fetch all users from database
+  useEffect(() => {
+    if (isLoaded && user && isOpen) {
+      const fetchUsers = async () => {
+        try {
+          setLoadingUsers(true);
+          const apiClient = new ApiClient(getToken);
+          const data = await apiClient.getAllUsers(1, 1000); // Fetch up to 1000 users
+          setAllUsers(data.users || []);
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        } finally {
+          setLoadingUsers(false);
+        }
+      };
+      fetchUsers();
+    }
+  }, [isLoaded, user, isOpen, getToken]);
+
+  // Sync selected users with textarea (only from dropdown selection)
+  useEffect(() => {
+    const emailString = selectedUsers.map((u) => u.email).join(",");
+    setFormData((prev) => ({
+      ...prev,
+      sentTo: emailString,
+    }));
+  }, [selectedUsers]);
 
   useEffect(() => {
     if (isOpen && initialData) {
       setFormData((prev) => ({
-        sentBy: initialData.sentBy || prev.sentBy,
+        sentBy: HARDCODED_SENDER_EMAIL, // Always use hardcoded email
         sentTo: initialData.sentTo || prev.sentTo,
         subject: initialData.subject || prev.subject,
         bodyContent: initialData.bodyContent || prev.bodyContent,
       }));
+      
+      // If initialData has sentTo, try to match with users
+      if (initialData.sentTo && allUsers.length > 0) {
+        const emails = initialData.sentTo.split(",").map((e) => e.trim()).filter(Boolean);
+        const matchedUsers = allUsers.filter((user) => emails.includes(user.email));
+        if (matchedUsers.length > 0) {
+          setSelectedUsers(matchedUsers);
+        }
+      }
     } else if (!isOpen) {
- 
       setFormData({
-        sentBy: "",
+        sentBy: HARDCODED_SENDER_EMAIL, // Always use hardcoded email
         sentTo: "",
         subject: "",
         bodyContent: "",
       });
+      setSelectedUsers([]);
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, allUsers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +121,7 @@ export default function CreateEmailCampaignModal({
     
     
     setFormData({
-      sentBy: "",
+      sentBy: HARDCODED_SENDER_EMAIL, // Always use hardcoded email
       sentTo: "",
       subject: "",
       bodyContent: "",
@@ -100,11 +153,8 @@ export default function CreateEmailCampaignModal({
             <input
               type="email"
               value={formData.sentBy}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, sentBy: e.target.value }))
-              }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder={t("sender@example.com")}
+              readOnly
+              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none opacity-75 cursor-not-allowed"
               required
               disabled={isLoading}
             />
@@ -115,19 +165,30 @@ export default function CreateEmailCampaignModal({
               <Mail className="w-4 h-4 inline mr-2" />
               {t("Sent To")} <span className="text-red-400">*</span>
             </label>
+            
+            {/* User Selector Dropdown */}
+            <div className="mb-3">
+              <UserSelector
+                selectedUsers={selectedUsers}
+                onUsersChange={setSelectedUsers}
+                allUsers={allUsers}
+                isLoading={loadingUsers}
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Read-only Email Display */}
             <textarea
               value={formData.sentTo}
-              onChange={(e) =>
-                setFormData((prev) => ({ ...prev, sentTo: e.target.value }))
-              }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder={t("recipient@example.com, recipient2@example.com, recipient3@example.com")}
+              readOnly
+              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] opacity-75 cursor-not-allowed"
+              placeholder={selectedUsers.length === 0 ? t("No users selected. Select users from dropdown above.") : ""}
               rows={3}
               required
               disabled={isLoading}
             />
             <p className="text-xs text-[var(--medium-grey)] mt-1">
-              💡 {t("Separate multiple email addresses with commas for bulk sending")}
+              💡 {t("Select users from the dropdown above. Selected emails will appear here as comma-separated values.")}
             </p>
           </div>
 
