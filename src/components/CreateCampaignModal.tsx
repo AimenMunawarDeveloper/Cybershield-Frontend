@@ -1,13 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X, Users, MessageSquare, Calendar, Link, Plus } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+
+interface TemplateData {
+  _id?: string;
+  id?: string;
+  title: string;
+  description: string;
+  messageTemplate: string;
+  category?: string;
+}
 
 interface CreateCampaignModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (campaignData: CampaignData) => void;
+  initialTemplate?: TemplateData | null;
 }
 
 interface CampaignData {
@@ -27,47 +37,13 @@ interface User {
   phoneNumber: string;
 }
 
-const getPhishingTemplates = (t: (text: string) => string) => [
-  {
-    id: "banking",
-    name: t("Banking Verification"),
-    template: t(`Your UBL account will be blocked within 24 hours due to incomplete verification.
-Click the link below to verify now:
-🔗 ubl-verification-pk.com/login
-
-Helpline: +92-301-1234567`),
-  },
-  {
-    id: "lottery",
-    name: t("Lottery Prize"),
-    template: t(`You have won Rs. 50,000 through the Jazz Daily Lucky Draw.
-Please send your CNIC number and JazzCash number to claim your prize!
-📞 Contact: 0345-9876543`),
-  },
-  {
-    id: "job",
-    name: t("Job Interview"),
-    template: t(`You have been shortlisted for a job interview.
-Please pay Rs. 2000 for form verification to confirm your slot.
-Send via Easypaisa: 0333-7654321
-Form link: nestle-careerpk.com`),
-  },
-  {
-    id: "delivery",
-    name: t("Package Delivery"),
-    template: t(`Your parcel is held due to incorrect address.
-Please click below to update details and pay Rs. 150 handling charges.
-🔗 tcs-tracking-pk.net`),
-  },
-];
-
 export default function CreateCampaignModal({
   isOpen,
   onClose,
   onSubmit,
+  initialTemplate,
 }: CreateCampaignModalProps) {
   const { t, tAsync, language } = useTranslation();
-  const phishingTemplates = getPhishingTemplates(t);
   const [formData, setFormData] = useState<CampaignData>({
     name: "",
     description: "",
@@ -76,24 +52,89 @@ export default function CreateCampaignModal({
     targetUserIds: [],
     scheduleDate: "",
   });
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [manualUsers, setManualUsers] = useState<User[]>([]);
   const [newUserName, setNewUserName] = useState("");
   const [newUserPhone, setNewUserPhone] = useState("");
   const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const templateProcessedRef = useRef<boolean>(false);
+  const previousIsOpenRef = useRef<boolean>(false);
+  const initialTemplateRef = useRef(initialTemplate);
+  const tAsyncRef = useRef(tAsync);
 
-  // Clear selected template when language changes (forces re-selection in new language)
+  // Keep refs in sync
   useEffect(() => {
-    if (selectedTemplate) {
-      setSelectedTemplate("");
-      setFormData((prev) => ({
-        ...prev,
-        name: "",
-        description: "",
-        messageTemplate: "",
-      }));
+    initialTemplateRef.current = initialTemplate;
+    tAsyncRef.current = tAsync;
+  });
+
+  // Pre-fill form when initialTemplate is provided
+  useEffect(() => {
+    // Only process when modal opens (transitions from closed to open)
+    const justOpened = isOpen && !previousIsOpenRef.current;
+    previousIsOpenRef.current = isOpen;
+
+    if (!isOpen) {
+      // Reset when modal closes
+      templateProcessedRef.current = false;
+      return;
     }
-  }, [language]); // Re-run when language changes
+
+    // Only process template when modal first opens and hasn't been processed yet
+    if (justOpened && !templateProcessedRef.current) {
+      templateProcessedRef.current = true;
+      
+      const currentTemplate = initialTemplateRef.current;
+      const currentTAsync = tAsyncRef.current;
+      
+      if (currentTemplate) {
+        const fillTemplate = async () => {
+          try {
+            const [translatedTitle, translatedDescription, translatedTemplate, translatedCampaignWord] = await Promise.all([
+              currentTAsync(currentTemplate.title),
+              currentTAsync(currentTemplate.description),
+              currentTAsync(currentTemplate.messageTemplate),
+              currentTAsync("Campaign"),
+            ]);
+
+            setFormData({
+              name: translatedTitle + " " + translatedCampaignWord,
+              description: translatedDescription,
+              messageTemplate: translatedTemplate,
+              landingPageUrl: "",
+              targetUserIds: [],
+              scheduleDate: "",
+            });
+          } catch (error) {
+            console.error("Error filling template:", error);
+            // Fallback to non-translated values
+            setFormData({
+              name: currentTemplate.title + " Campaign",
+              description: currentTemplate.description,
+              messageTemplate: currentTemplate.messageTemplate,
+              landingPageUrl: "",
+              targetUserIds: [],
+              scheduleDate: "",
+            });
+          }
+        };
+        fillTemplate();
+      } else {
+        // Reset form when modal opens without initial template
+        setFormData({
+          name: "",
+          description: "",
+          messageTemplate: "",
+          landingPageUrl: "",
+          targetUserIds: [],
+          scheduleDate: "",
+        });
+        setManualUsers([]);
+        setNewUserName("");
+        setNewUserPhone("");
+        setShowAddUserForm(false);
+      }
+    }
+  }, [isOpen]); // Only depend on isOpen
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +151,7 @@ export default function CreateCampaignModal({
     ) {
       console.log("Form validation failed - missing required fields");
       alert(
-        t("Please fill in all required fields including selecting a template.")
+        t("Please fill in all required fields.")
       );
       return;
     }
@@ -131,7 +172,7 @@ export default function CreateCampaignModal({
     console.log("Campaign data to submit:", campaignData);
 
     onSubmit(campaignData);
-    onClose();
+    
     // Reset form
     setFormData({
       name: "",
@@ -141,11 +182,12 @@ export default function CreateCampaignModal({
       targetUserIds: [],
       scheduleDate: "",
     });
-    setSelectedTemplate("");
     setManualUsers([]);
     setNewUserName("");
     setNewUserPhone("");
     setShowAddUserForm(false);
+    
+    onClose();
   };
 
   const handleAddUser = () => {
@@ -169,27 +211,6 @@ export default function CreateCampaignModal({
     setManualUsers((prev) => prev.filter((user) => user._id !== userId));
   };
 
-  const handleTemplateSelect = async (templateId: string) => {
-    const template = phishingTemplates.find((t) => t.id === templateId);
-    if (template) {
-      setSelectedTemplate(templateId);
-      
-      // Wait for all translations to complete before updating form
-      const [translatedTemplate, translatedCampaignWord, translatedDescription] = await Promise.all([
-        tAsync(template.template),
-        tAsync("Campaign"),
-        tAsync(`Security awareness campaign using ${template.name.toLowerCase()} phishing simulation`)
-      ]);
-      
-      setFormData((prev) => ({
-        ...prev,
-        messageTemplate: translatedTemplate,
-        name: template.name + " " + translatedCampaignWord,
-        description: translatedDescription,
-      }));
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -206,39 +227,6 @@ export default function CreateCampaignModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-white mb-3">
-              <MessageSquare className="w-4 h-4 inline mr-2" />
-              {t("Choose Phishing Template")}{" "}
-              {!selectedTemplate && <span className="text-red-400">*</span>}
-            </label>
-            {!selectedTemplate && (
-              <div className="mb-3 p-2 bg-red-900 bg-opacity-20 border border-red-500 rounded text-red-300 text-sm">
-                {t("Please select a phishing template to continue.")}
-              </div>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {phishingTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  type="button"
-                  onClick={() => handleTemplateSelect(template.id)}
-                  className={`p-3 rounded-lg border text-left transition-colors ${
-                    selectedTemplate === template.id
-                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)] bg-opacity-20"
-                      : "border-[var(--medium-grey)] hover:border-[var(--neon-blue)]"
-                  }`}
-                >
-                  <div className="text-sm font-medium text-white mb-1">
-                    {template.name}
-                  </div>
-                  <div className="text-xs text-[var(--medium-grey)] line-clamp-2">
-                    {template.template.split("\n")[0]}...
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
           <div>
             <label className="block text-sm font-medium text-white mb-2">
               {t("Campaign Name")}
