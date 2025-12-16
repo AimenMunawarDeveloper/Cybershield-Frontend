@@ -105,7 +105,10 @@ export default function TopBar({
   const { t } = useTranslation();
 
   // Don't render TopBar on dashboard pages when variant is "main" since it will be handled by dashboard layout
-  if (variant === "main" && isDashboardPage) return null;
+  // IMPORTANT: All hooks must be called before any conditional returns to follow Rules of Hooks
+  if (variant === "main" && isDashboardPage) {
+    return null;
+  }
 
   // Show loading state while authentication is being determined
   if (!isLoaded) {

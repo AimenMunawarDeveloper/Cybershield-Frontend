@@ -226,7 +226,7 @@ export default function CreateUnifiedCampaignModal({
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-purple-500 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-black rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -257,7 +257,7 @@ export default function CreateUnifiedCampaignModal({
               key={s}
               className={`flex-1 h-2 rounded-full transition-all ${
                 s <= step
-                  ? "bg-gradient-to-r from-[var(--neon-blue)] to-purple-500"
+                  ? "bg-gradient-to-r from-[var(--neon-blue)] to-black"
                   : "bg-[var(--navy-blue)]"
               }`}
             />
@@ -571,7 +571,7 @@ export default function CreateUnifiedCampaignModal({
                 type="button"
                 onClick={nextStep}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-purple-500 text-white rounded-lg hover:from-purple-500 hover:to-[var(--neon-blue)] transition-all disabled:opacity-50"
+                className="flex-1 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-lg hover:from-black hover:to-[var(--neon-blue)] transition-all disabled:opacity-50"
               >
                 {t("Next")}
               </button>

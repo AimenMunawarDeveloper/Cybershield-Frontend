@@ -39,11 +39,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }, 300);
   };
 
-  // Don't render children until mounted to avoid hydration mismatch
-  if (!mounted) {
-    return null;
-  }
-
+  // Always render the Provider to maintain consistent component tree structure
+  // This prevents "Rendered more hooks than during the previous render" errors
+  // The language will default to "en" until mounted and localStorage is read
   return (
     <LanguageContext.Provider value={{ language, setLanguage, isTranslating }}>
       {children}
