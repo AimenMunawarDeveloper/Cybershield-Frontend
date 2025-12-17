@@ -116,6 +116,8 @@ export function DashboardSidebar({
   const { getToken } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
   const { t } = useTranslation();
+  const isAdminRole =
+    userRole === "system_admin" || userRole === "client_admin";
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -157,25 +159,60 @@ export function DashboardSidebar({
           <SidebarGroupLabel>{t("Platform")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {data.navMain.map((item, index) => (
-                <Fragment key={item.title}>
-                  <SidebarMenuItem className="mb-2">
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === item.url}
-                      tooltip={t(item.title)}
-                    >
-                      <Link href={item.url}>
-                        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                          <item.icon className="w-4 h-4 text-white" />
-                        </div>
-                        <span>{t(item.title)}</span>
-                        {item.badge && (
-                          <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                        )}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+              {data.navMain.map((item, index) => {
+                // Hide campaign-related items for non-admin roles
+                const isCampaignNav =
+                  item.url === "/dashboard/simulations" ||
+                  item.url === "/dashboard/whatsapp-phishing" ||
+                  item.url === "/dashboard/email-phishing";
+                const isVoiceNav = item.url === "/dashboard/voice-phishing";
+
+                if (isCampaignNav && !isAdminRole) {
+                  return null;
+                }
+
+                return (
+                  <Fragment key={item.title}>
+                    <SidebarMenuItem className="mb-2">
+                      {isVoiceNav ? (
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname === item.url}
+                          tooltip={t(item.title)}
+                        >
+                          {/* Keep styling identical; block interaction without changing color */}
+                          <Link
+                            href={item.url}
+                            tabIndex={-1}
+                            className="pointer-events-none"
+                          >
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                              <item.icon className="w-4 h-4 text-white" />
+                            </div>
+                            <span>{t(item.title)}</span>
+                            {item.badge && (
+                              <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                            )}
+                          </Link>
+                        </SidebarMenuButton>
+                      ) : (
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname === item.url}
+                          tooltip={t(item.title)}
+                        >
+                          <Link href={item.url}>
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                              <item.icon className="w-4 h-4 text-white" />
+                            </div>
+                            <span>{t(item.title)}</span>
+                            {item.badge && (
+                              <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                            )}
+                          </Link>
+                        </SidebarMenuButton>
+                      )}
+                    </SidebarMenuItem>
 
                   {/* Show Organizations/Organization right after Dashboard */}
                   {index === 0 && (
@@ -228,7 +265,8 @@ export function DashboardSidebar({
                     </>
                   )}
                 </Fragment>
-              ))}
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

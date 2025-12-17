@@ -21,6 +21,7 @@ import Image from "next/image";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ApiClient } from "@/lib/api";
 
 interface Campaign {
   _id: string;
@@ -69,6 +70,31 @@ export default function WhatsAppPhishingPage() {
     category?: string;
   } | null>(null);
   const [translationReady, setTranslationReady] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [accessError, setAccessError] = useState<string | null>(null);
+
+  const verifyAccess = useCallback(async () => {
+    try {
+      const apiClient = new ApiClient(getToken);
+      const profile = await apiClient.getUserProfile();
+      const allowed =
+        profile.role === "system_admin" || profile.role === "client_admin";
+      setHasAccess(allowed);
+      if (!allowed) {
+        setAccessError(
+          t("Access restricted to system and client administrators.")
+        );
+      }
+    } catch (err) {
+      console.error("Failed to verify access:", err);
+      setAccessError(t("Failed to verify permissions. Please try again."));
+      setHasAccess(false);
+    }
+  }, [getToken, t]);
+
+  useEffect(() => {
+    verifyAccess();
+  }, [verifyAccess]);
 
   const fetchCampaigns = useCallback(async () => {
     try {
@@ -305,9 +331,11 @@ export default function WhatsAppPhishingPage() {
   }, [getToken, language, preTranslate]);
 
   useEffect(() => {
-    fetchCampaigns();
-    fetchTemplates();
-  }, [fetchCampaigns, fetchTemplates]);
+    if (hasAccess) {
+      fetchCampaigns();
+      fetchTemplates();
+    }
+  }, [hasAccess, fetchCampaigns, fetchTemplates]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -463,6 +491,14 @@ export default function WhatsAppPhishingPage() {
     }
   };
 
+  if (hasAccess === null) {
+    return (
+      <div className="p-8 text-center text-white">
+        <p>{t("Loading...")}</p>
+      </div>
+    );
+  }
+
   // Show loading state while translating or fetching data
   if (!translationReady || loading || templatesLoading) {
     return (
@@ -473,6 +509,18 @@ export default function WhatsAppPhishingPage() {
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
+      </div>
+    );
+  }
+
+  if (hasAccess === false) {
+    return (
+      <div className="p-8 text-center text-white">
+        <h1 className="text-2xl font-semibold">{t("Access Restricted")}</h1>
+        <p className="mt-2 text-sm text-gray-300">
+          {accessError ||
+            t("This page is available to system and client administrators only.")}
+        </p>
       </div>
     );
   }
