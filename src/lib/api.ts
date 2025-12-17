@@ -184,13 +184,24 @@ export class ApiClient {
       method: 'GET',
       headers,
     });
+
+    const parseJsonSafe = async () => {
+      const text = await response.text();
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { raw: text };
+      }
+    };
     
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to fetch user profile');
+      const error = await parseJsonSafe();
+      const message = (error as any)?.error || (error as any)?.message || 'Failed to fetch user profile';
+      throw new Error(message);
     }
     
-    return response.json();
+    return parseJsonSafe();
   }
 
   async getAllUsers(page = 1, limit = 1000, status?: string) {

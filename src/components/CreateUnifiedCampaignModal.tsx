@@ -32,7 +32,7 @@ export default function CreateUnifiedCampaignModal({
   onClose,
   onSuccess,
 }: CreateUnifiedCampaignModalProps) {
-  const { t } = useTranslation();
+  const { t, tAsync, preTranslate, language } = useTranslation();
   const { getToken } = useAuth();
   const { user, isLoaded } = useUser();
   
@@ -123,7 +123,21 @@ export default function CreateUnifiedCampaignModal({
               if (emailResponse.ok) {
                 const emailData = await emailResponse.json();
                 if (emailData.success && emailData.data?.templates) {
-                  setEmailTemplates(emailData.data.templates);
+                  const templatesData = emailData.data.templates;
+
+                  if (language === "ur") {
+                    const dynamicStrings = templatesData
+                      .flatMap((template: any) => [
+                        template.title,
+                        template.description,
+                        template.emailTemplate?.subject,
+                        template.emailTemplate?.bodyContent,
+                      ])
+                      .filter(Boolean);
+                    await preTranslate(dynamicStrings);
+                  }
+
+                  setEmailTemplates(templatesData);
                 }
               }
             } catch (error) {
@@ -146,7 +160,21 @@ export default function CreateUnifiedCampaignModal({
               if (whatsappResponse.ok) {
                 const whatsappData = await whatsappResponse.json();
                 if (whatsappData.success && whatsappData.data?.templates) {
-                  setWhatsappTemplates(whatsappData.data.templates);
+                  const templatesData = whatsappData.data.templates;
+
+                  if (language === "ur") {
+                    const dynamicStrings = templatesData
+                      .flatMap((template: any) => [
+                        template.title,
+                        template.description,
+                        template.category,
+                        template.messageTemplate,
+                      ])
+                      .filter(Boolean);
+                    await preTranslate(dynamicStrings);
+                  }
+
+                  setWhatsappTemplates(templatesData);
                 }
               }
             } catch (error) {
@@ -161,7 +189,22 @@ export default function CreateUnifiedCampaignModal({
       };
       fetchTemplates();
     }
-  }, [isOpen, emailEnabled, whatsappEnabled, getToken]);
+  }, [isOpen, emailEnabled, whatsappEnabled, getToken, language, preTranslate]);
+
+  const handleSelectEmailTemplate = async (template: any) => {
+    // Translate on selection to ensure Urdu is stored even if cache wasn't ready
+    const translatedSubject = await tAsync(template.emailTemplate?.subject || "");
+    const translatedBody = await tAsync(template.emailTemplate?.bodyContent || "");
+    setEmailSubject(translatedSubject);
+    setEmailBody(translatedBody);
+    setShowEmailTemplateSelector(false);
+  };
+
+  const handleSelectWhatsappTemplate = async (template: any) => {
+    const translatedMessage = await tAsync(template.messageTemplate || "");
+    setWhatsappMessage(translatedMessage);
+    setShowWhatsappTemplateSelector(false);
+  };
 
   // Reset form
   const resetForm = () => {
@@ -709,18 +752,14 @@ export default function CreateUnifiedCampaignModal({
                               <button
                                 key={template._id || template.id}
                                 type="button"
-                                onClick={() => {
-                                  setEmailSubject(template.emailTemplate?.subject || "");
-                                  setEmailBody(template.emailTemplate?.bodyContent || "");
-                                  setShowEmailTemplateSelector(false);
-                                }}
+                                onClick={() => handleSelectEmailTemplate(template)}
                                 className="p-3 text-left bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 hover:border-[var(--neon-blue)] transition-colors"
                               >
                                 <div className="text-white font-medium text-sm mb-1">
-                                  {template.title}
+                                  {t(template.title)}
                                 </div>
                                 <div className="text-[var(--medium-grey)] text-xs line-clamp-2">
-                                  {template.description}
+                                  {t(template.description)}
                                 </div>
                               </button>
                             ))}
@@ -799,17 +838,14 @@ export default function CreateUnifiedCampaignModal({
                               <button
                                 key={template._id || template.id}
                                 type="button"
-                                onClick={() => {
-                                  setWhatsappMessage(template.messageTemplate || "");
-                                  setShowWhatsappTemplateSelector(false);
-                                }}
+                                onClick={() => handleSelectWhatsappTemplate(template)}
                                 className="p-3 text-left bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 hover:border-green-500 transition-colors"
                               >
                                 <div className="text-white font-medium text-sm mb-1">
-                                  {template.title}
+                                  {t(template.title)}
                                 </div>
                                 <div className="text-[var(--medium-grey)] text-xs line-clamp-2">
-                                  {template.description}
+                                  {t(template.description)}
                                 </div>
                               </button>
                             ))}
