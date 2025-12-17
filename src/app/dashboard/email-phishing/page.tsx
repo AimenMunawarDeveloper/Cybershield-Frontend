@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Mail, Send, Shield, AlertTriangle, Lock, Globe, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ApiClient } from "@/lib/api";
 
 interface EmailTemplateContent {
   sentBy?: string;
@@ -49,9 +50,34 @@ export default function EmailPhishingPage() {
   const [emails, setEmails] = useState<EmailRecord[]>([]);
   const [loadingEmails, setLoadingEmails] = useState(true);
   const [translationReady, setTranslationReady] = useState(false);
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
+  const [accessError, setAccessError] = useState<string | null>(null);
+
+  const verifyAccess = async () => {
+    try {
+      const apiClient = new ApiClient(getToken);
+      const profile = await apiClient.getUserProfile();
+      const allowed =
+        profile.role === "system_admin" || profile.role === "client_admin";
+      setHasAccess(allowed);
+      if (!allowed) {
+        setAccessError(
+          t("Access restricted to system and client administrators.")
+        );
+      }
+    } catch (err) {
+      console.error("Failed to verify access:", err);
+      setAccessError(t("Failed to verify permissions. Please try again."));
+      setHasAccess(false);
+    }
+  };
+
+  useEffect(() => {
+    verifyAccess();
+  }, [getToken, t]);
 
   // Fetch templates from MongoDB
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     try {
       setLoadingTemplates(true);
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
@@ -91,10 +117,10 @@ export default function EmailPhishingPage() {
     } finally {
       setLoadingTemplates(false);
     }
-  };
+  }, [language, preTranslate]);
 
   // Fetch emails from database
-  const fetchEmails = async () => {
+  const fetchEmails = useCallback(async () => {
     try {
       setLoadingEmails(true);
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
@@ -116,7 +142,7 @@ export default function EmailPhishingPage() {
     } finally {
       setLoadingEmails(false);
     }
-  };
+  }, []);
 
   // Format date to local time
   const formatDate = (dateString: string) => {
@@ -208,9 +234,11 @@ export default function EmailPhishingPage() {
   }, [language, preTranslate]);
 
   useEffect(() => {
-    fetchTemplates();
-    fetchEmails();
-  }, []);
+    if (hasAccess) {
+      fetchTemplates();
+      fetchEmails();
+    }
+  }, [hasAccess, fetchTemplates, fetchEmails]);
 
   const handleSendEmail = async (emailData: {
     sentBy: string;
@@ -297,6 +325,33 @@ export default function EmailPhishingPage() {
     setShowModal(true);
   };
 
+
+  if (hasAccess === null) {
+    return (
+      <div className="flex flex-1 items-center justify-center min-h-screen">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">{t("Loading...")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasAccess === false) {
+    return (
+      <div className="flex flex-1 items-center justify-center min-h-screen px-4 text-center">
+        <div>
+          <h1 className="text-2xl font-semibold text-white">
+            {t("Access Restricted")}
+          </h1>
+          <p className="mt-2 text-sm text-gray-300">
+            {accessError ||
+              t("This page is available to system and client administrators only.")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while translating or fetching data
   if (!translationReady || loadingTemplates) {
