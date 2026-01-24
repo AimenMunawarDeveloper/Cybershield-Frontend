@@ -20,6 +20,7 @@ import {
   Building,
   Mail,
   Phone,
+  ShieldAlert,
 } from "lucide-react";
 
 import {
@@ -92,6 +93,11 @@ const data = {
       title: "Reports",
       url: "/dashboard/reports",
       icon: FileText,
+    },
+    {
+      title: "Incident Reporting",
+      url: "/dashboard/incident-reporting",
+      icon: ShieldAlert,
     },
     {
       title: "Settings",
