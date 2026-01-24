@@ -22,6 +22,10 @@ interface WhatsAppIncidentReport {
   messageType: "whatsapp";
   message: string;
   urls: string[];
+  /** Optional. When received (ISO or datetime-local). Matches training `timestamp`. */
+  date?: string;
+  /** Optional. Sender phone or name. Matches training `from` / `from_phone`. */
+  from?: string;
 }
 
 type IncidentReport = EmailIncidentReport | WhatsAppIncidentReport;
@@ -229,6 +233,37 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
             disabled={isLoading}
           />
         </div>
+
+        {/* Sender (Optional) — matches training from / from_phone */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-[#25d366]" />
+            {t("Sender (phone or name)")}
+          </label>
+          <input
+            type="text"
+            value={formData.from || ""}
+            onChange={(e) => setFormData((prev) => ({ ...prev, from: e.target.value }))}
+            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[var(--medium-grey)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
+            placeholder={t("e.g. +92123456789 or contact name")}
+            disabled={isLoading}
+          />
+        </div>
+
+        {/* Date received (Optional) — matches training timestamp */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <FileText className="w-5 h-5 text-[#25d366]" />
+            {t("Date received")}
+          </label>
+          <input
+            type="datetime-local"
+            value={formData.date || ""}
+            onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
+            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[var(--medium-grey)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
+            disabled={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
@@ -254,7 +289,14 @@ export default function IncidentReportingPage() {
   const [whatsappFormData, setWhatsappFormData] = useState<Omit<WhatsAppIncidentReport, "messageType">>({
     message: "",
     urls: [""],
+    from: "",
+    date: "",
   });
+  const [lastAnalysis, setLastAnalysis] = useState<{
+    is_phishing: boolean;
+    phishing_probability: number;
+    confidence?: number;
+  } | null>(null);
 
   // Pre-translate static strings when language changes
   useEffect(() => {
@@ -300,6 +342,9 @@ export default function IncidentReportingPage() {
         "Enter the WhatsApp message content",
         "URL",
         "Enter URL (optional)",
+        "Sender (phone or name)",
+        "e.g. +92123456789 or contact name",
+        "Date received",
         
         // Common
         "Fill out the form below to report a security incident. All fields marked with * are required.",
@@ -312,9 +357,18 @@ export default function IncidentReportingPage() {
         "Failed to submit incident report",
         "Please fill in all required fields.",
         "Congratulations!",
+        "Report submitted",
         "You've successfully reported the incident!",
         "This was part of a phishing campaign to test your security awareness.",
         "Got it!",
+
+        // ML result
+        "Phishing detected",
+        "Not phishing",
+        "Phishing probability",
+        "Confidence",
+        "Result from ML pipeline",
+        "Also check browser console for log",
       ];
 
       await preTranslate(staticStrings);
@@ -366,40 +420,56 @@ export default function IncidentReportingPage() {
         return;
       }
 
+      const waUrls = whatsappFormData.urls.filter(url => url.trim() !== "");
+      const waDate = whatsappFormData.date
+        ? new Date(whatsappFormData.date).toISOString()
+        : undefined;
       reportData = {
         messageType: "whatsapp",
         message: whatsappFormData.message,
-        urls: whatsappFormData.urls.filter(url => url.trim() !== ""),
+        urls: waUrls,
+        ...(whatsappFormData.from && { from: whatsappFormData.from, from_phone: whatsappFormData.from }),
+        ...(waDate && { date: waDate, timestamp: waDate }),
       };
     }
 
     try {
       const token = await getToken();
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
-      
+
       const headers: HeadersInit = {
         "Content-Type": "application/json",
       };
-      
+
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      
-      // Log the data - replace with actual API call when backend is ready
-      console.log("Incident Report Data:", reportData);
-      
-      // Simulate API call - replace with actual endpoint when backend is ready
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Show success toast
+
+      const res = await fetch(`${backendUrl}/api/incidents/analyze`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(reportData),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || `Request failed: ${res.status}`);
+      }
+
+      if (data.success && data.is_phishing != null) {
+        setLastAnalysis({
+          is_phishing: data.is_phishing === true,
+          phishing_probability: data.phishing_probability ?? 0,
+          confidence: data.confidence ?? undefined,
+        });
+      } else {
+        setLastAnalysis(null);
+      }
+
       setShowSuccessToast(true);
-      
-      // Auto-hide toast after 5 seconds
-      setTimeout(() => {
-        setShowSuccessToast(false);
-      }, 5000);
-      
-      // Reset form
+      setTimeout(() => setShowSuccessToast(false), 5000);
+
       if (activeTab === "email") {
         setEmailFormData({
           message: "",
@@ -413,14 +483,17 @@ export default function IncidentReportingPage() {
         setWhatsappFormData({
           message: "",
           urls: [""],
+          from: "",
+          date: "",
         });
       }
     } catch (error) {
       console.error("Error submitting incident report:", error);
-      setMessage({ 
-        type: "error", 
-        text: t("Failed to submit incident report. Please try again.") 
+      setMessage({
+        type: "error",
+        text: t("Failed to submit incident report. Please try again."),
       });
+      setLastAnalysis(null);
     } finally {
       setIsLoading(false);
     }
@@ -440,9 +513,12 @@ export default function IncidentReportingPage() {
       setWhatsappFormData({
         message: "",
         urls: [""],
+        from: "",
+        date: "",
       });
     }
     setMessage(null);
+    setLastAnalysis(null);
   };
 
 
@@ -643,16 +719,23 @@ export default function IncidentReportingPage() {
             <div className="flex items-start gap-4">
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-white mb-1 bg-gradient-to-r from-[#51b0ec] to-[#4fc3f7] bg-clip-text text-transparent">
-                  {t("Congratulations!")}
+                  {t("Report submitted")}
                 </h3>
                 
                 <p className="text-sm text-[var(--light-blue)] mb-1">
                   {t("You've successfully reported the incident!")}
                 </p>
-                
-                <p className="text-xs text-[var(--medium-grey)]">
-                  {t("This was part of a phishing campaign to test your security awareness.")}
-                </p>
+
+                {lastAnalysis != null && (
+                  <div className="mt-3 pt-3 border-t border-[var(--medium-grey)]/30">
+                    <p className={`text-sm font-semibold ${lastAnalysis.is_phishing ? "text-red-400" : "text-green-400"}`}>
+                      {lastAnalysis.is_phishing ? t("Phishing detected") : t("Not phishing")}
+                    </p>
+                    <p className="text-sm text-[var(--light-blue)] mt-0.5">
+                      {t("Phishing probability")}: <span className="font-mono font-bold text-white">{(lastAnalysis.phishing_probability * 100).toFixed(1)}%</span>
+                    </p>
+                  </div>
+                )}
               </div>
               
               <button
