@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Mail, Send, Shield, AlertTriangle, Lock, Globe, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus } from "lucide-react";
+import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ApiClient } from "@/lib/api";
-
 interface EmailTemplateContent {
   sentBy?: string;
   sentTo?: string;
@@ -36,6 +36,8 @@ interface EmailRecord {
   error?: string;
 }
 
+const INITIAL_VISIBLE_TEMPLATES = 6;
+
 export default function EmailPhishingPage() {
   const { getToken } = useAuth();
   const { t, tAsync, preTranslate, language } = useTranslation();
@@ -52,6 +54,7 @@ export default function EmailPhishingPage() {
   const [translationReady, setTranslationReady] = useState(false);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [accessError, setAccessError] = useState<string | null>(null);
+  const [visibleTemplates, setVisibleTemplates] = useState(INITIAL_VISIBLE_TEMPLATES);
 
   const verifyAccess = async () => {
     try {
@@ -171,59 +174,64 @@ export default function EmailPhishingPage() {
       // Collect all static strings on the page
       const staticStrings = [
         // Hero section
-        "Email Phishing Simulation",
-        "Create and manage realistic email phishing campaigns to test your organization's security awareness.",
+        "Email Phishing",
+        "Awareness Training",
+        "Protect your organization by training users to identify and respond to phishing emails. Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.",
         "Realistic Scenarios",
         "Security Training",
         "Safe Testing",
         "Send Email",
         
-        // Features section
-        "Email Phishing Features",
-        "Multi-Vector Phishing Campaigns",
-        "Test your users with realistic email phishing scenarios including fake security alerts, account verifications, and urgent messages.",
-        "Campaign Management",
-        "Track campaign performance, user interactions, and generate detailed reports to measure security awareness improvements.",
-        "Why Choose Us?",
-        "Industry-leading platform for Security Awareness Training",
+        // How it works section
+        "How Email Phishing Simulation Works",
+        "Our email phishing simulation sends realistic phishing emails directly to your employees' inboxes to test their security awareness and response.",
+        "Select a phishing template (banking alert, password reset, delivery notice) or create your own custom email.",
+        "Enter target employee email addresses. The system sends professional looking phishing emails with embedded tracking.",
+        "When users click links or submit credentials, the system captures their interaction for analysis.",
+        "Review detailed reports showing who clicked, who submitted data, and who reported the email to identify training needs.",
         
         // Templates section
         "Phishing Email Templates",
-        "Banking Verification",
-        "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
-        "Financial",
-        "Account Security Alert",
-        "Test how users respond to urgent security notifications and password reset requests from seemingly legitimate sources.",
-        "Security",
-        "Package Delivery",
-        "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
-        "Delivery",
-        "Job Opportunity",
-        "Create realistic job offer emails to evaluate how well users can identify employment-related phishing attempts.",
-        "Employment",
-        "View Template",
-        "Use Template",
+        "Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.",
+        "View",
+        "Use",
+        
+        // Campaign management section
+        "Email Phishing Campaigns",
+        "Create and manage phishing awareness campaigns",
+        "New Campaign",
         
         // Email history section
-        "Email History",
-        "Recent email campaigns and their status",
+        "Recent Emails",
+        "Manage your email phishing awareness campaigns",
         "Sent",
         "Failed",
         "To",
+        "From",
         
         // Loading/error states
         "Loading templates...",
         "No templates available. Please seed the database first.",
         "Loading emails...",
-        "No emails sent yet",
-        "Send your first phishing simulation email to get started.",
+        "No emails yet",
+        "Email phishing campaigns will appear here once they are created",
         "Email sent successfully to",
         "Failed to send email",
+        "Failed to send email. Please check your backend connection.",
         "Bulk email sent!",
         "successful",
         "failed",
         "out of",
         "recipients.",
+        "Loading...",
+        "Access Restricted",
+        "This page is available to system and client administrators only.",
+        "See More",
+        "Showing",
+        "of",
+        "templates",
+        "more",
+        "Show Less",
       ];
 
       await preTranslate(staticStrings);
@@ -369,16 +377,19 @@ export default function EmailPhishingPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+      <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
         <NetworkBackground />
+        {/* Blurred background element */}
+        <div className="blurred-background"></div>
+
         {/* Hero Section */}
-        <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden mb-8">
           <div className="blurred-background"></div>
           
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center space-y-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
+              <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
                   <Mail className="w-8 h-8 text-white" />
                 </div>
               </div>
@@ -410,20 +421,72 @@ export default function EmailPhishingPage() {
           </div>
         </div>
 
+        {/* How Email Phishing Works Section */}
+        <div className="relative z-10 mb-8 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-bold text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
+              {t("How Email Phishing Simulation Works")}
+            </h2>
+            <div className="dashboard-card rounded-lg p-6 md:p-8 bg-[var(--navy-blue-light)]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="relative h-64 md:h-80 rounded-lg overflow-hidden">
+                  <Image
+                    src="/Images/3.jpg"
+                    alt="Email Phishing Simulation"
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                </div>
+                <div className="space-y-4">
+                  <p className="text-white text-lg">
+                    {t("Our email phishing simulation sends realistic phishing emails directly to your employees' inboxes to test their security awareness and response.")}
+                  </p>
+                  <ul className="space-y-3 text-white">
+                    <li className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
+                      <span>
+                        {t("Select a phishing template (banking alert, password reset, delivery notice) or create your own custom email.")}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
+                      <span>
+                        {t("Enter target employee email addresses. The system sends professional looking phishing emails with embedded tracking.")}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
+                      <span>
+                        {t("When users click links or submit credentials, the system captures their interaction for analysis.")}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">4</div>
+                      <span>
+                        {t("Review detailed reports showing who clicked, who submitted data, and who reported the email to identify training needs.")}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Phishing Templates Section */}
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
+        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4 underline decoration-[var(--neon-blue)]">
                 {t("Phishing Email Templates")}
               </h2>
-              <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
+              <p className="text-base text-[var(--medium-grey)] max-w-2xl mx-auto">
                 {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
 
             {/* Template Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
               {loadingTemplates ? (
                 <div className="col-span-full text-center py-12">
                   <div className="text-[var(--medium-grey)]">{t("Loading templates...")}</div>
@@ -434,7 +497,7 @@ export default function EmailPhishingPage() {
                   <p className="text-[var(--medium-grey)]">{t("No templates available. Please seed the database first.")}</p>
                 </div>
               ) : (
-                templates.map((template) => (
+                templates.slice(0, visibleTemplates).map((template) => (
                   <div
                     key={template._id || template.id}
                   className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
@@ -514,130 +577,157 @@ export default function EmailPhishingPage() {
               )}
             </div>
 
-            {/* Send Email Section */}
-            <div className="mt-12">
-              <div className="flex flex-col gap-6">
-                {/* Page Header */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
-                      <Send className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white">{t("Send Test Email")}</h2>
-                      <p className="text-[var(--medium-grey)] text-sm">
-                        {t("Send test emails for phishing awareness")}
-                      </p>
-                    </div>
-                  </div>
+            {/* See More Button */}
+            {templates.length > INITIAL_VISIBLE_TEMPLATES && (
+              <div className="text-center">
+                <p className="text-[var(--medium-grey)] text-sm mb-4">
+                  {t("Showing")} {Math.min(visibleTemplates, templates.length)} {t("of")} {templates.length} {t("templates")}
+                </p>
+                {visibleTemplates < templates.length ? (
                   <button
-                    onClick={() => setShowModal(true)}
-                    disabled={isLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors disabled:opacity-50"
+                    onClick={() => setVisibleTemplates(templates.length)}
+                    className="px-8 py-3 bg-[var(--neon-blue)] text-white rounded-lg font-medium hover:bg-[var(--medium-blue)] transition-colors"
                   >
-                    <Send className="w-4 h-4" />
-                    {t("Send Email")}
+                    {t("See More")} ({templates.length - visibleTemplates} {t("more")})
                   </button>
-                </div>
-
-                {/* Message */}
-                {message && (
-                  <div
-                    className={`p-4 rounded-lg text-sm ${
-                      message.type === "success"
-                        ? "bg-green-900 bg-opacity-20 border border-green-500 text-green-300"
-                        : "bg-red-900 bg-opacity-20 border border-red-500 text-red-300"
-                    }`}
+                ) : (
+                  <button
+                    onClick={() => setVisibleTemplates(INITIAL_VISIBLE_TEMPLATES)}
+                    className="px-8 py-3 bg-[var(--navy-blue-lighter)] text-white rounded-lg font-medium hover:bg-[var(--navy-blue)] transition-colors border border-[var(--neon-blue)]/30"
                   >
-                    {message.text}
-                    <button
-                      onClick={() => setMessage(null)}
-                      className="ml-2 hover:opacity-70"
-                    >
-                      ×
-                    </button>
-                  </div>
+                    {t("Show Less")}
+                  </button>
                 )}
+              </div>
+            )}
 
-                {/* Email History */}
-                <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-6 border border-[var(--medium-grey)] border-opacity-20">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-white">
-                      {t("Email History")}
-                    </h3>
-                    <button
-                      onClick={fetchEmails}
-                      disabled={loadingEmails}
-                      className="text-sm text-[var(--neon-blue)] hover:text-[var(--neon-blue-dark)] transition-colors disabled:opacity-50"
+          </div>
+        </div>
+
+        {/* Page Header */}
+        <div className="relative z-10 flex flex-1 flex-col gap-6 p-6 pt-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
+                <Mail className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">
+                  {t("Email Phishing Campaigns")}
+                </h1>
+                <p className="text-[var(--medium-grey)] text-sm">
+                  {t("Create and manage phishing awareness campaigns")}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowModal(true)}
+              disabled={isLoading}
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+            >
+              <Plus className="w-4 h-4" />
+              {t("New Campaign")}
+            </button>
+          </div>
+
+          {/* Message */}
+          {message && (
+            <div className="relative z-10">
+              <div
+                className={`p-4 rounded-lg text-sm ${
+                  message.type === "success"
+                    ? "bg-green-900 bg-opacity-20 border border-green-500 text-green-300"
+                    : "bg-red-900 bg-opacity-20 border border-red-500 text-red-300"
+                }`}
+              >
+                {message.text}
+                <button
+                  onClick={() => setMessage(null)}
+                  className="ml-2 hover:opacity-70"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Email History */}
+          <div className="relative z-10">
+            <div className="dashboard-card rounded-lg p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  {t("Recent Emails")}
+                </h3>
+                <p className="text-sm text-[var(--medium-grey)]">
+                  {t("Manage your email phishing awareness campaigns")}
+                </p>
+              </div>
+
+              {loadingEmails ? (
+                <div className="text-center py-8">
+                  <div className="text-[var(--medium-grey)]">{t("Loading emails...")}</div>
+                </div>
+              ) : emails.length === 0 ? (
+                <div className="text-center py-12">
+                  <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {t("No emails yet")}
+                  </h3>
+                  <p className="text-sm text-[var(--medium-grey)]">
+                    {t("Email phishing campaigns will appear here once they are created")}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {emails.map((email) => (
+                    <div
+                      key={email._id}
+                      className="bg-[var(--navy-blue-lighter)] rounded-lg p-4"
                     >
-                      {loadingEmails ? t("Refreshing...") : t("Refresh")}
-                    </button>
-                  </div>
-
-                  {loadingEmails ? (
-                    <div className="text-center py-8">
-                      <div className="text-[var(--medium-grey)]">{t("Loading emails...")}</div>
-                    </div>
-                  ) : emails.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                      <p className="text-sm text-[var(--medium-grey)]">
-                        {t("No emails sent yet. Send your first email above!")}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {emails.map((email) => (
-                        <div
-                          key={email._id}
-                          className="bg-[var(--navy-blue)] rounded-lg p-4 border border-[var(--medium-grey)] border-opacity-20 hover:border-[var(--neon-blue)] transition-colors"
-                        >
-                          <div className="flex items-start gap-3">
-                            {email.status === "sent" ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
-                            ) : (
-                              <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-2 mb-2">
-                                <p className="text-white font-semibold truncate">
-                                  {t(email.subject)}
-                                </p>
-                                <span
-                                  className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
-                                    email.status === "sent"
-                                      ? "bg-green-900/30 text-green-400 border border-green-500/30"
-                                      : "bg-red-900/30 text-red-400 border border-red-500/30"
-                                  }`}
-                                >
-                                  {email.status === "sent" ? t("Sent") : t("Failed")}
-                                </span>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-sm text-[var(--medium-grey)] truncate">
-                                  <span className="text-white">{t("To")}:</span> {email.sentTo}
-                                </p>
-                                <p className="text-xs text-[var(--medium-grey)] truncate">
-                                  <span className="text-white">{t("From")}:</span> {email.sentBy}
-                                </p>
-                                <div className="flex items-center gap-1 text-xs text-[var(--medium-grey)] mt-2">
-                                  <Clock className="w-3 h-3" />
-                                  <span>{formatDate(email.createdAt)}</span>
-                                </div>
-                              </div>
-                              {email.error && (
-                                <p className="text-xs text-red-400 mt-2">
-                                  {email.error}
-                                </p>
-                              )}
+                      <div className="flex items-start gap-3">
+                        {email.status === "sent" ? (
+                          <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <p className="text-white font-semibold truncate">
+                              {t(email.subject)}
+                            </p>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
+                                email.status === "sent"
+                                  ? "bg-green-900/30 text-green-400 border border-green-500/30"
+                                  : "bg-red-900/30 text-red-400 border border-red-500/30"
+                              }`}
+                            >
+                              {email.status === "sent" ? t("Sent") : t("Failed")}
+                            </span>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm text-[var(--medium-grey)] truncate">
+                              <span className="text-white">{t("To")}:</span> {email.sentTo}
+                            </p>
+                            <p className="text-xs text-[var(--medium-grey)] truncate">
+                              <span className="text-white">{t("From")}:</span> {email.sentBy}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-[var(--medium-grey)] mt-2">
+                              <Clock className="w-3 h-3" />
+                              <span>{formatDate(email.createdAt)}</span>
                             </div>
                           </div>
+                          {email.error && (
+                            <p className="text-xs text-red-400 mt-2">
+                              {email.error}
+                            </p>
+                          )}
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

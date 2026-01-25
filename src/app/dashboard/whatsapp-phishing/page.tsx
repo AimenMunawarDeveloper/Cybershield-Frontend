@@ -9,10 +9,7 @@ import {
   Users,
   Clock,
   AlertTriangle,
-  FileText,
   Shield,
-  TrendingUp,
-  CheckCircle2,
   Send,
   Lock,
 } from "lucide-react";
@@ -52,6 +49,8 @@ interface Campaign {
   scheduleDate?: string;
 }
 
+const INITIAL_VISIBLE_TEMPLATES = 6;
+
 export default function WhatsAppPhishingPage() {
   const { t, preTranslate, isTranslating, language } = useTranslation();
   const { getToken } = useAuth();
@@ -72,6 +71,7 @@ export default function WhatsAppPhishingPage() {
   const [translationReady, setTranslationReady] = useState(false);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [accessError, setAccessError] = useState<string | null>(null);
+  const [visibleTemplates, setVisibleTemplates] = useState(INITIAL_VISIBLE_TEMPLATES);
 
   const verifyAccess = useCallback(async () => {
     try {
@@ -206,39 +206,38 @@ export default function WhatsAppPhishingPage() {
       // Collect all static strings on the page
       const staticStrings = [
         // Hero section
-        "WhatsApp Phishing Simulation",
-        "Create and manage realistic WhatsApp phishing campaigns to test your organization's security awareness.",
+        "WhatsApp Phishing",
+        "Awareness Training",
+        "Protect your organization by training users to identify and respond to phishing messages. Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.",
         "Realistic Scenarios",
         "Security Training",
         "Safe Testing",
         "New Campaign",
         
-        // Features section
-        "Phishing Simulation Features",
-        "Multi-Vector Phishing Campaigns",
-        "Test your users with realistic WhatsApp phishing scenarios including fake prize notifications, verification requests, and urgent messages.",
-        "Campaign Management",
-        "Track campaign performance, user interactions, and generate detailed reports to measure security awareness improvements.",
-        "Why us?",
-        "Best platform in the world for Security Awareness Training",
+        // How it works section
+        "How WhatsApp Phishing Simulation Works",
+        "Our WhatsApp phishing simulation sends realistic phishing messages directly to your employees' WhatsApp accounts to test their security awareness.",
+        "Select a phishing template (banking scam, prize notification, job offer) or customize your own message.",
+        "Add target employees with their phone numbers. Messages are sent via WhatsApp with a tracking link.",
+        "When users click the link, they land on a simulated phishing page that captures their interaction.",
+        "Track who clicked, who submitted data, and who reported. Use results to identify training needs.",
         
         // Templates section
         "Phishing Message Templates",
-        "Banking Verification",
-        "Simulate banking security alerts and account verification requests to test user awareness of financial phishing attempts.",
-        "Financial",
-        "Lottery Prize",
-        "Test how users respond to prize-winning notifications and lottery scams that request personal information.",
-        "Prize",
-        "Job Interview",
-        "Create realistic job offer messages to evaluate how well users can identify employment-related phishing attempts.",
-        "Employment",
-        "Package Delivery",
-        "Simulate shipping notifications and delivery updates to assess user vigilance against delivery-related phishing scams.",
-        "Delivery",
+        "Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.",
         "View",
         "Use",
         "Use This Template",
+        
+        // Campaign management
+        "WhatsApp Phishing Campaigns",
+        "Create and manage phishing awareness campaigns",
+        "Total Campaigns",
+        "Active Campaigns",
+        "Total Targets",
+        "Completed",
+        "Recent Campaigns",
+        "Manage your WhatsApp phishing awareness campaigns",
         
         // Campaign status
         "Start Now",
@@ -265,7 +264,14 @@ export default function WhatsAppPhishingPage() {
         "Network error. Please check your internet connection.",
         "Loading campaigns...",
         "No campaigns yet",
-        "Create your first WhatsApp phishing campaign to get started.",
+        "WhatsApp phishing campaigns will appear here once they are created",
+        "No templates available. Please seed the database first.",
+        "See More",
+        "Showing",
+        "of",
+        "templates",
+        "more",
+        "Show Less",
       ];
 
       await preTranslate(staticStrings);
@@ -571,96 +577,48 @@ export default function WhatsAppPhishingPage() {
           </div>
         </div>
 
-        {/* Phishing Simulation Features */}
+        {/* How WhatsApp Phishing Works Section */}
         <div className="relative z-10 mb-8">
           <h2 className="text-3xl font-bold text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
-            {t("Phishing Simulation Features")}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Template Library */}
-            <div
-              className="dashboard-card rounded-lg p-6"
-              style={{ backgroundColor: "var(--navy-blue-light)" }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">
-                  {t("Template Library")}
-                </h3>
-              </div>
-              <p className="text-[var(--medium-grey)] text-sm">
-                {t("Template library with AI-generated variants for realistic phishing messages and landing pages.")}
-              </p>
-            </div>
-            <div
-              className="dashboard-card rounded-lg p-6"
-              style={{ backgroundColor: "var(--navy-blue-light)" }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">
-                  {t("Telemetry Capture")}
-                </h3>
-              </div>
-              <p className="text-[var(--medium-grey)] text-sm">
-                {t("Track deliveries, clicks, submissions, call outcomes, and time-to-respond for comprehensive campaign analytics.")}
-              </p>
-            </div>
-
-            {/* Campaign Scheduling */}
-            <div
-              className="dashboard-card rounded-lg p-6"
-              style={{ backgroundColor: "var(--navy-blue-light)" }}
-            >
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-white">
-                  {t("Campaign Scheduling")}
-                </h3>
-              </div>
-              <p className="text-[var(--medium-grey)] text-sm">
-                {t("Schedule campaigns according to date and time. Monitor all activities including deliveries, openings, clicks, and data-entry attempts.")}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Multi-Vector Phishing Campaigns */}
-        <div className="relative z-10 mb-8">
-          <h2 className="text-3xl font-bold text-white text-center mb-8">
-            {t("Multi-Vector Phishing Campaigns")}
+            {t("How WhatsApp Phishing Simulation Works")}
           </h2>
           <div className="dashboard-card rounded-lg p-6 md:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div className="relative h-64 md:h-80 rounded-lg overflow-hidden">
                 <Image
                   src="/Images/2.jpg"
-                  alt="Multi-Vector Phishing"
+                  alt="WhatsApp Phishing Simulation"
                   fill
                   className="object-cover rounded-lg"
                 />
               </div>
               <div className="space-y-4">
-                <p className="text-white">
-                  {t("CyberShield supports multi-vector campaigns including email, WhatsApp/smishing, and browser-based voice/vishing to create comprehensive security awareness training.")}
+                <p className="text-white text-lg">
+                  {t("Our WhatsApp phishing simulation sends realistic phishing messages directly to your employees' WhatsApp accounts to test their security awareness.")}
                 </p>
                 <ul className="space-y-3 text-white">
                   <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[var(--neon-blue)] mt-1 flex-shrink-0" />
+                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                     <span>
-                      {t("Campaigns are scoped by organizations or groups, ensuring targeted delivery to registered users only.")}
+                      {t("Select a phishing template (banking scam, prize notification, job offer) or customize your own message.")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-[var(--neon-blue)] mt-1 flex-shrink-0" />
+                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
                     <span>
-                      {t("Analytics provide per-campaign summaries including submission attempts, time-to-click, and time-to-report metrics.")}
+                      {t("Add target employees with their phone numbers. Messages are sent via WhatsApp with a tracking link.")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
+                    <span>
+                      {t("When users click the link, they land on a simulated phishing page that captures their interaction.")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">4</div>
+                    <span>
+                      {t("Track who clicked, who submitted data, and who reported. Use results to identify training needs.")}
                     </span>
                   </li>
                 </ul>
@@ -669,171 +627,20 @@ export default function WhatsAppPhishingPage() {
           </div>
         </div>
 
-        {/* Campaign Management */}
-        <div className="relative z-10 mb-8">
-          <h2 className="text-3xl font-bold text-white text-center mb-8">
-            {t("Campaign Management")}
-          </h2>
-          <div className="dashboard-card rounded-lg p-6 md:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4 text-white">
-                <p>
-                  {t("Create and schedule WhatsApp phishing campaigns for targeted groups within your organization. Campaigns track all activities including deliveries, openings, clicks, data-entry attempts, and outcomes.")}
-                </p>
-                <p>
-                  {t("The system limits targets to registered users of authorized organizations/groups only and provides comprehensive analytics for campaign evaluation.")}
-                </p>
-              </div>
-              <div className="space-y-3">
-                {[
-                  t("Template library with AI-generated variants"),
-                  t("Campaign scheduling by date and time"),
-                  t("Telemetry capture and analytics"),
-                  t("Organization and group scoping"),
-                  t("Exportable campaign reports"),
-                  t("Landing page creation for information capture"),
-                ].map((service, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-3 text-white"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-[var(--neon-blue)]"></div>
-                    <span>{service}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Why Us Section */}
-        <div className="relative z-10 mb-8">
-          <div className="flex justify-center mb-8">
-            <div className="bg-gradient-to-r from-[var(--neon-blue)] to-[var(--electric-blue)] px-8 py-3 rounded-full">
-              <h2 className="text-2xl font-bold text-[var(--navy-blue)]">
-                {t("Why us?")}
-              </h2>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Template Library */}
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {t("Template Library")}
-                  </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {t("AI-generated variants for realistic phishing messages and landing pages")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Telemetry Capture */}
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[var(--electric-blue)] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <BarChart3 className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {t("Telemetry Capture")}
-                  </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {t("Track deliveries, clicks, submissions, and time-to-respond metrics")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Campaign Analytics */}
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[var(--success-green)] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {t("Campaign Analytics")}
-                  </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {t("Per-campaign summaries with submission attempts and time-to-report data")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Organization Scoping */}
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[var(--purple-blue)] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {t("Organization Scoping")}
-                  </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {t("Campaigns scoped by organizations or groups for targeted delivery")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Scheduled Campaigns */}
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[var(--medium-blue)] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {t("Scheduled Campaigns")}
-                  </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {t("Schedule campaigns by date and time with automated execution")}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Exportable Reports */}
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center flex-shrink-0">
-                  <FileText className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {t("Exportable Reports")}
-                  </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {t("Export campaign data in CSV/PDF formats for audits and reviews")}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Phishing Templates Section */}
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4 mb-8">
+        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4 underline decoration-[var(--neon-blue)]">
                 {t("Phishing Message Templates")}
               </h2>
-              <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
+              <p className="text-base text-[var(--medium-grey)] max-w-2xl mx-auto">
                 {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
 
             {/* Template Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
               {templates.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <p className="text-[var(--medium-grey)]">
@@ -841,7 +648,7 @@ export default function WhatsAppPhishingPage() {
                   </p>
                 </div>
               ) : (
-                templates.map((template) => (
+                templates.slice(0, visibleTemplates).map((template) => (
                 <div
                   key={template._id || template.id}
                   className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
@@ -921,6 +728,30 @@ export default function WhatsAppPhishingPage() {
                 ))
               )}
             </div>
+
+            {/* See More Button */}
+            {templates.length > INITIAL_VISIBLE_TEMPLATES && (
+              <div className="text-center">
+                <p className="text-[var(--medium-grey)] text-sm mb-4">
+                  {t("Showing")} {Math.min(visibleTemplates, templates.length)} {t("of")} {templates.length} {t("templates")}
+                </p>
+                {visibleTemplates < templates.length ? (
+                  <button
+                    onClick={() => setVisibleTemplates(templates.length)}
+                    className="px-8 py-3 bg-[var(--neon-blue)] text-white rounded-lg font-medium hover:bg-[var(--medium-blue)] transition-colors"
+                  >
+                    {t("See More")} ({templates.length - visibleTemplates} {t("more")})
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setVisibleTemplates(INITIAL_VISIBLE_TEMPLATES)}
+                    className="px-8 py-3 bg-[var(--navy-blue-lighter)] text-white rounded-lg font-medium hover:bg-[var(--navy-blue)] transition-colors border border-[var(--neon-blue)]/30"
+                  >
+                    {t("Show Less")}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
