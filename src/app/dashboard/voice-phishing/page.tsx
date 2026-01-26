@@ -328,33 +328,61 @@ export default function VoicePhishingPage() {
 
       // End conversation on backend and get score
       const token = await getToken();
-      if (!token) return;
+      if (!token) {
+        setError("Authentication required. Please log in again.");
+        return;
+      }
 
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
-      const response = await fetch(
-        `${API_BASE_URL}/voice-phishing/${conversationId}/end`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
+      
+      console.log("Ending conversation:", conversationId);
+      
+      // Add timeout and better error handling
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+      
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/voice-phishing/${conversationId}/end`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            signal: controller.signal,
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Backend error response:", errorText);
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-      );
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (response.ok && data.success) {
-        setScore(data.data.score);
-        setScoreDetails(data.data.scoreDetails);
-        await fetchConversationHistory();
-      } else {
-        setError(data.message || "Failed to end conversation");
+        if (data.success) {
+          setScore(data.data.score);
+          setScoreDetails(data.data.scoreDetails);
+          await fetchConversationHistory();
+        } else {
+          setError(data.message || "Failed to end conversation");
+        }
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          setError("Request timed out. The analysis is taking longer than expected. Please try again.");
+        } else {
+          throw fetchError;
+        }
       }
     } catch (error: any) {
       console.error("Failed to end conversation:", error);
-      setError(error.message || "Failed to end conversation");
+      setError(error.message || "Failed to end conversation. Please check your connection and try again.");
     }
   };
 

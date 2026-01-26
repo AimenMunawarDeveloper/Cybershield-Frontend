@@ -165,7 +165,6 @@ export function DashboardSidebar({
                   item.url === "/dashboard/simulations" ||
                   item.url === "/dashboard/whatsapp-phishing" ||
                   item.url === "/dashboard/email-phishing";
-                const isVoiceNav = item.url === "/dashboard/voice-phishing";
 
                 if (isCampaignNav && !isAdminRole) {
                   return null;
@@ -174,44 +173,21 @@ export function DashboardSidebar({
                 return (
                   <Fragment key={item.title}>
                     <SidebarMenuItem className="mb-2">
-                      {isVoiceNav ? (
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathname === item.url}
-                          tooltip={t(item.title)}
-                        >
-                          {/* Keep styling identical; block interaction without changing color */}
-                          <Link
-                            href={item.url}
-                            tabIndex={-1}
-                            className="pointer-events-none"
-                          >
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                              <item.icon className="w-4 h-4 text-white" />
-                            </div>
-                            <span>{t(item.title)}</span>
-                            {item.badge && (
-                              <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                            )}
-                          </Link>
-                        </SidebarMenuButton>
-                      ) : (
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathname === item.url}
-                          tooltip={t(item.title)}
-                        >
-                          <Link href={item.url}>
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                              <item.icon className="w-4 h-4 text-white" />
-                            </div>
-                            <span>{t(item.title)}</span>
-                            {item.badge && (
-                              <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                            )}
-                          </Link>
-                        </SidebarMenuButton>
-                      )}
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === item.url}
+                        tooltip={t(item.title)}
+                      >
+                        <Link href={item.url}>
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                            <item.icon className="w-4 h-4 text-white" />
+                          </div>
+                          <span>{t(item.title)}</span>
+                          {item.badge && (
+                            <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                          )}
+                        </Link>
+                      </SidebarMenuButton>
                     </SidebarMenuItem>
 
                   {/* Show Organizations/Organization right after Dashboard */}
