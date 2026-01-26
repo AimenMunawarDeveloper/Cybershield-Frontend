@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { AlertTriangle, Shield, FileText, Send, CheckCircle2, XCircle, Mail, MessageSquare, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { AlertTriangle, Shield, FileText, Send, CheckCircle2, XCircle, Mail, MessageSquare, X, Link, Plus, Trash2, Info, Table2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
+import IncidentGraph from "./graph";
 
 type MessageType = "email" | "whatsapp";
 
@@ -26,6 +27,10 @@ interface WhatsAppIncidentReport {
   date?: string;
   /** Optional. Sender phone or name. Matches training `from` / `from_phone`. */
   from?: string;
+  /** Optional. Sender phone number (same as `from` for WhatsApp). Backend expects this. */
+  from_phone?: string;
+  /** Optional. Timestamp (same as `date` for WhatsApp). Backend expects this. */
+  timestamp?: string;
 }
 
 type IncidentReport = EmailIncidentReport | WhatsAppIncidentReport;
@@ -41,12 +46,37 @@ const getCurrentDateTimeLocal = () => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
+// Extract URLs from text
+const extractUrls = (text: string): string[] => {
+  const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+  const matches = text.match(urlRegex) || [];
+  return [...new Set(matches.map(url => url.trim()))];
+};
+
+// Validate email format
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+// Validate URL format
+const isValidUrl = (url: string): boolean => {
+  if (!url.trim()) return true; // Empty is valid (optional field)
+  try {
+    new URL(url.startsWith('http') ? url : `https://${url}`);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Email Form Component
 interface EmailFormProps {
   formData: Omit<EmailIncidentReport, "messageType">;
   setFormData: React.Dispatch<React.SetStateAction<Omit<EmailIncidentReport, "messageType">>>;
   isLoading: boolean;
   t: (key: string) => string;
+  errors?: Record<string, string>;
 }
 
 const EmailForm: React.FC<EmailFormProps> = ({
@@ -54,7 +84,35 @@ const EmailForm: React.FC<EmailFormProps> = ({
   setFormData,
   isLoading,
   t,
+  errors = {},
 }) => {
+  const messageRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-extract URLs from message
+  useEffect(() => {
+    if (formData.message) {
+      const extractedUrls = extractUrls(formData.message);
+      if (extractedUrls.length > 0 && formData.urls.length === 1 && !formData.urls[0]) {
+        setFormData(prev => ({ ...prev, urls: extractedUrls }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.message]);
+
+  const handleAddUrl = () => {
+    setFormData(prev => ({ ...prev, urls: [...prev.urls, ""] }));
+  };
+
+  const handleRemoveUrl = (index: number) => {
+    setFormData(prev => ({ ...prev, urls: prev.urls.filter((_, i) => i !== index) }));
+  };
+
+  const handleUrlChange = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      urls: prev.urls.map((url, i) => (i === index ? value : url))
+    }));
+  };
   return (
     <div className="rounded-2xl p-8 border-2 bg-gradient-to-br from-[var(--navy-blue-lighter)] via-[var(--navy-blue)] to-[var(--navy-blue-lighter)] border-[#51b0ec] shadow-[0_0_40px_rgba(81,176,236,0.3)] backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-br from-[#51b0ec]/10 via-transparent to-[#4fc3f7]/10 rounded-2xl"></div>
@@ -75,14 +133,30 @@ const EmailForm: React.FC<EmailFormProps> = ({
             {t("Message")} <span className="text-red-400">*</span>
           </label>
           <textarea
+            ref={messageRef}
             value={formData.message}
             onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[#51b0ec]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
+            className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+              errors.message 
+                ? "border-red-500/50 focus:border-red-500" 
+                : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+            }`}
             placeholder={t("Enter the full email body")}
             rows={6}
             required
             disabled={isLoading}
           />
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-xs text-[var(--medium-grey)]">
+              {formData.message.length} {t("characters")}
+            </span>
+            {errors.message && (
+              <span className="text-xs text-red-400 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.message}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Text (Optional) */}
@@ -113,11 +187,21 @@ const EmailForm: React.FC<EmailFormProps> = ({
               type="text"
               value={formData.subject}
               onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
-              className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[#51b0ec]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
+              className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+                errors.subject 
+                  ? "border-red-500/50 focus:border-red-500" 
+                  : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+              }`}
               placeholder={t("Enter email subject")}
               required
               disabled={isLoading}
             />
+            {errors.subject && (
+              <span className="text-xs text-red-400 flex items-center gap-1 mt-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.subject}
+              </span>
+            )}
           </div>
 
           {/* From */}
@@ -130,28 +214,83 @@ const EmailForm: React.FC<EmailFormProps> = ({
               type="email"
               value={formData.from}
               onChange={(e) => setFormData((prev) => ({ ...prev, from: e.target.value }))}
-              className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[#51b0ec]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
+              className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+                errors.from 
+                  ? "border-red-500/50 focus:border-red-500" 
+                  : formData.from && !isValidEmail(formData.from)
+                  ? "border-yellow-500/50 focus:border-yellow-500"
+                  : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+              }`}
               placeholder={t("Enter sender email address")}
               required
               disabled={isLoading}
             />
+            {errors.from && (
+              <span className="text-xs text-red-400 flex items-center gap-1 mt-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.from}
+              </span>
+            )}
+            {formData.from && !isValidEmail(formData.from) && !errors.from && (
+              <span className="text-xs text-yellow-400 flex items-center gap-1 mt-1">
+                <Info className="w-3 h-3" />
+                {t("Please enter a valid email address")}
+              </span>
+            )}
           </div>
         </div>
 
-        {/* URL (Optional) */}
+        {/* URLs (Optional) */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
-            {t("URL")}
-          </label>
-          <input
-            type="url"
-            value={formData.urls[0] || ""}
-            onChange={(e) => setFormData((prev) => ({ ...prev, urls: [e.target.value] }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[#51b0ec]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
-            placeholder={t("Enter URL (optional)")}
-            disabled={isLoading}
-          />
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-semibold text-white flex items-center gap-2">
+              <Link className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
+              {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--medium-grey)]">({formData.urls.length})</span>}
+            </label>
+            <button
+              type="button"
+              onClick={handleAddUrl}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#51b0ec] hover:text-white bg-[var(--navy-blue)]/50 hover:bg-[#51b0ec]/20 rounded-lg border border-[#51b0ec]/30 hover:border-[#51b0ec] transition-all duration-300"
+              disabled={isLoading}
+            >
+              <Plus className="w-4 h-4" />
+              {t("Add URL")}
+            </button>
+          </div>
+          <div className="space-y-3">
+            {formData.urls.map((url, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => handleUrlChange(index, e.target.value)}
+                  className={`flex-1 px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+                    url && !isValidUrl(url)
+                      ? "border-yellow-500/50 focus:border-yellow-500"
+                      : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+                  }`}
+                  placeholder={t("Enter URL (optional)")}
+                  disabled={isLoading}
+                />
+                {formData.urls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveUrl(index)}
+                    className="px-3 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl border border-red-500/30 hover:border-red-500/50 transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+            {formData.urls.some(url => url && !isValidUrl(url)) && (
+              <span className="text-xs text-yellow-400 flex items-center gap-1">
+                <Info className="w-3 h-3" />
+                {t("Please enter valid URLs (e.g., https://example.com)")}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Date */}
@@ -180,6 +319,7 @@ interface WhatsappFormProps {
   setFormData: React.Dispatch<React.SetStateAction<Omit<WhatsAppIncidentReport, "messageType">>>;
   isLoading: boolean;
   t: (key: string) => string;
+  errors?: Record<string, string>;
 }
 
 const WhatsappForm: React.FC<WhatsappFormProps> = ({
@@ -187,7 +327,33 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
   setFormData,
   isLoading,
   t,
+  errors = {},
 }) => {
+  // Auto-extract URLs from message
+  useEffect(() => {
+    if (formData.message) {
+      const extractedUrls = extractUrls(formData.message);
+      if (extractedUrls.length > 0 && formData.urls.length === 1 && !formData.urls[0]) {
+        setFormData(prev => ({ ...prev, urls: extractedUrls }));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.message]);
+
+  const handleAddUrl = () => {
+    setFormData(prev => ({ ...prev, urls: [...prev.urls, ""] }));
+  };
+
+  const handleRemoveUrl = (index: number) => {
+    setFormData(prev => ({ ...prev, urls: prev.urls.filter((_, i) => i !== index) }));
+  };
+
+  const handleUrlChange = (index: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      urls: prev.urls.map((url, i) => (i === index ? value : url))
+    }));
+  };
   return (
     <div className="rounded-2xl p-8 border-2 bg-gradient-to-br from-[var(--navy-blue-lighter)] via-[var(--navy-blue)] to-[var(--navy-blue-lighter)] border-[#25d366] shadow-[0_0_40px_rgba(37,211,102,0.3)] backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-br from-[#25d366]/10 via-transparent to-[#128c7e]/10 rounded-2xl"></div>
@@ -210,28 +376,80 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
           <textarea
             value={formData.message}
             onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[var(--medium-grey)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
+            className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
+              errors.message 
+                ? "border-red-500/50 focus:border-red-500" 
+                : "border-[var(--medium-grey)]/30 focus:border-[#25d366]"
+            }`}
             placeholder={t("Enter the WhatsApp message content")}
             rows={8}
             required
             disabled={isLoading}
           />
+          <div className="flex justify-between items-center mt-2">
+            <span className="text-xs text-[var(--medium-grey)]">
+              {formData.message.length} {t("characters")}
+            </span>
+            {errors.message && (
+              <span className="text-xs text-red-400 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.message}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* URL (Optional) */}
+        {/* URLs (Optional) */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#25d366]" />
-            {t("URL")}
-          </label>
-          <input
-            type="url"
-            value={formData.urls[0] || ""}
-            onChange={(e) => setFormData((prev) => ({ ...prev, urls: [e.target.value] }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[var(--medium-grey)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
-            placeholder={t("Enter URL (optional)")}
-            disabled={isLoading}
-          />
+          <div className="flex items-center justify-between mb-3">
+            <label className="block text-sm font-semibold text-white flex items-center gap-2">
+              <Link className="w-5 h-5 text-[#25d366]" />
+              {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--medium-grey)]">({formData.urls.length})</span>}
+            </label>
+            <button
+              type="button"
+              onClick={handleAddUrl}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#25d366] hover:text-white bg-[var(--navy-blue)]/50 hover:bg-[#25d366]/20 rounded-lg border border-[#25d366]/30 hover:border-[#25d366] transition-all duration-300"
+              disabled={isLoading}
+            >
+              <Plus className="w-4 h-4" />
+              {t("Add URL")}
+            </button>
+          </div>
+          <div className="space-y-3">
+            {formData.urls.map((url, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => handleUrlChange(index, e.target.value)}
+                  className={`flex-1 px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
+                    url && !isValidUrl(url)
+                      ? "border-yellow-500/50 focus:border-yellow-500"
+                      : "border-[var(--medium-grey)]/30 focus:border-[#25d366]"
+                  }`}
+                  placeholder={t("Enter URL (optional)")}
+                  disabled={isLoading}
+                />
+                {formData.urls.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveUrl(index)}
+                    className="px-3 py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl border border-red-500/30 hover:border-red-500/50 transition-all duration-300"
+                    disabled={isLoading}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+            {formData.urls.some(url => url && !isValidUrl(url)) && (
+              <span className="text-xs text-yellow-400 flex items-center gap-1">
+                <Info className="w-3 h-3" />
+                {t("Please enter valid URLs (e.g., https://example.com)")}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Sender (Optional) — matches training from / from_phone */}
@@ -277,6 +495,7 @@ export default function IncidentReportingPage() {
   const [translationReady, setTranslationReady] = useState(false);
   const [activeTab, setActiveTab] = useState<MessageType>("email");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [viewMode, setViewMode] = useState<"form" | "table">("form");
 
   const [emailFormData, setEmailFormData] = useState<Omit<EmailIncidentReport, "messageType">>({
     message: "",
@@ -297,6 +516,7 @@ export default function IncidentReportingPage() {
     phishing_probability: number;
     confidence?: number;
   } | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Pre-translate static strings when language changes
   useEffect(() => {
@@ -369,6 +589,31 @@ export default function IncidentReportingPage() {
         "Confidence",
         "Result from ML pipeline",
         "Also check browser console for log",
+        "characters",
+        "Add URL",
+        "URLs",
+        "Please enter a valid email address",
+        "Please enter valid URLs (e.g., https://example.com)",
+        "Please fix the errors in the form.",
+        "Incident Reports",
+        "Visual analytics of your reported incidents",
+        "View Reports",
+        "Loading incidents...",
+        "Total Incidents",
+        "Phishing Detected",
+        "Safe Messages",
+        "Avg Probability",
+        "of total",
+        "Incidents Over Time",
+        "Phishing vs Safe",
+        "Incidents by Type",
+        "Email vs WhatsApp",
+        "Recent Incidents",
+        "No incidents found for the selected time range",
+        "7 Days",
+        "30 Days",
+        "90 Days",
+        "All Time",
       ];
 
       await preTranslate(staticStrings);
@@ -383,15 +628,37 @@ export default function IncidentReportingPage() {
     e.preventDefault();
     setIsLoading(true);
     setMessage(null);
+    setFormErrors({});
 
     let reportData: IncidentReport;
+    const errors: Record<string, string> = {};
 
     if (activeTab === "email") {
       // Validate email fields
-      if (!emailFormData.message || !emailFormData.subject || !emailFormData.from) {
+      if (!emailFormData.message?.trim()) {
+        errors.message = t("Message is required");
+      }
+      if (!emailFormData.subject?.trim()) {
+        errors.subject = t("Subject is required");
+      }
+      if (!emailFormData.from?.trim()) {
+        errors.from = t("Sender email is required");
+      } else if (!isValidEmail(emailFormData.from)) {
+        errors.from = t("Please enter a valid email address");
+      }
+      
+      // Validate URLs
+      emailFormData.urls.forEach((url, index) => {
+        if (url && !isValidUrl(url)) {
+          errors[`url_${index}`] = t("Invalid URL format");
+        }
+      });
+
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
         setMessage({ 
           type: "error", 
-          text: t("Please fill in all required fields.") 
+          text: t("Please fix the errors in the form.") 
         });
         setIsLoading(false);
         return;
@@ -411,10 +678,22 @@ export default function IncidentReportingPage() {
       };
     } else {
       // Validate WhatsApp fields
-      if (!whatsappFormData.message) {
+      if (!whatsappFormData.message?.trim()) {
+        errors.message = t("Message is required");
+      }
+      
+      // Validate URLs
+      whatsappFormData.urls.forEach((url, index) => {
+        if (url && !isValidUrl(url)) {
+          errors[`url_${index}`] = t("Invalid URL format");
+        }
+      });
+
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
         setMessage({ 
           type: "error", 
-          text: t("Please fill in all required fields.") 
+          text: t("Please fix the errors in the form.") 
         });
         setIsLoading(false);
         return;
@@ -519,6 +798,7 @@ export default function IncidentReportingPage() {
     }
     setMessage(null);
     setLastAnalysis(null);
+    setFormErrors({});
   };
 
 
@@ -584,12 +864,54 @@ export default function IncidentReportingPage() {
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center mb-8">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                {t("Report an Incident")}
+                {viewMode === "form" ? t("Report an Incident") : t("Incident Reports")}
               </h2>
               <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
-                {t("Fill out the form below to report a security incident. All fields marked with * are required.")}
+                {viewMode === "form" 
+                  ? t("Fill out the form below to report a security incident. All fields marked with * are required.")
+                  : t("View and manage all reported incidents")
+                }
               </p>
             </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex justify-center mb-8">
+              <div className="flex gap-3 bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-[var(--medium-grey)]/20">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("form")}
+                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    viewMode === "form"
+                      ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
+                      : "text-[var(--medium-grey)] hover:text-white hover:bg-[var(--navy-blue)]/50"
+                  }`}
+                >
+                  <FileText className="w-5 h-5" />
+                  {t("Report")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("table")}
+                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                    viewMode === "table"
+                      ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
+                      : "text-[var(--medium-grey)] hover:text-white hover:bg-[var(--navy-blue)]/50"
+                  }`}
+                >
+                  <Table2 className="w-5 h-5" />
+                  {t("View Reports")}
+                </button>
+              </div>
+            </div>
+
+            {/* Graph View */}
+            {viewMode === "table" && (
+              <IncidentGraph className="mb-8" />
+            )}
+
+            {/* Form View */}
+            {viewMode === "form" && (
+              <>
 
             {/* Tabs with Neon Effects */}
             <div className="flex gap-3 mb-8 bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-[var(--medium-grey)] border-opacity-20 shadow-2xl">
@@ -664,6 +986,7 @@ export default function IncidentReportingPage() {
                     setFormData={setEmailFormData}
                     isLoading={isLoading}
                     t={t}
+                    errors={formErrors}
                   />
                 ) : (
                   <WhatsappForm
@@ -671,6 +994,7 @@ export default function IncidentReportingPage() {
                     setFormData={setWhatsappFormData}
                     isLoading={isLoading}
                     t={t}
+                    errors={formErrors}
                   />
                 )}
 
@@ -708,6 +1032,8 @@ export default function IncidentReportingPage() {
                 </div>
               </form>
             </div>
+              </>
+            )}
           </div>
         </div>
       </div>
