@@ -13,7 +13,12 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  X,
+  Clock,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
+import NetworkBackground from "@/components/NetworkBackground";
 
 interface ConversationMessage {
   role: "user" | "agent";
@@ -63,10 +68,12 @@ export default function VoicePhishingPage() {
     agentId: string;
     userId: string;
   } | null>(null);
+  const [showTranscript, setShowTranscript] = useState(false);
 
   const conversation = useConversation({
     overrides: conversationOverrides,
     onConnect: () => {
+      setLoading(false);
       setIsConnected(true);
     },
     onDisconnect: () => {
@@ -170,6 +177,7 @@ export default function VoicePhishingPage() {
       } catch (error: any) {
         console.error("Failed to start session:", error);
         setError(error.message || "Failed to start conversation");
+        setLoading(false);
         setPendingStart(null);
       }
     };
@@ -251,6 +259,7 @@ export default function VoicePhishingPage() {
 
       setConversationId(data.data.conversationId);
       setScenario(data.data.scenario);
+      setShowTranscript(true);
 
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -282,7 +291,6 @@ export default function VoicePhishingPage() {
     } catch (error: any) {
       console.error("Failed to initiate conversation:", error);
       setError(error.message || "Failed to start conversation");
-    } finally {
       setLoading(false);
     }
   };
@@ -386,6 +394,16 @@ export default function VoicePhishingPage() {
     }
   };
 
+  const cancelCall = () => {
+    setConversationId(null);
+    setScenario(null);
+    setMessages([]);
+    setScore(null);
+    setScoreDetails(null);
+    setError(null);
+    setShowTranscript(false);
+  };
+
   const getScoreColor = (score: number | null) => {
     if (score === null) return "text-gray-400";
     if (score >= 75) return "text-green-400";
@@ -403,7 +421,8 @@ export default function VoicePhishingPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
+    <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
+      <NetworkBackground />
       {/* Blurred background element */}
       <div className="blurred-background"></div>
 
@@ -422,86 +441,211 @@ export default function VoicePhishingPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-        {/* Main Call Interface */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Call Control Card */}
-          <div className="dashboard-card rounded-lg p-6">
-            <div className="flex flex-col items-center justify-center space-y-6">
-              {/* Scenario Info */}
-              {scenario && (
-                <div className="w-full p-4 bg-[var(--navy-blue-lighter)] rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    {scenario.type === "phishing" ? (
-                      <AlertTriangle className="w-5 h-5 text-yellow-400" />
-                    ) : (
-                      <CheckCircle className="w-5 h-5 text-green-400" />
-                    )}
-                    <span className="text-sm font-semibold text-white">
-                      {scenario.type === "phishing" ? "Phishing Scenario" : "Normal Scenario"}
-                    </span>
+      {/* Main Voice Chat Interface */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto">
+          {/* Voice Chat Card */}
+          <div className="bg-[var(--navy-blue)]/80 backdrop-blur-xl rounded-3xl border border-[var(--neon-blue)]/20 p-8 md:p-12 shadow-2xl shadow-[var(--neon-blue)]/10">
+            <div className="flex flex-col items-center justify-center space-y-8">
+              
+              {/* Show Orb and Controls only when call is not completed */}
+              {score === null && (
+                <>
+                  {/* Glowing Orb */}
+                  <div className="relative">
+                    {/* Outer glow rings */}
+                    <div className={`absolute inset-0 rounded-full blur-3xl scale-150 ${isConnected ? 'animate-pulse' : ''}`} style={{ background: 'radial-gradient(circle, rgba(81, 176, 236, 0.2) 0%, rgba(8, 66, 241, 0.15) 50%, transparent 70%)' }}></div>
+                    <div className={`absolute inset-0 rounded-full blur-2xl scale-125 ${isConnected ? 'animate-pulse' : ''}`} style={{ background: 'radial-gradient(circle, rgba(0, 229, 222, 0.12) 0%, rgba(13, 13, 163, 0.1) 60%, transparent 80%)' }}></div>
+                    
+                    {/* Main orb */}
+                    <div 
+                      className={`relative w-32 h-32 md:w-40 md:h-40 rounded-full flex items-center justify-center overflow-hidden ${
+                        isConnected ? 'animate-pulse' : ''
+                      }`}
+                      style={{
+                        background: isConnected 
+                          ? 'radial-gradient(circle at 30% 30%, #ff4444 0%, #cc0000 50%, #880000 100%)'
+                          : '#050120',
+                        boxShadow: isConnected
+                          ? '0 0 60px rgba(255, 68, 68, 0.5), inset 0 0 60px rgba(255, 100, 100, 0.3)'
+                          : '0 0 50px rgba(81, 176, 236, 0.3), 0 0 80px rgba(8, 66, 241, 0.2), inset 0 0 40px rgba(0, 229, 222, 0.1)',
+                      }}
+                    >
+                      {/* Base gradient layer */}
+                      {!isConnected && (
+                        <div 
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: `
+                              radial-gradient(ellipse 140% 80% at 10% 40%, #0b076f 0%, transparent 50%),
+                              radial-gradient(ellipse 120% 100% at 0% 60%, #050120 0%, transparent 40%),
+                              radial-gradient(ellipse 100% 80% at 100% 50%, #00e5de 0%, #00b4d8 20%, transparent 50%),
+                              radial-gradient(ellipse 80% 60% at 90% 70%, #00d4aa 0%, transparent 40%)
+                            `,
+                          }}
+                        ></div>
+                      )}
+                      
+                      {/* Mid layer - blues */}
+                      {!isConnected && (
+                        <div 
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: `
+                              radial-gradient(ellipse 100% 100% at 30% 30%, #0d0da3 0%, transparent 45%),
+                              radial-gradient(ellipse 90% 70% at 50% 80%, #001ace 0%, #0842f1 20%, transparent 50%),
+                              radial-gradient(ellipse 80% 90% at 20% 70%, #014efd 0%, transparent 40%)
+                            `,
+                          }}
+                        ></div>
+                      )}
+                      
+                      {/* Top layer - highlights and cyan */}
+                      {!isConnected && (
+                        <div 
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: `
+                              radial-gradient(ellipse 70% 50% at 75% 45%, rgba(0, 229, 222, 0.8) 0%, rgba(81, 176, 236, 0.4) 30%, transparent 60%),
+                              radial-gradient(ellipse 50% 40% at 60% 55%, rgba(0, 180, 216, 0.6) 0%, transparent 50%),
+                              radial-gradient(ellipse 60% 50% at 45% 50%, rgba(8, 66, 241, 0.5) 0%, rgba(1, 78, 253, 0.3) 30%, transparent 55%)
+                            `,
+                          }}
+                        ></div>
+                      )}
+                      
+                      {/* Accent layer - smooth transitions */}
+                      {!isConnected && (
+                        <div 
+                          className="absolute inset-0 rounded-full"
+                          style={{
+                            background: `
+                              radial-gradient(ellipse 40% 35% at 70% 35%, rgba(81, 176, 236, 0.6) 0%, transparent 70%),
+                              radial-gradient(ellipse 50% 40% at 80% 60%, rgba(0, 229, 222, 0.5) 0%, transparent 60%),
+                              radial-gradient(ellipse 35% 30% at 55% 40%, rgba(58, 124, 165, 0.4) 0%, transparent 70%)
+                            `,
+                          }}
+                        ></div>
+                      )}
+                      
+                      {/* Top highlight shimmer */}
+                      {!isConnected && (
+                        <div 
+                          className="absolute rounded-full"
+                          style={{
+                            width: '45%',
+                            height: '35%',
+                            background: 'radial-gradient(ellipse at 50% 50%, rgba(171, 210, 235, 0.25) 0%, rgba(81, 176, 236, 0.15) 40%, transparent 70%)',
+                            top: '12%',
+                            right: '15%',
+                          }}
+                        ></div>
+                      )}
+                      
+                      {/* Icon in center - only show for loading and connected states */}
+                      {loading ? (
+                        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin relative z-10" />
+                      ) : isConnected ? (
+                        <Phone className="w-12 h-12 md:w-14 md:h-14 text-white/90 relative z-10" />
+                      ) : null}
+                    </div>
                   </div>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    {scenario.description}
-                  </p>
-                </div>
-              )}
 
-              {/* Call Button */}
-              {!isConnected && !conversationId && (
-                <button
-                  onClick={initiateConversation}
-                  disabled={loading}
-                  className="w-24 h-24 bg-[var(--neon-blue)] rounded-full flex items-center justify-center hover:bg-[var(--neon-blue-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <Mic className="w-10 h-10 text-white" />
+                  {/* Status Text */}
+                  <div className="text-center space-y-2">
+                    <h2 className="text-xl md:text-2xl font-semibold text-white">
+                      {loading ? "Connecting..." : isConnected ? "Call in progress..." : "Ready to start"}
+                    </h2>
+                    <p className="text-[var(--light-blue)] text-sm md:text-base">
+                      {loading 
+                        ? "Setting up your voice phishing simulation" 
+                        : isConnected 
+                          ? "Listen carefully and respond to the caller" 
+                          : "Click the microphone to start a call"
+                      }
+                    </p>
+                  </div>
+
+                  {/* Scenario Info Badge */}
+                  {scenario && (
+                    <div className="px-4 py-2 bg-[var(--navy-blue-lighter)]/80 rounded-full border border-[var(--neon-blue)]/30">
+                      <div className="flex items-center gap-2">
+                        {scenario.type === "phishing" ? (
+                          <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                        ) : (
+                          <CheckCircle className="w-4 h-4 text-green-400" />
+                        )}
+                        <span className="text-sm text-white">
+                          {scenario.type === "phishing" ? "Phishing Scenario" : "Normal Scenario"}
+                        </span>
+                      </div>
+                    </div>
                   )}
-                </button>
+
+                  {/* Control Buttons */}
+                  <div className="flex items-center gap-4">
+                    {/* Cancel/Close Button */}
+                    {(isConnected || conversationId) && (
+                      <button
+                        onClick={isConnected ? endConversation : cancelCall}
+                        className="w-14 h-14 rounded-full bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)]/30 flex items-center justify-center hover:bg-[var(--navy-blue-lighter)]/80 transition-all hover:scale-105"
+                      >
+                        <X className="w-6 h-6 text-white" />
+                      </button>
+                    )}
+
+                    {/* Main Action Button */}
+                    {!isConnected && !conversationId && (
+                      <button
+                        onClick={initiateConversation}
+                        disabled={loading}
+                        className="w-16 h-16 rounded-full bg-[var(--neon-blue)] flex items-center justify-center hover:bg-[var(--neon-blue-dark)] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--neon-blue)]/30"
+                      >
+                        <Mic className="w-7 h-7 text-white" />
+                      </button>
+                    )}
+
+                    {/* End Call Button */}
+                    {isConnected && (
+                      <button
+                        onClick={endConversation}
+                        className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
+                      >
+                        <PhoneOff className="w-7 h-7 text-white" />
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
 
-              {/* Active Call Controls */}
-              {isConnected && (
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
-                    <Phone className="w-10 h-10 text-white" />
-                  </div>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    Call in progress...
-                  </p>
-                  <button
-                    onClick={endConversation}
-                    className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
-                  >
-                    <PhoneOff className="w-4 h-4" />
-                    End Call
-                  </button>
+              {/* Error Display */}
+              {error && (
+                <div className="w-full max-w-md p-4 bg-red-500/20 border border-red-500/50 rounded-xl">
+                  <p className="text-sm text-red-400 text-center">{error}</p>
                 </div>
               )}
 
-              {/* Score Display */}
+              {/* Score Display - Only shown when call is completed */}
               {score !== null && (
-                <div className="w-full p-6 bg-[var(--navy-blue-lighter)] rounded-lg">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-white">Your Score</h3>
-                    <Trophy className="w-6 h-6 text-yellow-400" />
+                <div className="w-full max-w-md p-6">
+                  <div className="flex items-center justify-center mb-6">
+                    <Trophy className="w-12 h-12 text-yellow-400" />
                   </div>
                   <div className="text-center">
-                    <div className={`text-5xl font-bold mb-2 ${getScoreColor(score)}`}>
+                    <h3 className="text-xl font-semibold text-white mb-2">Call Completed</h3>
+                    <div className={`text-6xl font-bold mb-2 ${getScoreColor(score)}`}>
                       {score}
                     </div>
-                    <div className="text-sm text-[var(--medium-grey)] mb-4">
+                    <div className="text-lg text-[var(--medium-grey)] mb-6">
                       {getScoreLabel(score)}
                     </div>
                     {scoreDetails && (
-                      <div className="text-left space-y-2 text-sm">
+                      <div className="text-left space-y-3 text-sm bg-[var(--navy-blue-lighter)]/50 rounded-xl p-4 mb-6">
                         <div className="flex items-center gap-2">
                           {scoreDetails.fellForPhishing ? (
-                            <XCircle className="w-4 h-4 text-red-400" />
+                            <XCircle className="w-5 h-5 text-red-400" />
                           ) : (
-                            <CheckCircle className="w-4 h-4 text-green-400" />
+                            <CheckCircle className="w-5 h-5 text-green-400" />
                           )}
                           <span className="text-white">
                             {scoreDetails.fellForPhishing
@@ -521,113 +665,160 @@ export default function VoicePhishingPage() {
                             {scoreDetails.resistanceLevel}
                           </span>
                         </div>
-                        <div className="text-xs text-[var(--medium-grey)] mt-2">
+                        <div className="text-xs text-[var(--medium-grey)] mt-2 pt-2 border-t border-[var(--medium-grey)]/20">
                           {scoreDetails.analysisRationale}
                         </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
-
-              {error && (
-                <div className="w-full p-4 bg-red-500/20 border border-red-500 rounded-lg">
-                  <p className="text-sm text-red-400">{error}</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Transcript Card */}
-          <div className="dashboard-card rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="w-5 h-5 text-[var(--neon-blue)]" />
-              <h3 className="text-lg font-semibold text-white">Conversation Transcript</h3>
-            </div>
-            <div className="max-h-96 overflow-y-auto space-y-3">
-              {messages.length === 0 ? (
-                <p className="text-sm text-[var(--medium-grey)] text-center py-8">
-                  {isConnected
-                    ? "Waiting for conversation to start..."
-                    : "Start a call to see the transcript here"}
-                </p>
-              ) : (
-                messages.map((msg, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${
-                      msg.role === "user" ? "justify-end" : "justify-start"
-                    }`}
+                  
+                  {/* Start New Call Button */}
+                  <button
+                    onClick={cancelCall}
+                    className="w-full px-6 py-4 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold text-lg shadow-lg shadow-[var(--neon-blue)]/30"
                   >
-                    <div
-                      className={`max-w-[80%] p-3 rounded-lg ${
-                        msg.role === "user"
-                          ? "bg-[var(--neon-blue)] text-white"
-                          : "bg-[var(--navy-blue-lighter)] text-white"
-                      }`}
-                    >
-                      <div className="text-xs text-opacity-70 mb-1">
-                        {msg.role === "user" ? "You" : "Agent"}
-                      </div>
-                      <div className="text-sm">{msg.message}</div>
-                    </div>
-                  </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-          </div>
-        </div>
-
-        {/* Conversation History Sidebar */}
-        <div className="space-y-6">
-          <div className="dashboard-card rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Conversation History
-            </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {conversationHistory.length === 0 ? (
-                <p className="text-sm text-[var(--medium-grey)] text-center py-4">
-                  No previous conversations
-                </p>
-              ) : (
-                conversationHistory.map((conv) => (
-                  <div
-                    key={conv._id}
-                    className="p-3 bg-[var(--navy-blue-lighter)] rounded-lg cursor-pointer hover:bg-[var(--navy-blue-lighter)]/80 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          conv.scenarioType === "phishing"
-                            ? "bg-yellow-500/20 text-yellow-400"
-                            : "bg-green-500/20 text-green-400"
-                        }`}
-                      >
-                        {conv.scenarioType}
-                      </span>
-                      {conv.score !== null && (
-                        <span
-                          className={`text-sm font-semibold ${getScoreColor(conv.score)}`}
-                        >
-                          {conv.score}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-[var(--medium-grey)] mb-1">
-                      {conv.scenarioDescription}
-                    </p>
-                    <p className="text-xs text-[var(--medium-grey)]">
-                      {new Date(conv.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))
+                    Start New Call
+                  </button>
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Call History Section */}
+      <div className="relative z-10 mt-8">
+        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Clock className="w-6 h-6 text-[var(--neon-blue)]" />
+            <h3 className="text-xl font-semibold text-white">Call History</h3>
+          </div>
+          
+          {conversationHistory.length === 0 ? (
+            <div className="text-center py-12">
+              <Phone className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4 opacity-50" />
+              <p className="text-[var(--medium-grey)]">No previous calls</p>
+              <p className="text-[var(--medium-grey)] text-sm mt-1">Your call history will appear here</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {conversationHistory.map((conv) => (
+                <div
+                  key={conv._id}
+                  className="p-4 bg-[var(--navy-blue-lighter)]/80 rounded-xl border border-[var(--neon-blue)]/10 hover:border-[var(--neon-blue)]/30 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        conv.scenarioType === "phishing"
+                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                          : "bg-green-500/20 text-green-400 border border-green-500/30"
+                      }`}
+                    >
+                      {conv.scenarioType === "phishing" ? "Phishing" : "Normal"}
+                    </span>
+                    {conv.score !== null && (
+                      <span
+                        className={`text-lg font-bold ${getScoreColor(conv.score)}`}
+                      >
+                        {conv.score}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-white mb-2 line-clamp-2 group-hover:text-[var(--neon-blue)] transition-colors">
+                    {conv.scenarioDescription}
+                  </p>
+                  <div className="flex items-center gap-2 text-xs text-[var(--medium-grey)]">
+                    <Clock className="w-3 h-3" />
+                    <span>{new Date(conv.createdAt).toLocaleDateString()}</span>
+                    {conv.duration > 0 && (
+                      <>
+                        <span>•</span>
+                        <span>{Math.round(conv.duration / 60)}m {conv.duration % 60}s</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Transcript Button - Bottom Right (only show after call starts) */}
+      {(isConnected || conversationId) && (
+        <button
+          onClick={() => setShowTranscript(!showTranscript)}
+          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all ${
+            showTranscript
+              ? 'bg-[var(--neon-blue)] text-white'
+              : 'bg-[var(--navy-blue-lighter)] text-white border border-[var(--neon-blue)]/30 hover:border-[var(--neon-blue)]'
+          }`}
+        >
+          <MessageSquare className="w-5 h-5" />
+          <span className="font-medium">Transcript</span>
+          {messages.length > 0 && (
+            <span className="w-5 h-5 bg-[var(--neon-blue)] rounded-full text-xs flex items-center justify-center">
+              {messages.length}
+            </span>
+          )}
+          {showTranscript ? (
+            <ChevronDown className="w-4 h-4" />
+          ) : (
+            <ChevronUp className="w-4 h-4" />
+          )}
+        </button>
+      )}
+
+      {/* Transcript Panel */}
+      {showTranscript && (isConnected || conversationId) && (
+        <div className="fixed bottom-20 right-6 z-50 w-96 max-h-[60vh] bg-[var(--navy-blue)]/95 backdrop-blur-xl rounded-2xl border border-[var(--neon-blue)]/30 shadow-2xl overflow-hidden">
+          <div className="p-4 border-b border-[var(--neon-blue)]/20 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-[var(--neon-blue)]" />
+              <h3 className="font-semibold text-white">Conversation Transcript</h3>
+            </div>
+            <button
+              onClick={() => setShowTranscript(false)}
+              className="text-[var(--medium-grey)] hover:text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="p-4 max-h-[50vh] overflow-y-auto space-y-3">
+            {messages.length === 0 ? (
+              <p className="text-sm text-[var(--medium-grey)] text-center py-8">
+                {isConnected
+                  ? "Waiting for conversation to start..."
+                  : "Start a call to see the transcript here"}
+              </p>
+            ) : (
+              messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${
+                    msg.role === "user" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <div
+                    className={`max-w-[85%] p-3 rounded-2xl ${
+                      msg.role === "user"
+                        ? "bg-[var(--neon-blue)] text-white rounded-br-md"
+                        : "bg-[var(--navy-blue-lighter)] text-white rounded-bl-md"
+                    }`}
+                  >
+                    <div className="text-xs opacity-70 mb-1">
+                      {msg.role === "user" ? "You" : "Agent"}
+                    </div>
+                    <div className="text-sm">{msg.message}</div>
+                  </div>
+                </div>
+              ))
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
