@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { useConversation } from "@elevenlabs/react";
 import {
   Mic,
@@ -19,6 +20,78 @@ import {
   ChevronDown,
 } from "lucide-react";
 import NetworkBackground from "@/components/NetworkBackground";
+
+// Simple markdown formatter for analysis rationale
+function formatMarkdown(text: string): React.ReactElement[] {
+  if (!text) return [];
+  
+  const parts: React.ReactElement[] = [];
+  const lines = text.split('\n');
+  
+  lines.forEach((line, lineIndex) => {
+    const trimmedLine = line.trim();
+    
+    // Empty line - add spacing
+    if (trimmedLine === '') {
+      parts.push(<br key={`br-${lineIndex}`} />);
+      return;
+    }
+    
+    // Check if it's a list item (starts with - or * followed by space)
+    if (/^[-*]\s/.test(trimmedLine)) {
+      const listContent = trimmedLine.substring(2).trim();
+      const formattedContent = formatInlineMarkdown(listContent);
+      parts.push(
+        <div key={`list-${lineIndex}`} className="flex items-start gap-2 my-1.5">
+          <span className="text-[var(--medium-grey)] mt-0.5 flex-shrink-0">•</span>
+          <span className="flex-1">{formattedContent}</span>
+        </div>
+      );
+    } else {
+      // Regular paragraph
+      const formattedContent = formatInlineMarkdown(trimmedLine);
+      parts.push(
+        <p key={`p-${lineIndex}`} className="mb-2 last:mb-0">
+          {formattedContent}
+        </p>
+      );
+    }
+  });
+  
+  return parts;
+}
+
+// Format inline markdown (bold, etc.)
+function formatInlineMarkdown(text: string): React.ReactElement[] {
+  if (!text) return [<span key="empty"></span>];
+  
+  const parts: React.ReactElement[] = [];
+  const boldRegex = /\*\*(.+?)\*\*/g;
+  let lastIndex = 0;
+  let match;
+  let key = 0;
+  
+  while ((match = boldRegex.exec(text)) !== null) {
+    // Add text before the bold
+    if (match.index > lastIndex) {
+      parts.push(<span key={`text-${key++}`}>{text.substring(lastIndex, match.index)}</span>);
+    }
+    // Add bold text
+    parts.push(
+      <strong key={`bold-${key++}`} className="text-white font-semibold">
+        {match[1]}
+      </strong>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(<span key={`text-${key++}`}>{text.substring(lastIndex)}</span>);
+  }
+  
+  return parts.length > 0 ? parts : [<span key="text">{text}</span>];
+}
 
 interface ConversationMessage {
   role: "user" | "agent";
@@ -45,6 +118,7 @@ interface Conversation {
 
 export default function VoicePhishingPage() {
   const { getToken } = useAuth();
+  const router = useRouter();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -61,6 +135,7 @@ export default function VoicePhishingPage() {
   const [scoreDetails, setScoreDetails] = useState<any>(null);
   const [conversationHistory, setConversationHistory] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(false);
+  const [calculatingScore, setCalculatingScore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [conversationOverrides, setConversationOverrides] = useState<any>(undefined);
@@ -331,6 +406,11 @@ export default function VoicePhishingPage() {
     try {
       if (!conversationId) return;
 
+      // Set calculating score state
+      setCalculatingScore(true);
+      setError(null);
+      setIsConnected(false); // Disconnect the call UI
+
       // End the ElevenLabs conversation
       await conversation.endSession();
 
@@ -338,6 +418,7 @@ export default function VoicePhishingPage() {
       const token = await getToken();
       if (!token) {
         setError("Authentication required. Please log in again.");
+        setCalculatingScore(false);
         return;
       }
 
@@ -387,10 +468,13 @@ export default function VoicePhishingPage() {
         } else {
           throw fetchError;
         }
+      } finally {
+        setCalculatingScore(false);
       }
     } catch (error: any) {
       console.error("Failed to end conversation:", error);
       setError(error.message || "Failed to end conversation. Please check your connection and try again.");
+      setCalculatingScore(false);
     }
   };
 
@@ -542,8 +626,10 @@ export default function VoicePhishingPage() {
                         ></div>
                       )}
                       
-                      {/* Icon in center - only show for loading and connected states */}
+                      {/* Icon in center - only show for loading, calculating score, and connected states */}
                       {loading ? (
+                        <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin relative z-10" />
+                      ) : calculatingScore ? (
                         <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin relative z-10" />
                       ) : isConnected ? (
                         <Phone className="w-12 h-12 md:w-14 md:h-14 text-white/90 relative z-10" />
@@ -554,11 +640,19 @@ export default function VoicePhishingPage() {
                   {/* Status Text */}
                   <div className="text-center space-y-2">
                     <h2 className="text-xl md:text-2xl font-semibold text-white">
-                      {loading ? "Connecting..." : isConnected ? "Call in progress..." : "Ready to start"}
+                      {loading 
+                        ? "Connecting..." 
+                        : calculatingScore 
+                          ? "Calculating score..." 
+                          : isConnected 
+                            ? "Call in progress..." 
+                            : "Ready to start"}
                     </h2>
                     <p className="text-[var(--light-blue)] text-sm md:text-base">
                       {loading 
                         ? "Setting up your voice phishing simulation" 
+                        : calculatingScore
+                          ? "Analyzing your conversation and generating your security score"
                         : isConnected 
                           ? "Listen carefully and respond to the caller" 
                           : "Click the microphone to start a call"
@@ -585,7 +679,7 @@ export default function VoicePhishingPage() {
                   {/* Control Buttons */}
                   <div className="flex items-center gap-4">
                     {/* Cancel/Close Button */}
-                    {(isConnected || conversationId) && (
+                    {(isConnected || conversationId) && !calculatingScore && (
                       <button
                         onClick={isConnected ? endConversation : cancelCall}
                         className="w-14 h-14 rounded-full bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)]/30 flex items-center justify-center hover:bg-[var(--navy-blue-lighter)]/80 transition-all hover:scale-105"
@@ -595,7 +689,7 @@ export default function VoicePhishingPage() {
                     )}
 
                     {/* Main Action Button */}
-                    {!isConnected && !conversationId && (
+                    {!isConnected && !conversationId && !calculatingScore && (
                       <button
                         onClick={initiateConversation}
                         disabled={loading}
@@ -606,7 +700,7 @@ export default function VoicePhishingPage() {
                     )}
 
                     {/* End Call Button */}
-                    {isConnected && (
+                    {isConnected && !calculatingScore && (
                       <button
                         onClick={endConversation}
                         className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
@@ -665,8 +759,8 @@ export default function VoicePhishingPage() {
                             {scoreDetails.resistanceLevel}
                           </span>
                         </div>
-                        <div className="text-xs text-[var(--medium-grey)] mt-2 pt-2 border-t border-[var(--medium-grey)]/20">
-                          {scoreDetails.analysisRationale}
+                        <div className="text-xs text-[var(--medium-grey)] mt-2 pt-2 border-t border-[var(--medium-grey)]/20 leading-relaxed">
+                          {formatMarkdown(scoreDetails.analysisRationale)}
                         </div>
                       </div>
                     )}
@@ -705,7 +799,8 @@ export default function VoicePhishingPage() {
               {conversationHistory.map((conv) => (
                 <div
                   key={conv._id}
-                  className="p-4 bg-[var(--navy-blue-lighter)]/80 rounded-xl border border-[var(--neon-blue)]/10 hover:border-[var(--neon-blue)]/30 transition-all cursor-pointer group"
+                  onClick={() => router.push(`/dashboard/voice-phishing/${conv._id}`)}
+                  className="p-4 bg-[var(--navy-blue-lighter)]/80 rounded-xl border border-[var(--neon-blue)]/10 hover:border-[var(--neon-blue)]/30 transition-all cursor-pointer group hover:scale-[1.02]"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <span
