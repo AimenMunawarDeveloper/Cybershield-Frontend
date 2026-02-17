@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter, useParams } from "next/navigation";
+import { ApiClient } from "@/lib/api";
+import Link from "next/link";
 import {
   ArrowLeft,
   Clock,
@@ -134,12 +136,21 @@ function getScoreLabel(score: number): string {
   return "Needs Improvement";
 }
 
+interface UserProfile {
+  _id: string;
+  role: string;
+  orgId?: string;
+}
+
 export default function CallDetailsPage() {
   const { getToken } = useAuth();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
   const params = useParams();
   const conversationId = params.id as string;
   
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -149,8 +160,27 @@ export default function CallDetailsPage() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    if (isLoaded && user) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user]);
+
+  useEffect(() => {
     fetchConversationDetails();
   }, [conversationId]);
+
+  const fetchProfile = async () => {
+    try {
+      const apiClient = new ApiClient(getToken);
+      const profileData = await apiClient.getUserProfile();
+      setProfile(profileData);
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   // Cleanup audio on unmount
   useEffect(() => {
@@ -262,6 +292,18 @@ export default function CallDetailsPage() {
       setLoading(false);
     }
   };
+
+  // Show loading state while profile is loading
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue-dark)] via-[var(--navy-blue)] to-[var(--navy-blue-light)] relative overflow-hidden">
+        <NetworkBackground />
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
