@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useConversation } from "@elevenlabs/react";
+import { ApiClient } from "@/lib/api";
+import Link from "next/link";
 import {
   Mic,
   MicOff,
@@ -18,6 +20,10 @@ import {
   Clock,
   ChevronUp,
   ChevronDown,
+  FileText,
+  Plus,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import NetworkBackground from "@/components/NetworkBackground";
 
@@ -116,9 +122,18 @@ interface Conversation {
   createdAt: string;
 }
 
+interface UserProfile {
+  _id: string;
+  role: string;
+  orgId?: string;
+}
+
 export default function VoicePhishingPage() {
   const { getToken } = useAuth();
+  const { user, isLoaded } = useUser();
   const router = useRouter();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -144,6 +159,16 @@ export default function VoicePhishingPage() {
     userId: string;
   } | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
+  const [templateForm, setTemplateForm] = useState({
+    title: "",
+    description: "",
+    type: "phishing" as "phishing" | "normal",
+    firstMessage: "",
+  });
 
   const conversation = useConversation({
     overrides: conversationOverrides,
@@ -270,8 +295,142 @@ export default function VoicePhishingPage() {
   }, [messages]);
 
   useEffect(() => {
+    if (isLoaded && user) {
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user]);
+
+  useEffect(() => {
     fetchConversationHistory();
   }, []);
+
+  useEffect(() => {
+    // Only fetch templates if user is an admin
+    if (profile && (profile.role === "system_admin" || profile.role === "client_admin")) {
+      fetchTemplates();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile]);
+
+  const fetchTemplates = async () => {
+    try {
+      setLoadingTemplates(true);
+      const token = await getToken();
+      if (!token) return;
+
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+      const response = await fetch(`${API_BASE_URL}/voice-phishing-templates`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setTemplates(data.data || []);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch templates:", error);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const handleCreateTemplate = () => {
+    setEditingTemplate(null);
+    setTemplateForm({
+      title: "",
+      description: "",
+      type: "phishing",
+      firstMessage: "",
+    });
+    setShowTemplateModal(true);
+  };
+
+  const handleEditTemplate = (template: any) => {
+    setEditingTemplate(template);
+    setTemplateForm({
+      title: template.title,
+      description: template.description,
+      type: template.type,
+      firstMessage: template.firstMessage,
+    });
+    setShowTemplateModal(true);
+  };
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (!confirm("Are you sure you want to delete this template?")) return;
+
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+      const response = await fetch(
+        `${API_BASE_URL}/voice-phishing-templates/${templateId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        await fetchTemplates();
+      }
+    } catch (error) {
+      console.error("Failed to delete template:", error);
+    }
+  };
+
+  const handleSaveTemplate = async () => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+      const url = editingTemplate
+        ? `${API_BASE_URL}/voice-phishing-templates/${editingTemplate._id}`
+        : `${API_BASE_URL}/voice-phishing-templates`;
+
+      const response = await fetch(url, {
+        method: editingTemplate ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(templateForm),
+      });
+
+      if (response.ok) {
+        setShowTemplateModal(false);
+        await fetchTemplates();
+      }
+    } catch (error) {
+      console.error("Failed to save template:", error);
+    }
+  };
+
+  const fetchProfile = async () => {
+    try {
+      const apiClient = new ApiClient(getToken);
+      const profileData = await apiClient.getUserProfile();
+      setProfile(profileData);
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const fetchConversationHistory = async () => {
     try {
@@ -504,6 +663,21 @@ export default function VoicePhishingPage() {
     return "Very Poor";
   };
 
+  // Show loading state while profile is loading
+  if (profileLoading) {
+    return (
+      <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
+        <NetworkBackground />
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
+  // Check if user is admin (for templates section visibility)
+  const isAdmin = profile && (profile.role === "system_admin" || profile.role === "client_admin");
+
   return (
     <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
       <NetworkBackground />
@@ -660,8 +834,8 @@ export default function VoicePhishingPage() {
                     </p>
                   </div>
 
-                  {/* Scenario Info Badge */}
-                  {scenario && (
+                  {/* Scenario Info Badge - Only show for admins */}
+                  {scenario && isAdmin && (
                     <div className="px-4 py-2 bg-[var(--navy-blue-lighter)]/80 rounded-full border border-[var(--neon-blue)]/30">
                       <div className="flex items-center gap-2">
                         {scenario.type === "phishing" ? (
@@ -779,6 +953,83 @@ export default function VoicePhishingPage() {
           </div>
         </div>
       </div>
+
+      {/* Templates Management Section - Only visible to admins */}
+      {isAdmin && (
+        <div className="relative z-10 mt-8">
+          <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <FileText className="w-6 h-6 text-[var(--neon-blue)]" />
+              <h3 className="text-xl font-semibold text-white">Scenario Templates</h3>
+            </div>
+            <button
+              onClick={handleCreateTemplate}
+              className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Create Template</span>
+            </button>
+          </div>
+
+          {loadingTemplates ? (
+            <div className="text-center py-12">
+              <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+            </div>
+          ) : templates.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4 opacity-50" />
+              <p className="text-[var(--medium-grey)]">No templates found</p>
+              <p className="text-[var(--medium-grey)] text-sm mt-1">
+                Create your first scenario template
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {templates.map((template) => (
+                <div
+                  key={template._id}
+                  className="p-4 bg-[var(--navy-blue-lighter)]/80 rounded-xl border border-[var(--neon-blue)]/10 hover:border-[var(--neon-blue)]/30 transition-all group hover:scale-[1.02]"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full font-medium ${
+                        template.type === "phishing"
+                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
+                          : "bg-green-500/20 text-green-400 border border-green-500/30"
+                      }`}
+                    >
+                      {template.type === "phishing" ? "Phishing" : "Normal"}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditTemplate(template)}
+                        className="p-1.5 hover:bg-[var(--navy-blue)] rounded-lg transition-colors"
+                      >
+                        <Edit className="w-4 h-4 text-[var(--neon-blue)]" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTemplate(template._id)}
+                        className="p-1.5 hover:bg-[var(--navy-blue)] rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                  <h4 className="text-white font-semibold mb-2">{template.title}</h4>
+                  <p className="text-sm text-[var(--medium-grey)] mb-3 line-clamp-2">
+                    {template.description}
+                  </p>
+                  <p className="text-xs text-[var(--medium-grey)] italic line-clamp-2">
+                    "{template.firstMessage}"
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        </div>
+      )}
 
       {/* Call History Section */}
       <div className="relative z-10 mt-8">
@@ -911,6 +1162,100 @@ export default function VoicePhishingPage() {
               ))
             )}
             <div ref={messagesEndRef} />
+          </div>
+        </div>
+      )}
+
+      {/* Template Modal - Only visible to admins */}
+      {showTemplateModal && isAdmin && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--navy-blue)] rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[var(--neon-blue)]/30">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">
+                {editingTemplate ? "Edit Template" : "Create Template"}
+              </h2>
+              <button
+                onClick={() => setShowTemplateModal(false)}
+                className="text-[var(--medium-grey)] hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Title</label>
+                <input
+                  type="text"
+                  value={templateForm.title}
+                  onChange={(e) =>
+                    setTemplateForm({ ...templateForm, title: e.target.value })
+                  }
+                  className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
+                  placeholder="Enter template title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Description</label>
+                <textarea
+                  value={templateForm.description}
+                  onChange={(e) =>
+                    setTemplateForm({ ...templateForm, description: e.target.value })
+                  }
+                  className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
+                  placeholder="Enter scenario description"
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">Type</label>
+                <select
+                  value={templateForm.type}
+                  onChange={(e) =>
+                    setTemplateForm({
+                      ...templateForm,
+                      type: e.target.value as "phishing" | "normal",
+                    })
+                  }
+                  className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                >
+                  <option value="phishing">Phishing</option>
+                  <option value="normal">Normal</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white mb-2">
+                  First Message
+                </label>
+                <textarea
+                  value={templateForm.firstMessage}
+                  onChange={(e) =>
+                    setTemplateForm({ ...templateForm, firstMessage: e.target.value })
+                  }
+                  className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
+                  placeholder="Enter the first message the agent will say"
+                  rows={4}
+                />
+              </div>
+
+              <div className="flex items-center gap-4 pt-4">
+                <button
+                  onClick={handleSaveTemplate}
+                  className="flex-1 px-6 py-3 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold"
+                >
+                  {editingTemplate ? "Update Template" : "Create Template"}
+                </button>
+                <button
+                  onClick={() => setShowTemplateModal(false)}
+                  className="flex-1 px-6 py-3 bg-[var(--navy-blue-lighter)] text-white rounded-xl hover:bg-[var(--navy-blue-lighter)]/80 transition-colors font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
