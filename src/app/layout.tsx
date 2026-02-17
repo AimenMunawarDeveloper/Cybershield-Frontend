@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import TopBar from "@/components/TopBar";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import Chatbot from "@/components/Chatbot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
           <LanguageProvider>
           <TopBar />
           {children}
+          <Chatbot />
           </LanguageProvider>
         </body>
       </html>
