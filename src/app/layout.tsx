@@ -2,9 +2,8 @@ import { type Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import TopBar from "@/components/TopBar";
+import LayoutChrome from "@/components/LayoutChrome";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import Chatbot from "@/components/Chatbot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,9 +33,7 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <LanguageProvider>
-          <TopBar />
-          {children}
-          <Chatbot />
+          <LayoutChrome>{children}</LayoutChrome>
           </LanguageProvider>
         </body>
       </html>
