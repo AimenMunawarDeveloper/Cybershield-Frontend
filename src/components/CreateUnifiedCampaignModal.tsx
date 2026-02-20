@@ -68,7 +68,7 @@ export default function CreateUnifiedCampaignModal({
   const [whatsappLandingPage, setWhatsappLandingPage] = useState("");
   
   // Email config
-  const HARDCODED_SENDER_EMAIL = "hadiaali90500@gmail.com";
+  const HARDCODED_SENDER_EMAIL = "cybershieldlearningportal@gmail.com";
   const [emailSubject, setEmailSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
   const [emailLandingPage, setEmailLandingPage] = useState("");

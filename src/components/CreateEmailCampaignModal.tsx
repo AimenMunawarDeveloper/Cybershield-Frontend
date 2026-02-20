@@ -38,7 +38,7 @@ export default function CreateEmailCampaignModal({
   const { t } = useTranslation();
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
-  const HARDCODED_SENDER_EMAIL = "hadiaali90500@gmail.com";
+  const HARDCODED_SENDER_EMAIL = "cybershieldlearningportal@gmail.com";
   
   const [formData, setFormData] = useState<EmailCampaignData>({
     sentBy: HARDCODED_SENDER_EMAIL,
