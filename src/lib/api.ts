@@ -225,6 +225,104 @@ export class ApiClient {
     
     return response.json();
   }
+
+  // Training courses (MongoDB)
+  async getCourses(params?: { page?: number; limit?: number; sort?: string; createdBy?: string }) {
+    const headers = await this.getAuthHeaders();
+    const searchParams = new URLSearchParams();
+    if (params?.page != null) searchParams.set('page', String(params.page));
+    if (params?.limit != null) searchParams.set('limit', String(params.limit));
+    if (params?.sort) searchParams.set('sort', params.sort);
+    if (params?.createdBy) searchParams.set('createdBy', params.createdBy);
+    const query = searchParams.toString();
+    const url = query ? `${API_BASE_URL}/courses?${query}` : `${API_BASE_URL}/courses`;
+    const response = await fetch(url, { method: 'GET', headers });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      const msg = (error as any).error || (error as any).message;
+      if (response.status === 404) {
+        throw new Error(
+          msg ? `Courses API not found (404). ${msg}` : 'Courses API not found (404). Is the backend running and restarted after adding /api/courses?'
+        );
+      }
+      throw new Error(msg || `Failed to fetch courses (${response.status})`);
+    }
+    return response.json();
+  }
+
+  async getCourseById(id: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${id}`, { method: 'GET', headers });
+    if (!response.ok) {
+      if (response.status === 404) return null;
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch course');
+    }
+    return response.json();
+  }
+
+  async createCourse(payload: { courseTitle: string; description?: string; level?: "basic" | "advanced"; badges?: string[]; modules: any[] }) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to create course');
+    }
+    return response.json();
+  }
+
+  async updateCourse(courseId: string, payload: { courseTitle: string; description?: string; level?: "basic" | "advanced"; badges?: string[]; modules: any[] }) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to update course');
+    }
+    return response.json();
+  }
+
+  async deleteCourse(courseId: string) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}`, { method: 'DELETE', headers });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to delete course');
+    }
+    return response.json();
+  }
+
+  async getCourseProgress(courseId: string): Promise<{ completed: string[] }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress`, { method: 'GET', headers });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch progress');
+    }
+    const data = await response.json();
+    return { completed: data.completed ?? [] };
+  }
+
+  async markCourseProgressComplete(courseId: string, submoduleId: string): Promise<{ completed: string[] }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ submoduleId }),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to update progress');
+    }
+    return response.json();
+  }
 }
 
 // Hook to create API client with Clerk token
