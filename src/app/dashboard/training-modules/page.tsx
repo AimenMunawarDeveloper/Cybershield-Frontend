@@ -1,42 +1,137 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useAuth } from "@clerk/nextjs";
 import HeroSection from "@/components/HeroSection";
 import ModuleTable from "@/components/ModuleTable";
-import CreateTrainingModuleModal from "@/components/CreateTrainingModuleModal";
-import { courses } from "@/lib/coursesData";
-
-interface TrainingModuleData {
-  title: string;
-  description: string;
-  category: string;
-  difficulty: string;
-  duration: number;
-  learningObjectives: string[];
-  content: string;
-  attachments: File[];
-  targetAudience: string[];
-  prerequisites: string[];
-  tags: string[];
-  isPublished: boolean;
-}
-import { Plus, Grid, List, Filter, Search, Users } from "lucide-react";
+import CreateTrainingModuleModal, {
+  type TrainingModuleData,
+} from "@/components/CreateTrainingModuleModal";
+import { ApiClient } from "@/lib/api";
+import type { Course } from "@/lib/coursesData";
+import { Plus, Grid, List, Filter, Search, Users, Pencil, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+function courseToInitialData(course: Course): TrainingModuleData {
+  return {
+    courseTitle: course.courseTitle,
+    description: course.description ?? "",
+    level: course.level === "advanced" ? "advanced" : "basic",
+    badges: course.badges ?? [],
+    modules: (course.modules ?? []).map((m) => ({
+      title: m.title ?? "",
+      sections:
+        (m.sections ?? []).length > 0
+          ? (m.sections ?? []).map((s) => ({
+              title: s.title ?? "",
+              material: s.material ?? "",
+              urls: Array.isArray(s.urls) ? s.urls : [],
+            }))
+          : [{ title: "", material: "", urls: [] }],
+      quiz: Array.isArray(m.quiz)
+        ? m.quiz.map((q) => ({
+            question: q.question ?? "",
+            choices: Array.isArray(q.choices) && q.choices.length > 0 ? q.choices : [""],
+            correctIndex: typeof q.correctIndex === "number" ? q.correctIndex : 0,
+          }))
+        : [],
+    })),
+  };
+}
 
 export default function TrainingModulesPage() {
   const router = useRouter();
+  const { getToken } = useAuth();
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [filter, setFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("popularity");
+  const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleTrainingModuleSubmit = (moduleData: TrainingModuleData) => {
-    console.log("New training module created:", moduleData);
-    // Here you would typically make an API call to save the training module
-    // For now, we'll just log it and close the modal
+  const fetchCourses = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const api = new ApiClient(getToken!);
+      const res = await api.getCourses({ limit: 100, sort: sortBy === "oldest" ? "oldest" : "newest" });
+      if (res.success && Array.isArray(res.courses)) {
+        setCourses(res.courses);
+      } else {
+        setCourses([]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch courses:", err);
+      setError(err instanceof Error ? err.message : "Failed to load courses");
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [getToken, sortBy]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
+
+  const handleTrainingModuleSubmit = async (data: TrainingModuleData) => {
+    try {
+      const api = new ApiClient(getToken!);
+      if (editingCourse) {
+        await api.updateCourse(editingCourse._id, {
+          courseTitle: data.courseTitle,
+          description: data.description,
+          level: data.level,
+          badges: data.badges,
+          modules: data.modules,
+        });
+      } else {
+        await api.createCourse({
+          courseTitle: data.courseTitle,
+          description: data.description,
+          level: data.level,
+          badges: data.badges,
+          modules: data.modules,
+        });
+      }
+      setIsModalOpen(false);
+      setEditingCourse(null);
+      await fetchCourses();
+    } catch (err) {
+      console.error("Failed to save course:", err);
+      alert(err instanceof Error ? err.message : "Failed to save course");
+    }
+  };
+
+  const handleDeleteCourse = async () => {
+    if (!courseToDelete || !getToken) return;
+    try {
+      setDeleting(true);
+      const api = new ApiClient(getToken);
+      await api.deleteCourse(courseToDelete._id);
+      setCourseToDelete(null);
+      await fetchCourses();
+    } catch (err) {
+      console.error("Failed to delete course:", err);
+      alert(err instanceof Error ? err.message : "Failed to delete course");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const openEditModal = (course: Course) => {
+    setEditingCourse(course);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
     setIsModalOpen(false);
+    setEditingCourse(null);
   };
 
   return (
@@ -140,9 +235,9 @@ export default function TrainingModulesPage() {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setIsModalOpen(true)}
-                  className="inline-flex items-center gap-2 bg-[var(--neon-blue)] text-white px-6 py-3 rounded-full text-lg font-medium hover:bg-[var(--medium-blue)] transform hover:scale-105 transition-all duration-300 shadow-lg"
+                  className="inline-flex items-center gap-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors shadow"
                 >
-                  <Plus className="w-5 h-5" />
+                  <Plus className="w-4 h-4" />
                   New Training Module
                 </button>
               </div>
@@ -179,36 +274,6 @@ export default function TrainingModulesPage() {
                     >
                       Show all trainings
                     </option>
-                    <option
-                      value="beginner"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Beginner Level
-                    </option>
-                    <option
-                      value="intermediate"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Intermediate Level
-                    </option>
-                    <option
-                      value="advanced"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Advanced Level
-                    </option>
-                    <option
-                      value="premium"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Premium Modules
-                    </option>
-                    <option
-                      value="custom"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Custom Modules
-                    </option>
                   </select>
                 </div>
 
@@ -221,34 +286,22 @@ export default function TrainingModulesPage() {
                     className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]"
                   >
                     <option
-                      value="popularity"
+                      value="newest"
                       className="bg-[var(--navy-blue)] text-white"
                     >
-                      Popularity (Most to Least)
+                      Newest First
                     </option>
                     <option
-                      value="duration"
+                      value="oldest"
                       className="bg-[var(--navy-blue)] text-white"
                     >
-                      Duration (Short to Long)
-                    </option>
-                    <option
-                      value="difficulty"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Difficulty (Easy to Hard)
+                      Oldest First
                     </option>
                     <option
                       value="alphabetical"
                       className="bg-[var(--navy-blue)] text-white"
                     >
                       Alphabetical (A to Z)
-                    </option>
-                    <option
-                      value="newest"
-                      className="bg-[var(--navy-blue)] text-white"
-                    >
-                      Newest First
                     </option>
                   </select>
                 </div>
@@ -314,107 +367,168 @@ export default function TrainingModulesPage() {
 
           {/* Course Cards/Grid */}
           {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {courses
-                .filter((course) => {
-                  if (filter === "all") return true;
-                  if (filter === "beginner") return course.level === "beginner";
-                  if (filter === "intermediate")
-                    return course.level === "intermediate";
-                  if (filter === "advanced") return course.level === "advanced";
-                  if (filter === "premium") return course.isPremium;
-                  if (filter === "custom") return course.isCustom;
-                  return true;
-                })
-                .filter((course) => {
-                  if (!searchQuery) return true;
-                  return (
-                    course.title
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase()) ||
-                    course.description
-                      .toLowerCase()
-                      .includes(searchQuery.toLowerCase())
-                  );
-                })
-                .sort((a, b) => {
-                  if (sortBy === "popularity") return 0; // Mock sort
-                  if (sortBy === "duration") return a.hours - b.hours;
-                  if (sortBy === "difficulty") {
-                    const order: Record<string, number> = {
-                      beginner: 1,
-                      intermediate: 2,
-                      advanced: 3,
-                    };
-                    return (order[a.level] || 0) - (order[b.level] || 0);
-                  }
-                  if (sortBy === "alphabetical")
-                    return a.title.localeCompare(b.title);
-                  return 0;
-                })
-                .map((course) => (
-                  <div
-                    key={course.id}
-                    onClick={() =>
-                      router.push(`/dashboard/training-modules/${course.id}`)
-                    }
-                    className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
-                  >
-                    <div className="relative h-48">
-                      <Image
-                        src={course.imageUrl}
-                        alt={course.title}
-                        fill
-                        className="object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src =
-                            "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
-                        }}
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">
-                        {course.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                        {course.description}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-[var(--neon-blue)]" />
-                          <span className="text-sm text-gray-600">
-                            3k+ Students
-                          </span>
+            <>
+              {loading && (
+                <div className="text-center py-12 text-white">Loading courses...</div>
+              )}
+              {error && (
+                <div className="text-center py-12 text-red-300">{error}</div>
+              )}
+              {!loading && !error && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  {[...courses]
+                    .filter((course) => {
+                      if (!searchQuery) return true;
+                      return (
+                        course.courseTitle
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase()) ||
+                        (course.description || "")
+                          .toLowerCase()
+                          .includes(searchQuery.toLowerCase())
+                      );
+                    })
+                    .sort((a, b) => {
+                      if (sortBy === "alphabetical")
+                        return a.courseTitle.localeCompare(b.courseTitle);
+                      return 0;
+                    })
+                    .map((course) => (
+                      <div
+                        key={course._id}
+                        className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative group"
+                      >
+                        <div
+                          onClick={() =>
+                            router.push(`/dashboard/training-modules/${course._id}`)
+                          }
+                          className="block"
+                        >
+                          <div className="relative h-48 bg-[var(--navy-blue-lighter)]">
+                            <Image
+                              src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                              alt={course.courseTitle}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="p-4">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">
+                              {course.courseTitle}
+                            </h3>
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                              {course.description || "No description"}
+                            </p>
+                            <div className="flex items-center justify-between">
+                              {course.createdBy && (
+                                <div className="flex items-center gap-2">
+                                  <Users className="w-4 h-4 text-[var(--neon-blue)]" />
+                                  <span className="text-sm text-gray-600">
+                                    {course.createdBy.displayName || "Unknown"}
+                                  </span>
+                                </div>
+                              )}
+                              {course.createdAt && (
+                                <span className="text-xs text-gray-500">
+                                  {new Date(course.createdAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <span className="text-lg font-bold text-gray-900">
-                          {course.isPremium ? "$350" : "Free"}
-                        </span>
+                        <div
+                          className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEditModal(course);
+                            }}
+                            className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-[var(--neon-blue)]"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCourseToDelete(course);
+                            }}
+                            className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-red-500"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+              )}
+            </>
           ) : (
             <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-              <ModuleTable />
+              <ModuleTable
+                courses={courses}
+                loading={loading}
+                error={error}
+                onEdit={openEditModal}
+                onDelete={(course) => setCourseToDelete(course)}
+              />
             </div>
           )}
 
-          <div className="text-center mt-8">
-            <button className="px-8 py-3 bg-[var(--neon-blue)] text-white rounded-lg font-medium hover:bg-[var(--medium-blue)] transition-colors">
-              Load More Courses
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Create Training Module Modal */}
+      {/* Create / Edit Training Module Modal */}
       <CreateTrainingModuleModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={closeModal}
         onSubmit={handleTrainingModuleSubmit}
+        initialData={editingCourse ? courseToInitialData(editingCourse) : null}
+        courseId={editingCourse?._id ?? null}
       />
+
+      {/* Delete confirmation */}
+      {courseToDelete && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Delete course?</h3>
+              <button
+                type="button"
+                onClick={() => setCourseToDelete(null)}
+                className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">
+              This will permanently delete &quot;{courseToDelete.courseTitle}&quot; and all progress for this course. This cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setCourseToDelete(null)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteCourse}
+                disabled={deleting}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
