@@ -310,7 +310,7 @@ export class ApiClient {
     return { completed: data.completed ?? [] };
   }
 
-  async markCourseProgressComplete(courseId: string, submoduleId: string): Promise<{ completed: string[] }> {
+  async markCourseProgressComplete(courseId: string, submoduleId: string): Promise<{ completed: string[]; certificateGenerated?: boolean }> {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress`, {
       method: 'POST',
@@ -336,6 +336,63 @@ export class ApiClient {
       throw new Error((error as any).error || 'Failed to update progress');
     }
     return response.json();
+  }
+
+  // Certificate methods
+  async getUserCertificates(): Promise<{ certificates: any[] }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/certificates`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch certificates');
+    }
+    const data = await response.json();
+    return { certificates: data.certificates ?? [] };
+  }
+
+  async getCertificateById(certificateId: string): Promise<{ certificate: any }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/certificates/${certificateId}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch certificate');
+    }
+    const data = await response.json();
+    return { certificate: data.certificate };
+  }
+
+  async getCertificateByCourse(courseId: string): Promise<{ certificate: any | null }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/certificates/course/${courseId}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch certificate');
+    }
+    const data = await response.json();
+    return { certificate: data.certificate ?? null };
+  }
+
+  async generateCertificate(courseId: string): Promise<{ certificate: any }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/certificates/generate/${courseId}`, {
+      method: 'POST',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to generate certificate');
+    }
+    const data = await response.json();
+    return { certificate: data.certificate };
   }
 }
 

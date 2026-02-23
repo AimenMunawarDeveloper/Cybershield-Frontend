@@ -310,6 +310,7 @@ export default function SubmodulePage() {
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [markingRead, setMarkingRead] = useState(false);
   const [markReadError, setMarkReadError] = useState<string | null>(null);
+  const [certificateGenerated, setCertificateGenerated] = useState(false);
   const [quizSelections, setQuizSelections] = useState<Record<number, number>>({});
   const [showQuizResults, setShowQuizResults] = useState(false);
   const [quizResults, setQuizResults] = useState<Record<number, boolean>>({});
@@ -374,6 +375,13 @@ export default function SubmodulePage() {
         // Mark as complete (only if quiz is correct or not a quiz)
       const res = await api.markCourseProgressComplete(courseId, submoduleId);
       setCompletedIds(res.completed ?? [...completedIds, submoduleId]);
+      
+      // Check if certificate was generated
+      if (res.certificateGenerated) {
+        setCertificateGenerated(true);
+        // Auto-hide notification after 10 seconds
+        setTimeout(() => setCertificateGenerated(false), 10000);
+      }
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to update progress";
@@ -655,6 +663,45 @@ export default function SubmodulePage() {
         {/* Main content - professional layout */}
         <main className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-6 py-8">
+            {/* Certificate Generated Notification - Cisco Style with Cybershield Colors */}
+            {certificateGenerated && (
+              <div className="mb-6 bg-white border border-[var(--neon-blue)]/30 rounded-lg p-5 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--neon-blue)] flex items-center justify-center">
+                    <Award className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1.5">Certificate Earned! 🎉</h3>
+                    <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                      Congratulations! You've successfully completed this course and earned a certificate of completion.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => router.push("/dashboard/certificates")}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+                      >
+                        <Award className="w-4 h-4" />
+                        View Certificate
+                      </button>
+                      <button
+                        onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--neon-blue)] text-[var(--neon-blue)] rounded-md hover:bg-[var(--neon-blue)]/5 transition-colors text-sm font-medium"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Course
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setCertificateGenerated(false)}
+                    className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    aria-label="Close notification"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
         {isQuiz ? (
               <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 px-8 py-6 border-b border-gray-200">
