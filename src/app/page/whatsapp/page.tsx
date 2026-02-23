@@ -1,5 +1,7 @@
 import { getFakeLandingContent } from "@/lib/fakeLandingPage";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "WhatsApp",
   description: "Phishing simulation landing page",
