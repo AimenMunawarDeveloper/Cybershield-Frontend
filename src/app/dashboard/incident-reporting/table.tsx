@@ -180,7 +180,7 @@ export default function IncidentTable({ className = "" }: IncidentTableProps) {
           <div>
             <select
               value={filters.messageType}
-              onChange={(e) => setFilters({ ...filters, messageType: e.target.value, page: 1 })}
+              onChange={(e) => { setFilters({ ...filters, messageType: e.target.value }); setPage(1); }}
               className="w-full px-4 py-2 bg-[var(--navy-blue)]/80 border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
             >
               <option value="">{t("All Types")}</option>
@@ -193,7 +193,7 @@ export default function IncidentTable({ className = "" }: IncidentTableProps) {
           <div>
             <select
               value={filters.isPhishing}
-              onChange={(e) => setFilters({ ...filters, isPhishing: e.target.value, page: 1 })}
+              onChange={(e) => { setFilters({ ...filters, isPhishing: e.target.value }); setPage(1); }}
               className="w-full px-4 py-2 bg-[var(--navy-blue)]/80 border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
             >
               <option value="">{t("All Results")}</option>
