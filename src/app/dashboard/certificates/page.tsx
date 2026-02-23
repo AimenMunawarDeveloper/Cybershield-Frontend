@@ -159,7 +159,7 @@ export default function CertificatesPage() {
       // Draw description (text-lg text-gray-700)
       ctx.fillStyle = '#374151'; // gray-700
       ctx.font = '54px Arial, sans-serif'; // text-lg equivalent
-      const description = certificate.description || `Successfully completed the course "${certificate.courseTitle}" on ${formatDate(certificate.completionDate)}.`;
+      const description = certificate.courseDescription || `Successfully completed the course "${certificate.courseTitle}" on ${formatDate(certificate.completionDate)}.`;
       const maxWidth = width * 0.7;
       const lines = wrapText(ctx, description, maxWidth);
       let yPos = 1350;
