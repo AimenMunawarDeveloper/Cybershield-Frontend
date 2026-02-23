@@ -12,6 +12,7 @@ import { ApiClient } from "@/lib/api";
 import type { Course } from "@/lib/coursesData";
 import { Plus, Grid, List, Filter, Search, Users, Pencil, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "@/hooks/useTranslation";
 
 function courseToInitialData(course: Course): TrainingModuleData {
   return {
@@ -27,8 +28,9 @@ function courseToInitialData(course: Course): TrainingModuleData {
               title: s.title ?? "",
               material: s.material ?? "",
               urls: Array.isArray(s.urls) ? s.urls : [],
+              media: Array.isArray(s.media) ? s.media : [],
             }))
-          : [{ title: "", material: "", urls: [] }],
+          : [{ title: "", material: "", urls: [], media: [] }],
       quiz: Array.isArray(m.quiz)
         ? m.quiz.map((q) => ({
             question: q.question ?? "",
@@ -43,6 +45,7 @@ function courseToInitialData(course: Course): TrainingModuleData {
 export default function TrainingModulesPage() {
   const router = useRouter();
   const { getToken } = useAuth();
+  const { t, tAsync, preTranslate, language } = useTranslation();
   const [viewMode, setViewMode] = useState<"grid" | "table">("grid");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
@@ -52,8 +55,10 @@ export default function TrainingModulesPage() {
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [translatedCourses, setTranslatedCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [translationReady, setTranslationReady] = useState(false);
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -61,14 +66,18 @@ export default function TrainingModulesPage() {
       setError(null);
       const api = new ApiClient(getToken!);
       const res = await api.getCourses({ limit: 100, sort: sortBy === "oldest" ? "oldest" : "newest" });
+      console.log("[TrainingModules] Fetched courses:", res);
       if (res.success && Array.isArray(res.courses)) {
+        console.log("[TrainingModules] Setting courses:", res.courses.length, "courses");
+        console.log("[TrainingModules] First course sample:", res.courses[0]);
         setCourses(res.courses);
       } else {
+        console.warn("[TrainingModules] No courses in response or invalid format");
         setCourses([]);
       }
     } catch (err) {
-      console.error("Failed to fetch courses:", err);
-      setError(err instanceof Error ? err.message : "Failed to load courses");
+      console.error("[TrainingModules] Failed to fetch courses:", err);
+      setError(err instanceof Error ? err.message : t("Failed to load courses"));
       setCourses([]);
     } finally {
       setLoading(false);
@@ -78,6 +87,148 @@ export default function TrainingModulesPage() {
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
+
+  // Pre-translate static strings when language changes
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page
+      const staticStrings = [
+        // About Us section
+        "About Us",
+        "Empowering Lifelong Learners, One Course at a Time",
+        "Founded with a vision to bridge the gap between traditional learning and modern technology, our platform offers flexible, on-demand learning that fits into your lifestyle. Join thousands of learners who are achieving their goals and shaping their future one lesson at a time.",
+        "See More",
+        "Total Register Students",
+        "Excellent Employees",
+        "Excellent Courses",
+        
+        // Course Catalog section
+        "Explore Our Course Catalog",
+        "New Training Module",
+        "Search Courses",
+        "Show all trainings",
+        "Sort:",
+        "Newest First",
+        "Oldest First",
+        "Alphabetical (A to Z)",
+        "Grid View",
+        "Table View",
+        "Loading courses...",
+        "No description",
+        "Unknown",
+        
+        // Delete modal
+        "Delete course?",
+        "This will permanently delete",
+        "and all progress for this course. This cannot be undone.",
+        "Cancel",
+        "Delete",
+        "Deleting…",
+        
+        // Error messages
+        "Failed to save course",
+        "Failed to load courses",
+        "Failed to delete course",
+        "Edit",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Translate course data when language or courses change
+  useEffect(() => {
+    console.log("[TrainingModules] Translation effect triggered:", {
+      language,
+      coursesCount: courses.length,
+      translationReady,
+      translatedCoursesCount: translatedCourses.length,
+    });
+
+    if (language === "en" || courses.length === 0) {
+      console.log("[TrainingModules] Setting courses directly (English or empty)");
+      setTranslatedCourses(courses);
+      return;
+    }
+
+    if (!translationReady) {
+      console.log("[TrainingModules] Translation not ready yet, waiting...");
+      // Don't set translated courses yet if translation is not ready
+      // This prevents showing English text when language is Urdu
+      return;
+    }
+
+    const translateCourses = async () => {
+      console.log("[TrainingModules] Starting translation for", courses.length, "courses");
+      
+      // Collect all course titles and descriptions for batch translation
+      const courseTexts: string[] = [];
+      courses.forEach((course, index) => {
+        if (course?.courseTitle && typeof course.courseTitle === "string") {
+          courseTexts.push(course.courseTitle);
+          console.log(`[TrainingModules] Course ${index} title:`, course.courseTitle);
+        } else {
+          console.warn(`[TrainingModules] Course ${index} has invalid title:`, course?.courseTitle);
+        }
+        if (course?.description && typeof course.description === "string") {
+          courseTexts.push(course.description);
+        }
+      });
+
+      console.log("[TrainingModules] Collected", courseTexts.length, "texts to translate");
+
+      // Batch translate all course texts
+      if (courseTexts.length > 0) {
+        console.log("[TrainingModules] Calling preTranslate...");
+        await preTranslate(courseTexts);
+        console.log("[TrainingModules] preTranslate completed");
+      }
+
+      // Map translated texts back to courses using tAsync to ensure we get the translated values
+      const translated = await Promise.all(
+        courses.map(async (course, index) => {
+          const originalTitle = course.courseTitle && typeof course.courseTitle === "string" ? course.courseTitle : "";
+          const originalDesc = course.description && typeof course.description === "string" ? course.description : "";
+          
+          // Use tAsync to get translated values (it will use cached translations from preTranslate)
+          const translatedTitle = originalTitle ? await tAsync(originalTitle) : "";
+          const translatedDescription = originalDesc ? await tAsync(originalDesc) : "";
+          
+          console.log(`[TrainingModules] Course ${index} translation:`, {
+            originalTitle,
+            translatedTitle,
+            titleChanged: originalTitle !== translatedTitle,
+            originalDesc: originalDesc?.substring(0, 50),
+            translatedDesc: translatedDescription?.substring(0, 50),
+            descChanged: originalDesc !== translatedDescription,
+          });
+
+          return {
+            ...course,
+            courseTitle: translatedTitle || originalTitle,
+            description: translatedDescription || originalDesc,
+          };
+        })
+      );
+      
+      console.log("[TrainingModules] Setting translated courses:", translated.length);
+      console.log("[TrainingModules] First translated course:", translated[0]);
+      setTranslatedCourses(translated);
+    };
+
+    translateCourses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courses, language, translationReady]);
 
   const handleTrainingModuleSubmit = async (data: TrainingModuleData) => {
     try {
@@ -104,7 +255,7 @@ export default function TrainingModulesPage() {
       await fetchCourses();
     } catch (err) {
       console.error("Failed to save course:", err);
-      alert(err instanceof Error ? err.message : "Failed to save course");
+      alert(err instanceof Error ? err.message : t("Failed to save course"));
     }
   };
 
@@ -118,7 +269,7 @@ export default function TrainingModulesPage() {
       await fetchCourses();
     } catch (err) {
       console.error("Failed to delete course:", err);
-      alert(err instanceof Error ? err.message : "Failed to delete course");
+      alert(err instanceof Error ? err.message : t("Failed to delete course"));
     } finally {
       setDeleting(false);
     }
@@ -136,30 +287,41 @@ export default function TrainingModulesPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
-      <HeroSection />
+      <HeroSection 
+        courses={(() => {
+          const coursesToPass = language === "en" ? courses : (translatedCourses.length > 0 ? translatedCourses : courses);
+          console.log("[TrainingModules] Passing courses to HeroSection:", {
+            language,
+            coursesCount: courses.length,
+            translatedCoursesCount: translatedCourses.length,
+            passingCount: coursesToPass.length,
+            translationReady,
+            firstCourse: coursesToPass[0],
+          });
+          return coursesToPass;
+        })()}
+        translationReady={translationReady} 
+      />
 
       {/* About Us Section */}
-      <div className="bg-white py-16 px-4 sm:px-6 lg:px-8">
+      {translationReady && (
+        <div className="bg-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Text Content */}
             <div className="space-y-6">
               <div>
                 <p className="text-sm font-semibold text-[var(--neon-blue)] mb-2">
-                  About Us
+                  {t("About Us")}
                 </p>
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                  Empowering Lifelong Learners, One Course at a Time
+                  {t("Empowering Lifelong Learners, One Course at a Time")}
                 </h2>
                 <p className="text-lg text-gray-700 mb-6">
-                  Founded with a vision to bridge the gap between traditional
-                  learning and modern technology, our platform offers flexible,
-                  on-demand learning that fits into your lifestyle. Join
-                  thousands of learners who are achieving their goals and
-                  shaping their future one lesson at a time.
+                  {t("Founded with a vision to bridge the gap between traditional learning and modern technology, our platform offers flexible, on-demand learning that fits into your lifestyle. Join thousands of learners who are achieving their goals and shaping their future one lesson at a time.")}
                 </p>
                 <button className="px-6 py-3 bg-[var(--neon-blue)] text-white rounded-lg font-medium hover:bg-[var(--medium-blue)] transition-colors">
-                  See More
+                  {t("See More")}
                 </button>
               </div>
 
@@ -170,7 +332,7 @@ export default function TrainingModulesPage() {
                     50+
                   </div>
                   <div className="text-sm text-gray-600">
-                    Total Register Students
+                    {t("Total Register Students")}
                   </div>
                 </div>
                 <div className="text-center border-l border-r border-gray-200">
@@ -178,14 +340,14 @@ export default function TrainingModulesPage() {
                     30+
                   </div>
                   <div className="text-sm text-gray-600">
-                    Excellent Employees
+                    {t("Excellent Employees")}
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="text-4xl font-bold text-[var(--neon-blue)] mb-2">
                     25+
                   </div>
-                  <div className="text-sm text-gray-600">Excellent Courses</div>
+                  <div className="text-sm text-gray-600">{t("Excellent Courses")}</div>
                 </div>
               </div>
             </div>
@@ -222,15 +384,17 @@ export default function TrainingModulesPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Course Catalog Section */}
-      <div className="bg-gradient-to-br from-[var(--navy-blue-light)] to-[var(--navy-blue-lighter)] py-16 px-4 sm:px-6 lg:px-8">
+      {translationReady && (
+        <div className="bg-gradient-to-br from-[var(--navy-blue-light)] to-[var(--navy-blue-lighter)] py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header with Controls */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
               <h2 className="text-4xl font-bold text-white mb-4 md:mb-0">
-                Explore Our Course Catalog
+                {t("Explore Our Course Catalog")}
               </h2>
               <div className="flex items-center gap-4">
                 <button
@@ -238,7 +402,7 @@ export default function TrainingModulesPage() {
                   className="inline-flex items-center gap-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors shadow"
                 >
                   <Plus className="w-4 h-4" />
-                  New Training Module
+                  {t("New Training Module")}
                 </button>
               </div>
             </div>
@@ -252,7 +416,7 @@ export default function TrainingModulesPage() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white z-10" />
                     <input
                       type="text"
-                      placeholder="Search Courses"
+                      placeholder={t("Search Courses")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:bg-white/20"
@@ -272,14 +436,14 @@ export default function TrainingModulesPage() {
                       value="all"
                       className="bg-[var(--navy-blue)] text-white"
                     >
-                      Show all trainings
+                      {t("Show all trainings")}
                     </option>
                   </select>
                 </div>
 
                 {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/70">Sort:</span>
+                  <span className="text-sm text-white/70">{t("Sort:")}</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
@@ -289,19 +453,19 @@ export default function TrainingModulesPage() {
                       value="newest"
                       className="bg-[var(--navy-blue)] text-white"
                     >
-                      Newest First
+                      {t("Newest First")}
                     </option>
                     <option
                       value="oldest"
                       className="bg-[var(--navy-blue)] text-white"
                     >
-                      Oldest First
+                      {t("Oldest First")}
                     </option>
                     <option
                       value="alphabetical"
                       className="bg-[var(--navy-blue)] text-white"
                     >
-                      Alphabetical (A to Z)
+                      {t("Alphabetical (A to Z)")}
                     </option>
                   </select>
                 </div>
@@ -319,7 +483,7 @@ export default function TrainingModulesPage() {
                     }`}
                   >
                     <Grid className="w-4 h-4" />
-                    Grid View
+                    {t("Grid View")}
                   </button>
                   <button
                     onClick={() => setViewMode("table")}
@@ -330,7 +494,7 @@ export default function TrainingModulesPage() {
                     }`}
                   >
                     <List className="w-4 h-4" />
-                    Table View
+                    {t("Table View")}
                   </button>
                 </div>
 
@@ -369,14 +533,14 @@ export default function TrainingModulesPage() {
           {viewMode === "grid" ? (
             <>
               {loading && (
-                <div className="text-center py-12 text-white">Loading courses...</div>
+                <div className="text-center py-12 text-white">{translationReady ? t("Loading courses...") : "Loading courses..."}</div>
               )}
               {error && (
                 <div className="text-center py-12 text-red-300">{error}</div>
               )}
-              {!loading && !error && (
+              {!loading && !error && translationReady && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {[...courses]
+                  {[...translatedCourses]
                     .filter((course) => {
                       if (!searchQuery) return true;
                       return (
@@ -417,14 +581,14 @@ export default function TrainingModulesPage() {
                               {course.courseTitle}
                             </h3>
                             <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                              {course.description || "No description"}
+                              {course.description || t("No description")}
                             </p>
                             <div className="flex items-center justify-between">
                               {course.createdBy && (
                                 <div className="flex items-center gap-2">
                                   <Users className="w-4 h-4 text-[var(--neon-blue)]" />
                                   <span className="text-sm text-gray-600">
-                                    {course.createdBy.displayName || "Unknown"}
+                                    {course.createdBy.displayName || t("Unknown")}
                                   </span>
                                 </div>
                               )}
@@ -444,10 +608,12 @@ export default function TrainingModulesPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              openEditModal(course);
+                              // Find original course for editing
+                              const originalCourse = courses.find(c => c._id === course._id);
+                              if (originalCourse) openEditModal(originalCourse);
                             }}
                             className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-[var(--neon-blue)]"
-                            title="Edit"
+                            title={t("Edit")}
                           >
                             <Pencil className="w-4 h-4" />
                           </button>
@@ -455,10 +621,12 @@ export default function TrainingModulesPage() {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setCourseToDelete(course);
+                              // Find original course for deletion
+                              const originalCourse = courses.find(c => c._id === course._id);
+                              if (originalCourse) setCourseToDelete(originalCourse);
                             }}
                             className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-red-500"
-                            title="Delete"
+                            title={t("Delete")}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -469,19 +637,30 @@ export default function TrainingModulesPage() {
               )}
             </>
           ) : (
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
-              <ModuleTable
-                courses={courses}
-                loading={loading}
-                error={error}
-                onEdit={openEditModal}
-                onDelete={(course) => setCourseToDelete(course)}
-              />
-            </div>
+            translationReady && (
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+                <ModuleTable
+                  courses={translatedCourses}
+                  loading={loading}
+                  error={error}
+                  onEdit={(translatedCourse) => {
+                    // Find original course for editing
+                    const originalCourse = courses.find(c => c._id === translatedCourse._id);
+                    if (originalCourse) openEditModal(originalCourse);
+                  }}
+                  onDelete={(translatedCourse) => {
+                    // Find original course for deletion
+                    const originalCourse = courses.find(c => c._id === translatedCourse._id);
+                    if (originalCourse) setCourseToDelete(originalCourse);
+                  }}
+                />
+              </div>
+            )
           )}
 
         </div>
       </div>
+      )}
 
       {/* Create / Edit Training Module Modal */}
       <CreateTrainingModuleModal
@@ -497,7 +676,7 @@ export default function TrainingModulesPage() {
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-gray-900">Delete course?</h3>
+              <h3 className="text-lg font-bold text-gray-900">{t("Delete course?")}</h3>
               <button
                 type="button"
                 onClick={() => setCourseToDelete(null)}
@@ -507,7 +686,7 @@ export default function TrainingModulesPage() {
               </button>
             </div>
             <p className="text-gray-600 mb-6">
-              This will permanently delete &quot;{courseToDelete.courseTitle}&quot; and all progress for this course. This cannot be undone.
+              {t("This will permanently delete")} &quot;{language === "ur" ? (translatedCourses.find(c => c._id === courseToDelete._id)?.courseTitle || courseToDelete.courseTitle) : courseToDelete.courseTitle}&quot; {t("and all progress for this course. This cannot be undone.")}
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -515,7 +694,7 @@ export default function TrainingModulesPage() {
                 onClick={() => setCourseToDelete(null)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
               >
-                Cancel
+                {t("Cancel")}
               </button>
               <button
                 type="button"
@@ -523,7 +702,7 @@ export default function TrainingModulesPage() {
                 disabled={deleting}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
               >
-                {deleting ? "Deleting…" : "Delete"}
+                {deleting ? t("Deleting…") : t("Delete")}
               </button>
             </div>
           </div>

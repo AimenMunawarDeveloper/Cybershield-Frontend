@@ -3,11 +3,19 @@
  * Course list and details are fetched from /api/courses.
  */
 
+export interface MediaItem {
+  type: 'image' | 'video';
+  url: string;
+  alt?: string;
+  caption?: string;
+}
+
 export interface ModuleSection {
   _id?: string;
   title: string;
   material: string;
   urls: string[];
+  media?: MediaItem[];
 }
 
 export interface QuizQuestion {

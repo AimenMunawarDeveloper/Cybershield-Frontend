@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import {
   X,
   Plus,
@@ -10,14 +11,27 @@ import {
   HelpCircle,
   Link as LinkIcon,
   Award,
+  Image as ImageIcon,
+  Video,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { AVAILABLE_BADGES, getBadgeIcon } from "@/lib/courseBadges";
+
+// Media item (image or video)
+export interface MediaItem {
+  type: 'image' | 'video';
+  url: string;
+  alt?: string;
+  caption?: string;
+}
 
 // Section inside a module (content only; URLs etc.)
 export interface ModuleSection {
   title: string;
   material: string;
   urls: string[];
+  media?: MediaItem[];
 }
 
 // Single quiz question (MCQ)
@@ -58,6 +72,7 @@ const emptySection = (): ModuleSection => ({
   title: "",
   material: "",
   urls: [],
+  media: [],
 });
 
 const emptyQuizQuestion = (): QuizQuestion => ({
@@ -79,6 +94,7 @@ export default function CreateTrainingModuleModal({
   initialData = null,
   courseId = null,
 }: CreateTrainingModuleModalProps) {
+  const { getToken } = useAuth();
   const [courseTitle, setCourseTitle] = useState("");
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState<"basic" | "advanced">("basic");
@@ -207,6 +223,89 @@ export default function CreateTrainingModuleModal({
     updateSection(moduleIndex, sectionIndex, { urls });
   };
 
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
+
+  const handleMediaUpload = async (
+    moduleIndex: number,
+    sectionIndex: number,
+    file: File
+  ) => {
+    const uploadKey = `${moduleIndex}-${sectionIndex}-${file.name}`;
+    setUploading((prev) => ({ ...prev, [uploadKey]: true }));
+
+    try {
+      const token = await getToken();
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Upload failed');
+      }
+
+      const data = await response.json();
+      const section = modules[moduleIndex].sections[sectionIndex];
+      const media = section.media || [];
+      
+      updateSection(moduleIndex, sectionIndex, {
+        media: [
+          ...media,
+          {
+            type: data.type,
+            url: data.url,
+            alt: file.name,
+            caption: '',
+          },
+        ],
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to upload file. Please try again.';
+      alert(errorMessage);
+    } finally {
+      setUploading((prev) => {
+        const next = { ...prev };
+        delete next[uploadKey];
+        return next;
+      });
+    }
+  };
+
+  const removeMedia = (
+    moduleIndex: number,
+    sectionIndex: number,
+    mediaIndex: number
+  ) => {
+    const section = modules[moduleIndex].sections[sectionIndex];
+    const media = (section.media || []).filter((_, i) => i !== mediaIndex);
+    updateSection(moduleIndex, sectionIndex, { media });
+  };
+
+  const updateMedia = (
+    moduleIndex: number,
+    sectionIndex: number,
+    mediaIndex: number,
+    patch: Partial<MediaItem>
+  ) => {
+    const section = modules[moduleIndex].sections[sectionIndex];
+    const media = [...(section.media || [])];
+    media[mediaIndex] = { ...media[mediaIndex], ...patch };
+    updateSection(moduleIndex, sectionIndex, { media });
+  };
+
   const addQuizToModule = (moduleIndex: number) => {
     const mod = modules[moduleIndex];
     updateModule(moduleIndex, { quiz: [...mod.quiz, emptyQuizQuestion()] });
@@ -297,8 +396,9 @@ export default function CreateTrainingModuleModal({
             title: s.title.trim(),
             material: s.material.trim(),
             urls: s.urls.map((u) => u.trim()).filter(Boolean),
+            media: Array.isArray(s.media) ? s.media : [],
           }))
-          .filter((s) => s.title || s.material || s.urls.length > 0),
+          .filter((s) => s.title || s.material || s.urls.length > 0 || (s.media && s.media.length > 0)),
         quiz: m.quiz
           .map((q) => ({
             question: q.question.trim(),
@@ -615,6 +715,104 @@ export default function CreateTrainingModuleModal({
                                     <Plus className="w-3 h-3" />
                                     Add URL
                                   </button>
+                                </div>
+                                
+                                {/* Media Upload Section */}
+                                <div className="mt-4">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <ImageIcon className="w-4 h-4 text-[var(--medium-grey)]" />
+                                    <span className="text-sm text-white">Images & Videos</span>
+                                  </div>
+                                  
+                                  {/* Existing Media */}
+                                  {section.media && section.media.length > 0 && (
+                                    <div className="space-y-2 mb-3">
+                                      {section.media.map((mediaItem, mediaIndex) => (
+                                        <div key={mediaIndex} className="flex items-start gap-2 p-2 bg-[var(--navy-blue-lighter)]/30 rounded border border-[var(--medium-grey)]/30">
+                                          {mediaItem.type === 'image' ? (
+                                            <img
+                                              src={mediaItem.url}
+                                              alt={mediaItem.alt || 'Uploaded image'}
+                                              className="w-20 h-20 object-cover rounded flex-shrink-0"
+                                            />
+                                          ) : (
+                                            <video
+                                              src={mediaItem.url}
+                                              className="w-20 h-20 object-cover rounded flex-shrink-0"
+                                              controls={false}
+                                            />
+                                          )}
+                                          <div className="flex-1 min-w-0">
+                                            <input
+                                              type="text"
+                                              value={mediaItem.caption || ''}
+                                              onChange={(e) =>
+                                                updateMedia(moduleIndex, sectionIndex, mediaIndex, {
+                                                  caption: e.target.value,
+                                                })
+                                              }
+                                              className={inputClass + " text-xs mb-1"}
+                                              placeholder="Caption (optional)"
+                                            />
+                                            <p className="text-xs text-gray-400 truncate">
+                                              {mediaItem.alt || mediaItem.url.substring(0, 30)}
+                                            </p>
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={() =>
+                                              removeMedia(moduleIndex, sectionIndex, mediaIndex)
+                                            }
+                                            className="p-1.5 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded flex-shrink-0"
+                                          >
+                                            <Trash2 className="w-3 h-3" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                  
+                                  {/* Upload Buttons */}
+                                  <div className="flex gap-2">
+                                    <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded cursor-pointer border border-[var(--neon-blue)]/30">
+                                      <ImageIcon className="w-3 h-3" />
+                                      <span>Upload Image</span>
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            handleMediaUpload(moduleIndex, sectionIndex, file);
+                                          }
+                                        }}
+                                        disabled={Object.values(uploading).some(v => v)}
+                                      />
+                                    </label>
+                                    <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded cursor-pointer border border-[var(--neon-blue)]/30">
+                                      <Video className="w-3 h-3" />
+                                      <span>Upload Video</span>
+                                      <input
+                                        type="file"
+                                        accept="video/*"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) {
+                                            handleMediaUpload(moduleIndex, sectionIndex, file);
+                                          }
+                                        }}
+                                        disabled={Object.values(uploading).some(v => v)}
+                                      />
+                                    </label>
+                                  </div>
+                                  {Object.values(uploading).some(v => v) && (
+                                    <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                      <span>Uploading...</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </div>
