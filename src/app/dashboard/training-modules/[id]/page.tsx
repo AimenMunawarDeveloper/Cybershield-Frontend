@@ -18,6 +18,9 @@ import {
   User,
   FileQuestion,
   CheckCircle2,
+  Download,
+  ExternalLink,
+  CheckCircle,
 } from "lucide-react";
 import { ApiClient } from "@/lib/api";
 import type { Course, CourseModule } from "@/lib/coursesData";
@@ -51,6 +54,8 @@ export default function TrainingModuleDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
+  const [certificate, setCertificate] = useState<any | null>(null);
+  const [loadingCertificate, setLoadingCertificate] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,6 +103,46 @@ export default function TrainingModuleDetailPage() {
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [courseId, getToken]);
+
+  // Check for certificate when course is completed
+  useEffect(() => {
+    if (!getToken || !courseId || !course) {
+      setCertificate(null);
+      return;
+    }
+
+    // Calculate progress
+    const modules: CourseModule[] = course.modules || [];
+    const totalItems = modules.reduce(
+      (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
+      0
+    );
+    const completedCount = completedIds.length;
+    const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+
+    if (progressPercent < 100) {
+      setCertificate(null);
+      return;
+    }
+    
+    const checkCertificate = async () => {
+      try {
+        setLoadingCertificate(true);
+        const api = new ApiClient(getToken);
+        const certData = await api.getCertificateByCourse(courseId);
+        if (certData.certificate) {
+          setCertificate(certData.certificate);
+        }
+      } catch (err) {
+        // Certificate doesn't exist yet or error - that's okay
+        setCertificate(null);
+      } finally {
+        setLoadingCertificate(false);
+      }
+    };
+
+    checkCertificate();
+  }, [getToken, courseId, course, completedIds]);
 
   const toggleModule = (moduleId: string) => {
     setExpandedModules((prev) => {
@@ -266,7 +311,7 @@ export default function TrainingModuleDetailPage() {
             </div>
             {/* Progress - circular like dashboard */}
             {totalItems > 0 && (
-              <div className="mb-4">
+              <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-0.5">
                   Your progress
                 </h3>
@@ -290,6 +335,98 @@ export default function TrainingModuleDetailPage() {
                 </div>
               </div>
             )}
+
+            {/* Certificate Section - Cisco Style with Cybershield Colors */}
+            <div className="mb-6">
+              <div className={`border rounded-lg overflow-hidden transition-all bg-white ${
+                certificate 
+                  ? "border-[var(--neon-blue)]/30 shadow-sm" 
+                  : progressPercent === 100
+                  ? "border-[var(--neon-blue)]/20"
+                  : "border-gray-200"
+              }`}>
+                <div className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
+                      certificate 
+                        ? "bg-[var(--neon-blue)]" 
+                        : progressPercent === 100
+                        ? "bg-[var(--neon-blue)]/80"
+                        : "bg-gray-100"
+                    }`}>
+                      <Award className={`w-6 h-6 ${
+                        certificate || progressPercent === 100 ? "text-white" : "text-gray-400"
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base font-semibold text-gray-900 mb-1.5">
+                        {certificate ? "Certificate Earned" : progressPercent === 100 ? "Certificate Available" : "Earn a Certificate"}
+                      </h3>
+                      <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+                        {certificate 
+                          ? "You've successfully completed this course and earned a certificate."
+                          : progressPercent === 100
+                          ? "Complete all modules to earn your certificate."
+                          : `Complete ${100 - progressPercent}% more to earn your certificate.`
+                        }
+                      </p>
+                      {certificate ? (
+                        <div className="flex flex-col gap-3">
+                          <button
+                            onClick={() => router.push(`/dashboard/certificates`)}
+                            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            View Certificate
+                          </button>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <CheckCircle className="w-3.5 h-3.5 text-[var(--neon-blue)]" />
+                            <span>Issued on {new Date(certificate.issuedDate).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      ) : progressPercent === 100 ? (
+                        <button
+                          onClick={async () => {
+                            try {
+                              setLoadingCertificate(true);
+                              const api = new ApiClient(getToken);
+                              await api.generateCertificate(courseId);
+                              const certData = await api.getCertificateByCourse(courseId);
+                              if (certData.certificate) {
+                                setCertificate(certData.certificate);
+                              }
+                            } catch (err) {
+                              console.error("Failed to generate certificate:", err);
+                            } finally {
+                              setLoadingCertificate(false);
+                            }
+                          }}
+                          disabled={loadingCertificate}
+                          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {loadingCertificate ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Award className="w-4 h-4" />
+                              Generate Certificate
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <Lock className="w-4 h-4" />
+                          <span>Complete course to unlock</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {course.createdAt && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
