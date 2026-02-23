@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import {
@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import { ApiClient } from "@/lib/api";
 import type { Course, CourseModule, ModuleSection, QuizQuestion } from "@/lib/coursesData";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Format inline markdown (bold, italic, code)
 function formatInlineMarkdown(text: string): React.ReactElement[] {
@@ -108,7 +110,7 @@ function formatInlineMarkdown(text: string): React.ReactElement[] {
 }
 
 // Format content with proper structure (headings, lists, paragraphs, callouts)
-function formatContent(material: string): React.ReactElement[] {
+function formatContent(material: string, translateFn?: (text: string) => string): React.ReactElement[] {
   if (!material) return [];
   
   const parts: React.ReactElement[] = [];
@@ -183,7 +185,7 @@ function formatContent(material: string): React.ReactElement[] {
           <div className="flex items-start gap-3">
             <Icon className={`w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5`} />
             <div className="flex-1">
-              <p className="font-semibold text-gray-900 mb-1">{type}</p>
+              <p className="font-semibold text-gray-900 mb-1">{translateFn ? translateFn(type) : type}</p>
               <div className="text-gray-800 leading-relaxed">{formatInlineMarkdown(content)}</div>
             </div>
           </div>
@@ -280,11 +282,20 @@ export default function SubmodulePage() {
   const params = useParams();
   const router = useRouter();
   const { getToken } = useAuth();
+  const { language } = useLanguage();
+  const { t, preTranslate, isTranslating } = useTranslation();
   const courseId = params.id as string;
   const submoduleId = params.submoduleId as string;
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [translationReady, setTranslationReady] = useState(false);
+  const [translatedCourse, setTranslatedCourse] = useState<Course | null>(null);
+  const [translatedSectionMaterial, setTranslatedSectionMaterial] = useState<string | null>(null);
+  const [translatedMediaCaptions, setTranslatedMediaCaptions] = useState<Map<number, string>>(new Map());
+
+  // Use translated course or fallback to original (must be declared early)
+  const displayCourse = useMemo(() => translatedCourse || course, [translatedCourse, course]);
 
   const parsed = parseSubmoduleId(submoduleId);
   const moduleIndex = parsed?.moduleIndex ?? -1;
@@ -292,7 +303,7 @@ export default function SubmodulePage() {
   const isQuiz = sectionIndex === "quiz";
 
   const currentModule: CourseModule | null =
-    course?.modules?.[moduleIndex] ?? null;
+    displayCourse?.modules?.[moduleIndex] ?? null;
   const currentSection: ModuleSection | null =
     typeof sectionIndex === "number" && currentModule?.sections?.[sectionIndex]
       ? currentModule.sections[sectionIndex]
@@ -342,20 +353,20 @@ export default function SubmodulePage() {
   const toggleComplete = async () => {
     if (markingRead) return;
     if (!getToken) {
-      setMarkReadError("Please sign in to save your progress.");
+      setMarkReadError(t("Please sign in to save your progress."));
       return;
     }
     
     // For quizzes, validate answers first
     if (isQuiz && !isRead(submoduleId) && !showQuizResults) {
       if (!allQuizAttempted) {
-        setMarkReadError("Please answer all questions before submitting.");
+        setMarkReadError(t("Please answer all questions before submitting."));
         return;
       }
       
       const allCorrect = checkQuizAnswers();
       if (!allCorrect) {
-        setMarkReadError("Some answers are incorrect. Please review and try again.");
+        setMarkReadError(t("Some answers are incorrect. Please review and try again."));
         return;
       }
     }
@@ -384,7 +395,7 @@ export default function SubmodulePage() {
       }
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to update progress";
+      const message = err instanceof Error ? err.message : t("Failed to update progress");
       setMarkReadError(message);
     } finally {
       setMarkingRead(false);
@@ -450,10 +461,285 @@ export default function SubmodulePage() {
 
   // Expand sidebar modules on load
   useEffect(() => {
-    if (course && moduleIndex >= 0) {
+    if (displayCourse && moduleIndex >= 0) {
       setSidebarExpanded(new Set([moduleIndex]));
     }
-  }, [course, moduleIndex]);
+  }, [displayCourse, moduleIndex]);
+
+  // Pre-translate static strings when language changes (performance optimization)
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page for batch translation
+      const staticStrings = [
+        // Navigation
+        "Back to course",
+        "items",
+        "complete",
+        "of",
+        "completed",
+        "Module Quiz",
+        "Section",
+        "Previous",
+        "Next",
+        "Back to Course",
+        
+        // Buttons and actions
+        "Mark as Complete",
+        "Mark as Incomplete",
+        "Saving…",
+        "Updating…",
+        "Submit Quiz",
+        "Submitting…",
+        "Retake Quiz",
+        "Complete Quiz",
+        
+        // Quiz
+        "No questions in this quiz.",
+        "Please answer all",
+        "question",
+        "questions",
+        "to submit.",
+        "Please answer all questions before submitting.",
+        "Some answers are incorrect. Please review and try again.",
+        "All answers are correct! Great job!",
+        
+        // Certificate notification
+        "Certificate Earned! 🎉",
+        "Congratulations! You've successfully completed this course and earned a certificate of completion.",
+        "View Certificate",
+        
+        // Resources
+        "Additional Resources",
+        "No content available for this section.",
+        "Section not found.",
+        
+        // Callout types
+        "INFO",
+        "NOTE",
+        "TIP",
+        "WARNING",
+        "IMPORTANT",
+        
+        // Error messages
+        "Please sign in to save your progress.",
+        "Failed to update progress",
+        "Loading...",
+        
+        // Module navigation
+        "modules",
+        "of",
+        
+        // Media
+        "Course image",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Translate dynamic course content when language or course changes
+  useEffect(() => {
+    if (language === "en" || !course) {
+      setTranslatedCourse(course);
+      return;
+    }
+
+    if (!translationReady) {
+      return;
+    }
+
+    const translateCourseContent = async () => {
+      try {
+        // Collect all dynamic texts for batch translation
+        const textsToTranslate: string[] = [];
+        const textMap: Array<{ type: string; path: string[] }> = [];
+
+        // Course title
+        if (course.courseTitle) {
+          textsToTranslate.push(course.courseTitle);
+          textMap.push({ type: "courseTitle", path: [] });
+        }
+
+        // Module titles and section titles
+        course.modules?.forEach((mod, modIdx) => {
+          if (mod.title) {
+            textsToTranslate.push(mod.title);
+            textMap.push({ type: "moduleTitle", path: [modIdx.toString()] });
+          }
+
+          mod.sections?.forEach((section, secIdx) => {
+            if (section.title) {
+              textsToTranslate.push(section.title);
+              textMap.push({ type: "sectionTitle", path: [modIdx.toString(), secIdx.toString()] });
+            }
+          });
+
+          // Quiz questions
+          mod.quiz?.forEach((q, qIdx) => {
+            if (q.question) {
+              textsToTranslate.push(q.question);
+              textMap.push({ type: "quizQuestion", path: [modIdx.toString(), qIdx.toString(), "question"] });
+            }
+            q.choices?.forEach((choice, cIdx) => {
+              if (choice) {
+                textsToTranslate.push(choice);
+                textMap.push({ type: "quizChoice", path: [modIdx.toString(), qIdx.toString(), "choices", cIdx.toString()] });
+              }
+            });
+          });
+        });
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedCourse(course);
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Reconstruct course with translated content
+        const translated: Course = {
+          ...course,
+          courseTitle: course.courseTitle && textMap.find(m => m.type === "courseTitle")
+            ? translatedTexts[textsToTranslate.indexOf(course.courseTitle)]
+            : course.courseTitle,
+          modules: course.modules?.map((mod, modIdx) => {
+            const moduleTitleIndex = textMap.findIndex(m => m.type === "moduleTitle" && m.path[0] === modIdx.toString());
+            const translatedModuleTitle = moduleTitleIndex >= 0
+              ? translatedTexts[textsToTranslate.indexOf(mod.title || "")]
+              : mod.title;
+
+            return {
+              ...mod,
+              title: translatedModuleTitle,
+              sections: mod.sections?.map((section, secIdx) => {
+                const sectionTitleIndex = textMap.findIndex(
+                  m => m.type === "sectionTitle" && m.path[0] === modIdx.toString() && m.path[1] === secIdx.toString()
+                );
+                const translatedSectionTitle = sectionTitleIndex >= 0
+                  ? translatedTexts[textsToTranslate.indexOf(section.title || "")]
+                  : section.title;
+
+                return {
+                  ...section,
+                  title: translatedSectionTitle,
+                };
+              }),
+              quiz: mod.quiz?.map((q, qIdx) => {
+                const questionIndex = textMap.findIndex(
+                  m => m.type === "quizQuestion" && m.path[0] === modIdx.toString() && m.path[1] === qIdx.toString()
+                );
+                const translatedQuestion = questionIndex >= 0
+                  ? translatedTexts[textsToTranslate.indexOf(q.question || "")]
+                  : q.question;
+
+                const translatedChoices = q.choices?.map((choice, cIdx) => {
+                  const choiceIndex = textMap.findIndex(
+                    m => m.type === "quizChoice" && m.path[0] === modIdx.toString() && m.path[1] === qIdx.toString() && m.path[3] === cIdx.toString()
+                  );
+                  return choiceIndex >= 0
+                    ? translatedTexts[textsToTranslate.indexOf(choice || "")]
+                    : choice;
+                });
+
+                return {
+                  ...q,
+                  question: translatedQuestion,
+                  choices: translatedChoices,
+                };
+              }),
+            };
+          }),
+        };
+
+        setTranslatedCourse(translated);
+      } catch (error) {
+        console.error("Error translating course content:", error);
+        setTranslatedCourse(course);
+      }
+    };
+
+    translateCourseContent();
+  }, [course, language, translationReady]);
+
+  // Translate current section material when section changes (performance: only translate visible content)
+  useEffect(() => {
+    if (language === "en" || !currentSection || !translationReady) {
+      setTranslatedSectionMaterial(null);
+      setTranslatedMediaCaptions(new Map());
+      return;
+    }
+
+    const translateSectionContent = async () => {
+      try {
+        const textsToTranslate: string[] = [];
+        const materialIndexRef = { value: -1 };
+        const captionIndices: number[] = [];
+        const captionMap: Map<number, number> = new Map(); // Maps media index to translation index
+
+        // Translate section material
+        if (currentSection.material) {
+          materialIndexRef.value = textsToTranslate.length;
+          textsToTranslate.push(currentSection.material);
+        }
+
+        // Translate media captions (alt text will use caption translation if available)
+        if (currentSection.media && currentSection.media.length > 0) {
+          currentSection.media.forEach((mediaItem, idx) => {
+            if (mediaItem.caption) {
+              captionMap.set(idx, textsToTranslate.length);
+              textsToTranslate.push(mediaItem.caption);
+            } else if (mediaItem.alt) {
+              // If no caption, translate alt text
+              captionMap.set(idx, textsToTranslate.length);
+              textsToTranslate.push(mediaItem.alt);
+            }
+          });
+        }
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedSectionMaterial(null);
+          setTranslatedMediaCaptions(new Map());
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Update state with translations
+        if (materialIndexRef.value >= 0) {
+          setTranslatedSectionMaterial(translatedTexts[materialIndexRef.value]);
+        } else {
+          setTranslatedSectionMaterial(null);
+        }
+
+        // Update media captions
+        const newCaptions = new Map<number, string>();
+        captionMap.forEach((translationIdx, mediaIdx) => {
+          newCaptions.set(mediaIdx, translatedTexts[translationIdx]);
+        });
+        setTranslatedMediaCaptions(newCaptions);
+      } catch (error) {
+        console.error("Error translating section content:", error);
+        setTranslatedSectionMaterial(null);
+        setTranslatedMediaCaptions(new Map());
+      }
+    };
+
+    translateSectionContent();
+  }, [currentSection, language, translationReady]);
 
   const toggleSidebarModule = (modIdx: number) => {
     setSidebarExpanded((prev) => {
@@ -464,21 +750,21 @@ export default function SubmodulePage() {
     });
   };
 
-  const getTotalItems = () => {
-    if (!course) return 0;
-    return course.modules.reduce(
+  const getTotalItems = useCallback(() => {
+    if (!displayCourse) return 0;
+    return displayCourse.modules.reduce(
       (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
       0
     );
-  };
+  }, [displayCourse]);
 
   const getCompletedCount = () => completedIds.length;
   const progressPercent = getTotalItems() > 0 ? Math.round((getCompletedCount() / getTotalItems()) * 100) : 0;
 
-  if (loading || !course) {
+  if (loading || !displayCourse) {
     return (
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500">{t("Loading...")}</p>
       </div>
     );
   }
@@ -507,17 +793,17 @@ export default function SubmodulePage() {
               className="flex items-center gap-2 text-sm text-gray-600 hover:text-[var(--neon-blue)] transition-colors mb-3"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to course
+              {t("Back to course")}
             </button>
-            <h2 className="text-lg font-bold text-gray-900 line-clamp-2 mb-2">{course.courseTitle}</h2>
+            <h2 className="text-lg font-bold text-gray-900 line-clamp-2 mb-2">{displayCourse.courseTitle}</h2>
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
-                <span>{getTotalItems()} items</span>
+                <span>{getTotalItems()} {t("items")}</span>
               </div>
               <div className="flex items-center gap-1">
                 <Award className="w-3 h-3" />
-                <span>{progressPercent}% complete</span>
+                <span>{progressPercent}% {t("complete")}</span>
               </div>
             </div>
           </div>
@@ -531,13 +817,13 @@ export default function SubmodulePage() {
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              {getCompletedCount()} of {getTotalItems()} completed
+              {getCompletedCount()} {t("of")} {getTotalItems()} {t("completed")}
             </p>
           </div>
 
           {/* Course Modules Navigation */}
           <nav className="space-y-1">
-            {course.modules.map((mod, modIdx) => {
+            {displayCourse.modules.map((mod, modIdx) => {
               const isExpanded = sidebarExpanded.has(modIdx);
               const sections = mod.sections || [];
               const hasQuiz = (mod.quiz?.length ?? 0) > 0;
@@ -618,7 +904,7 @@ export default function SubmodulePage() {
                           ) : (
                             <FileQuestion className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
                           )}
-                          <span>Module Quiz</span>
+                          <span>{t("Module Quiz")}</span>
                         </button>
                       )}
                     </div>
@@ -644,17 +930,17 @@ export default function SubmodulePage() {
                 <BookOpen className="w-5 h-5 text-gray-600" />
               </button>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">{course.courseTitle}</h1>
+                <h1 className="text-lg font-semibold text-gray-900">{displayCourse.courseTitle}</h1>
                 {currentModule && (
                   <p className="text-sm text-gray-500">
-                    {currentModule.title} {isQuiz ? "• Quiz" : currentSection ? `• ${currentSection.title}` : ""}
+                    {currentModule.title} {isQuiz ? `• ${t("Module Quiz")}` : currentSection ? `• ${currentSection.title}` : ""}
                   </p>
                 )}
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">
-                {moduleIndex + 1} of {course.modules.length} modules
+                {moduleIndex + 1} {t("of")} {displayCourse.modules.length} {t("modules")}
             </span>
           </div>
         </div>
@@ -671,9 +957,9 @@ export default function SubmodulePage() {
                     <Award className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-semibold text-gray-900 mb-1.5">Certificate Earned! 🎉</h3>
+                    <h3 className="text-base font-semibold text-gray-900 mb-1.5">{t("Certificate Earned! 🎉")}</h3>
                     <p className="text-gray-600 mb-4 text-sm leading-relaxed">
-                      Congratulations! You've successfully completed this course and earned a certificate of completion.
+                      {t("Congratulations! You've successfully completed this course and earned a certificate of completion.")}
                     </p>
                     <div className="flex items-center gap-3">
                       <button
@@ -681,14 +967,14 @@ export default function SubmodulePage() {
                         className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
                       >
                         <Award className="w-4 h-4" />
-                        View Certificate
+                        {t("View Certificate")}
                       </button>
                       <button
                         onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
                         className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--neon-blue)] text-[var(--neon-blue)] rounded-md hover:bg-[var(--neon-blue)]/5 transition-colors text-sm font-medium"
                       >
                         <ArrowLeft className="w-4 h-4" />
-                        Back to Course
+                        {t("Back to Course")}
                       </button>
                     </div>
                   </div>
@@ -710,7 +996,7 @@ export default function SubmodulePage() {
                       <FileQuestion className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-1">Module Quiz</h1>
+                      <h1 className="text-2xl font-bold text-gray-900 mb-1">{t("Module Quiz")}</h1>
                   {currentModule?.title && (
                         <p className="text-sm text-gray-600">{currentModule.title}</p>
                   )}
@@ -721,7 +1007,7 @@ export default function SubmodulePage() {
               {quizQuestions.length === 0 ? (
                     <div className="text-center py-12">
                       <FileQuestion className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">No questions in this quiz.</p>
+                      <p className="text-gray-500 text-lg">{t("No questions in this quiz.")}</p>
                     </div>
               ) : (
                     <div className="space-y-10">
@@ -826,7 +1112,7 @@ export default function SubmodulePage() {
                             className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                           >
                             <RotateCcw className="w-5 h-5 shrink-0" />
-                            <span>{markingRead ? "Updating…" : "Retake Quiz"}</span>
+                            <span>{markingRead ? t("Updating…") : t("Retake Quiz")}</span>
                           </button>
                         </div>
                       ) : showQuizResults ? (
@@ -835,7 +1121,7 @@ export default function SubmodulePage() {
                             <div className="space-y-3">
                               <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
                                 <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
-                                <span className="!text-green-800 font-medium">All answers are correct! Great job!</span>
+                                <span className="!text-green-800 font-medium">{t("All answers are correct! Great job!")}</span>
                               </div>
                               <button
                                 type="button"
@@ -844,7 +1130,7 @@ export default function SubmodulePage() {
                                 className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
-                                <span>{markingRead ? "Submitting…" : "Complete Quiz"}</span>
+                                <span>{markingRead ? t("Submitting…") : t("Complete Quiz")}</span>
                               </button>
                             </div>
                           ) : (
@@ -855,7 +1141,7 @@ export default function SubmodulePage() {
                                 className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
                                 <RotateCcw className="w-5 h-5 shrink-0" />
-                                <span>Retake Quiz</span>
+                                <span>{t("Retake Quiz")}</span>
                               </button>
                             </div>
                           )}
@@ -869,11 +1155,11 @@ export default function SubmodulePage() {
                             className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--neon-blue)] shadow-md hover:shadow-lg"
                     >
                       <Check className="w-5 h-5 shrink-0" />
-                            <span>{markingRead ? "Submitting…" : "Submit Quiz"}</span>
+                            <span>{markingRead ? t("Submitting…") : t("Submit Quiz")}</span>
                     </button>
                     {!allQuizAttempted && quizQuestions.length > 0 && (
                             <p className="text-sm text-gray-600">
-                              Please answer all {quizQuestions.length} question{quizQuestions.length !== 1 ? "s" : ""} to submit.
+                              {t("Please answer all")} {quizQuestions.length} {quizQuestions.length !== 1 ? t("questions") : t("question")} {t("to submit.")}
                       </p>
                     )}
                   </>
@@ -897,7 +1183,7 @@ export default function SubmodulePage() {
                 </div>
                 <div>
                       <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                    {currentSection.title || "Section"}
+                    {currentSection.title || t("Section")}
                   </h1>
                   {currentModule?.title && (
                         <p className="text-sm text-gray-600">{currentModule.title}</p>
@@ -908,10 +1194,13 @@ export default function SubmodulePage() {
 
                 {/* Section Content */}
                 <div className="px-8 py-8">
-                  {currentSection.material && (
+                  {(currentSection.material || translatedSectionMaterial) && (
                     <article className="max-w-none mb-8 prose prose-lg prose-gray max-w-none">
                       <div className="text-gray-800 leading-relaxed space-y-6">
-                        {formatContent(currentSection.material)}
+                        {formatContent(
+                          translatedSectionMaterial || currentSection.material || "",
+                          t
+                        )}
                       </div>
                     </article>
                   )}
@@ -925,7 +1214,13 @@ export default function SubmodulePage() {
                             <figure className="w-full">
                               <img
                                 src={mediaItem.url}
-                                alt={mediaItem.alt || 'Course image'}
+                                alt={
+                                  mediaItem.alt 
+                                    ? (translatedMediaCaptions.get(idx) || mediaItem.alt)
+                                    : mediaItem.caption
+                                    ? (translatedMediaCaptions.get(idx) || mediaItem.caption)
+                                    : t('Course image')
+                                }
                                 className="w-full rounded-xl shadow-lg object-cover"
                                 onError={(e) => {
                                   console.error('Image failed to load:', mediaItem.url);
@@ -934,7 +1229,7 @@ export default function SubmodulePage() {
                               />
                               {mediaItem.caption && (
                                 <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
-                                  {mediaItem.caption}
+                                  {translatedMediaCaptions.get(idx) || mediaItem.caption}
                                 </figcaption>
                               )}
                             </figure>
@@ -955,7 +1250,7 @@ export default function SubmodulePage() {
                               </div>
                               {mediaItem.caption && (
                                 <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
-                                  {mediaItem.caption}
+                                  {translatedMediaCaptions.get(idx) || mediaItem.caption}
                                 </figcaption>
                               )}
                             </figure>
@@ -969,7 +1264,7 @@ export default function SubmodulePage() {
                     <div className="mt-8 pt-8 border-t border-gray-200">
                       <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <LinkIcon className="w-5 h-5 text-[var(--neon-blue)]" />
-                        Additional Resources
+                        {t("Additional Resources")}
                   </h2>
                       <ul className="space-y-3">
                     {currentSection.urls.map((url, i) => (
@@ -994,7 +1289,7 @@ export default function SubmodulePage() {
               {!currentSection.material && !(currentSection.urls?.length) && (
                     <div className="text-center py-12">
                       <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">No content available for this section.</p>
+                      <p className="text-gray-500 text-lg">{t("No content available for this section.")}</p>
                     </div>
               )}
 
@@ -1009,7 +1304,7 @@ export default function SubmodulePage() {
                           className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                         >
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
-                          <span>{markingRead ? "Updating…" : "Mark as Incomplete"}</span>
+                          <span>{markingRead ? t("Updating…") : t("Mark as Incomplete")}</span>
                         </button>
                 ) : (
                   <button
@@ -1019,7 +1314,7 @@ export default function SubmodulePage() {
                           className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                   >
                           <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white transition-colors" />
-                          <span className="text-[var(--neon-blue)] group-hover:text-white transition-colors">{markingRead ? "Saving…" : "Mark as Complete"}</span>
+                          <span className="text-[var(--neon-blue)] group-hover:text-white transition-colors">{markingRead ? t("Saving…") : t("Mark as Complete")}</span>
                   </button>
                 )}
                 {markReadError && (
@@ -1034,7 +1329,7 @@ export default function SubmodulePage() {
         ) : (
               <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
                 <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">Section not found.</p>
+                <p className="text-gray-500 text-lg">{t("Section not found.")}</p>
           </div>
         )}
 
@@ -1046,7 +1341,7 @@ export default function SubmodulePage() {
                   className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium shadow-sm hover:shadow-md"
             >
                   <ChevronLeft className="w-5 h-5 flex-shrink-0" />
-                  <span>Previous</span>
+                  <span>{t("Previous")}</span>
             </button>
           ) : (
             <div />
@@ -1056,7 +1351,7 @@ export default function SubmodulePage() {
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${nextUrl}`)}
                   className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
             >
-                  <span>{sectionIndex === sections.length - 1 && hasQuiz ? "Module Quiz" : "Next"}</span>
+                  <span>{sectionIndex === sections.length - 1 && hasQuiz ? t("Module Quiz") : t("Next")}</span>
                   <ChevronRight className="w-5 h-5 flex-shrink-0" />
             </button>
           ) : (
@@ -1065,7 +1360,7 @@ export default function SubmodulePage() {
                   className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium ml-auto shadow-sm hover:shadow-md"
             >
                   <ArrowLeft className="w-5 h-5 flex-shrink-0" />
-                  <span>Back to Course</span>
+                  <span>{t("Back to Course")}</span>
             </button>
           )}
         </nav>
