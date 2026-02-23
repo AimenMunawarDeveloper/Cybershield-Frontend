@@ -323,6 +323,20 @@ export class ApiClient {
     }
     return response.json();
   }
+
+  async unmarkCourseProgressComplete(courseId: string, submoduleId: string): Promise<{ completed: string[] }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress`, {
+      method: 'DELETE',
+      headers,
+      body: JSON.stringify({ submoduleId }),
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to update progress');
+    }
+    return response.json();
+  }
 }
 
 // Hook to create API client with Clerk token
