@@ -12,14 +12,16 @@ import {
   Shield,
   Send,
   Lock,
+  FilePlus,
 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import CreateCampaignModal from "@/components/CreateCampaignModal";
+import CustomWhatsAppTemplateModal from "@/components/CustomWhatsAppTemplateModal";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ApiClient } from "@/lib/api";
-
+// sample change
 interface Campaign {
   _id: string;
   name: string;
@@ -72,6 +74,8 @@ export default function WhatsAppPhishingPage() {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [visibleTemplates, setVisibleTemplates] = useState(INITIAL_VISIBLE_TEMPLATES);
+  const [showCustomTemplateModal, setShowCustomTemplateModal] = useState(false);
+  const [savingCustomTemplate, setSavingCustomTemplate] = useState(false);
 
   const verifyAccess = useCallback(async () => {
     try {
@@ -272,6 +276,9 @@ export default function WhatsAppPhishingPage() {
         "templates",
         "more",
         "Show Less",
+        "Custom Template",
+        "Failed to save template.",
+        "Failed to save template. Please try again.",
       ];
 
       await preTranslate(staticStrings);
@@ -497,6 +504,40 @@ export default function WhatsAppPhishingPage() {
     }
   };
 
+  const handleSaveCustomWhatsAppTemplate = async (data: {
+    title?: string;
+    messageTemplate: string;
+    landingPageUrl?: string;
+  }) => {
+    setSavingCustomTemplate(true);
+    setError(null);
+    try {
+      const token = await getToken();
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+      const response = await fetch(`${API_BASE_URL}/whatsapp-templates/custom`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setShowCustomTemplateModal(false);
+        fetchTemplates();
+      } else {
+        setError(result.message || t("Failed to save template."));
+      }
+    } catch (err) {
+      console.error("Error saving custom template:", err);
+      setError(t("Failed to save template. Please try again."));
+    } finally {
+      setSavingCustomTemplate(false);
+    }
+  };
+
   if (hasAccess === null) {
     return (
       <div className="p-8 text-center text-white">
@@ -630,11 +671,21 @@ export default function WhatsAppPhishingPage() {
         {/* Phishing Templates Section */}
         <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4 underline decoration-[var(--neon-blue)]">
-                {t("Phishing Message Templates")}
-              </h2>
-              <p className="text-base text-[var(--medium-grey)] max-w-2xl mx-auto">
+            <div className="mb-8">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <h2 className="text-3xl font-bold text-white underline decoration-[var(--neon-blue)]">
+                  {t("Phishing Message Templates")}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomTemplateModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  <FilePlus className="w-4 h-4" />
+                  {t("Custom Template")}
+                </button>
+              </div>
+              <p className="text-base text-[var(--medium-grey)] max-w-2xl">
                 {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
@@ -1033,6 +1084,13 @@ export default function WhatsAppPhishingPage() {
         }}
         onSubmit={handleCreateCampaign}
         initialTemplate={selectedTemplateForModal}
+      />
+
+      <CustomWhatsAppTemplateModal
+        isOpen={showCustomTemplateModal}
+        onClose={() => setShowCustomTemplateModal(false)}
+        onSubmit={handleSaveCustomWhatsAppTemplate}
+        isLoading={savingCustomTemplate}
       />
     </>
   );

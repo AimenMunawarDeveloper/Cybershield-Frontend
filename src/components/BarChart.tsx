@@ -43,7 +43,7 @@ const metrics = [
   },
 ];
 
-export default function BarChart() {
+export default function BarChartCard() {
   return (
     <div className="dashboard-card rounded-lg p-6 relative overflow-hidden">
       {/* Bar Chart Section */}

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus } from "lucide-react";
+import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus, FilePlus } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
+import CustomEmailTemplateModal from "@/components/CustomEmailTemplateModal";
 import EmailTemplateViewModal from "@/components/EmailTemplateViewModal";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -55,6 +56,8 @@ export default function EmailPhishingPage() {
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [accessError, setAccessError] = useState<string | null>(null);
   const [visibleTemplates, setVisibleTemplates] = useState(INITIAL_VISIBLE_TEMPLATES);
+  const [showCustomTemplateModal, setShowCustomTemplateModal] = useState(false);
+  const [savingCustomTemplate, setSavingCustomTemplate] = useState(false);
 
   const verifyAccess = async () => {
     try {
@@ -232,6 +235,10 @@ export default function EmailPhishingPage() {
         "templates",
         "more",
         "Show Less",
+        "Custom Template",
+        "Custom template saved successfully.",
+        "Failed to save template.",
+        "Failed to save template. Please try again.",
       ];
 
       await preTranslate(staticStrings);
@@ -331,6 +338,37 @@ export default function EmailPhishingPage() {
       bodyContent: translatedBody,
     });
     setShowModal(true);
+  };
+
+  const handleSaveCustomEmailTemplate = async (data: {
+    title?: string;
+    subject: string;
+    bodyContent: string;
+    linkUrl?: string;
+  }) => {
+    setSavingCustomTemplate(true);
+    setMessage(null);
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+      const response = await fetch(`${backendUrl}/api/email-templates/custom`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setMessage({ type: "success", text: t("Custom template saved successfully.") });
+        setShowCustomTemplateModal(false);
+        fetchTemplates();
+      } else {
+        setMessage({ type: "error", text: result.message || t("Failed to save template.") });
+      }
+    } catch (err) {
+      console.error("Error saving custom template:", err);
+      setMessage({ type: "error", text: t("Failed to save template. Please try again.") });
+    } finally {
+      setSavingCustomTemplate(false);
+    }
   };
 
 
@@ -476,11 +514,21 @@ export default function EmailPhishingPage() {
         {/* Phishing Templates Section */}
         <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-4 underline decoration-[var(--neon-blue)]">
-                {t("Phishing Email Templates")}
-              </h2>
-              <p className="text-base text-[var(--medium-grey)] max-w-2xl mx-auto">
+            <div className="mb-8">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <h2 className="text-3xl font-bold text-white underline decoration-[var(--neon-blue)]">
+                  {t("Phishing Email Templates")}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowCustomTemplateModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  <FilePlus className="w-4 h-4" />
+                  {t("Custom Template")}
+                </button>
+              </div>
+              <p className="text-base text-[var(--medium-grey)] max-w-2xl">
                 {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
@@ -759,6 +807,13 @@ export default function EmailPhishingPage() {
         onSubmit={handleSendEmail}
         isLoading={isLoading}
         initialData={initialEmailData || undefined}
+      />
+
+      <CustomEmailTemplateModal
+        isOpen={showCustomTemplateModal}
+        onClose={() => setShowCustomTemplateModal(false)}
+        onSubmit={handleSaveCustomEmailTemplate}
+        isLoading={savingCustomTemplate}
       />
     </>
   );

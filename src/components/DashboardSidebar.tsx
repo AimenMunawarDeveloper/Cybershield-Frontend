@@ -21,6 +21,7 @@ import {
   Mail,
   Phone,
   ShieldAlert,
+  Medal,
 } from "lucide-react";
 
 import {
@@ -83,6 +84,11 @@ const data = {
       title: "Certificates",
       url: "/dashboard/certificates",
       icon: Trophy,
+    },
+    {
+      title: "Leaderboards",
+      url: "/dashboard/leaderboards",
+      icon: Medal,
     },
     {
       title: "Team Management",

