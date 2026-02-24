@@ -748,8 +748,8 @@ export default function TrainingModuleDetailPage() {
                   {t("Badges you can earn in this course.")}
                 </p>
                 <div className="grid grid-cols-3 gap-3">
-                  {course.badges && course.badges.length > 0 ? (
-                    course.badges.map((badgeId, index) => {
+                  {displayCourse.badges && displayCourse.badges.length > 0 ? (
+                    displayCourse.badges.map((badgeId, index) => {
                       const Icon = getBadgeIcon(badgeId);
                       const label = AVAILABLE_BADGES.find((b) => b.id === badgeId)?.label ?? badgeId;
                       const isFirst = index === 0;
