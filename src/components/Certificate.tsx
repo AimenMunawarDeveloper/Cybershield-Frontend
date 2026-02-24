@@ -1,6 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CertificateProps {
   userName: string;
@@ -11,6 +13,7 @@ interface CertificateProps {
   className?: string;
   courseLevel?: string;
   courseCreator?: string;
+  language?: "en" | "ur";
 }
 
 export default function Certificate({
@@ -22,7 +25,16 @@ export default function Certificate({
   className = "",
   courseLevel,
   courseCreator,
+  language: propLanguage,
 }: CertificateProps) {
+  const { language: contextLanguage } = useLanguage();
+  const { t } = useTranslation();
+  const language = propLanguage || contextLanguage;
+  
+  const [translatedDescription, setTranslatedDescription] = useState<string | undefined>(description);
+  const [translatedCourseTitle, setTranslatedCourseTitle] = useState<string>(courseTitle);
+  const [translationReady, setTranslationReady] = useState(false);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
@@ -31,6 +43,63 @@ export default function Certificate({
       day: "numeric",
     });
   };
+
+  // Translate dynamic content when language changes
+  useEffect(() => {
+    if (language === "en") {
+      setTranslatedDescription(description);
+      setTranslatedCourseTitle(courseTitle);
+      setTranslationReady(true);
+      return;
+    }
+
+    const translateContent = async () => {
+      try {
+        setTranslationReady(false);
+        const { translateService } = await import("@/services/translateService");
+        
+        const textsToTranslate: string[] = [];
+        if (description) textsToTranslate.push(description);
+        if (courseTitle) textsToTranslate.push(courseTitle);
+        
+        if (textsToTranslate.length > 0) {
+          const translatedTexts = await translateService.translateBatch(textsToTranslate);
+          
+          if (description) {
+            const descIndex = textsToTranslate.indexOf(description);
+            setTranslatedDescription(descIndex >= 0 ? translatedTexts[descIndex] : description);
+          } else {
+            setTranslatedDescription(undefined);
+          }
+          
+          if (courseTitle) {
+            const titleIndex = textsToTranslate.indexOf(courseTitle);
+            setTranslatedCourseTitle(titleIndex >= 0 ? translatedTexts[titleIndex] : courseTitle);
+          }
+        }
+        
+        setTranslationReady(true);
+      } catch (error) {
+        console.error("Error translating certificate content:", error);
+        setTranslatedDescription(description);
+        setTranslatedCourseTitle(courseTitle);
+        setTranslationReady(true);
+      }
+    };
+
+    translateContent();
+  }, [language, description, courseTitle]);
+
+  // Use translated content or fallback to original
+  const displayDescription = useMemo(() => {
+    return language === "ur" && translationReady && translatedDescription !== undefined
+      ? translatedDescription
+      : description;
+  }, [language, translationReady, translatedDescription, description]);
+
+  const displayCourseTitle = useMemo(() => {
+    return language === "ur" && translationReady ? translatedCourseTitle : courseTitle;
+  }, [language, translationReady, translatedCourseTitle, courseTitle]);
 
   return (
     <div
@@ -72,10 +141,10 @@ export default function Certificate({
       <div className="relative z-10 px-12 py-16 text-center">
         {/* Certificate Header */}
         <h1 className="text-6xl font-bold text-blue-900 mb-4 tracking-wider">
-          CERTIFICATE
+          {language === "ur" ? t("CERTIFICATE") : "CERTIFICATE"}
         </h1>
         <h2 className="text-2xl font-bold text-blue-600 mb-12 tracking-wide">
-          OF ACHIEVEMENT
+          {language === "ur" ? t("OF ACHIEVEMENT") : "OF ACHIEVEMENT"}
         </h2>
 
         {/* Recipient Name */}
@@ -90,7 +159,7 @@ export default function Certificate({
 
         {/* Description */}
         <p className="text-lg text-gray-700 mb-12 max-w-2xl mx-auto leading-relaxed">
-          {description ||
+          {displayDescription ||
             `Thank you for participating in the competition and winning the best award, which took place on ${formatDate(issuedDate)}.`}
         </p>
 
@@ -103,8 +172,8 @@ export default function Certificate({
           <div className="flex-1 text-center">
             <p className="text-gray-800 text-sm font-medium">
               {courseLevel 
-                ? `${courseLevel.charAt(0).toUpperCase() + courseLevel.slice(1)} Level`
-                : "Course Level"}
+                ? `${courseLevel.charAt(0).toUpperCase() + courseLevel.slice(1)} ${language === "ur" ? t("Level") : "Level"}`
+                : language === "ur" ? t("Course Level") : "Course Level"}
             </p>
             <div className="h-16 border-b-2 border-blue-500 w-48 mx-auto"></div>
           </div>
@@ -120,7 +189,7 @@ export default function Certificate({
 
           {/* Right - Course Creator */}
           <div className="flex-1 text-center">
-            <p className="text-blue-600 text-xs mb-0">Course Creator</p>
+            <p className="text-blue-600 text-xs mb-0">{language === "ur" ? t("Course Creator") : "Course Creator"}</p>
             <p className="text-gray-800 text-sm font-medium">
               {courseCreator || "N/A"}
             </p>
@@ -131,10 +200,10 @@ export default function Certificate({
         {/* Certificate number */}
         <div className="mt-12 pt-8 border-t border-blue-300">
           <p className="text-sm text-blue-700 font-mono">
-            Certificate No: {certificateNumber}
+            {language === "ur" ? t("Certificate No:") : "Certificate No:"} {certificateNumber}
           </p>
           <p className="text-xs text-blue-600 mt-2">
-            Issued on {formatDate(issuedDate)}
+            {language === "ur" ? t("Issued on") : "Issued on"} {formatDate(issuedDate)}
           </p>
         </div>
       </div>

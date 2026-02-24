@@ -62,6 +62,7 @@ export default function TrainingModuleDetailPage() {
   const [loadingCertificate, setLoadingCertificate] = useState(false);
   const [translationReady, setTranslationReady] = useState(false);
   const [translatedCourse, setTranslatedCourse] = useState<Course | null>(null);
+  const [translatedBadgeLabels, setTranslatedBadgeLabels] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     let cancelled = false;
@@ -192,9 +193,27 @@ export default function TrainingModuleDetailPage() {
         
         // Section labels
         "Section",
+        
+        // Badge labels
+        ...AVAILABLE_BADGES.map(badge => badge.label),
       ];
 
       await preTranslate(staticStrings);
+      
+      // Translate badge labels separately for efficient caching and Map-based lookup
+      if (language === "ur") {
+        const badgeLabels = AVAILABLE_BADGES.map(badge => badge.label);
+        const { translateService } = await import("@/services/translateService");
+        const translatedBadges = await translateService.translateBatch(badgeLabels);
+        const badgeMap = new Map<string, string>();
+        AVAILABLE_BADGES.forEach((badge, index) => {
+          badgeMap.set(badge.id, translatedBadges[index]);
+        });
+        setTranslatedBadgeLabels(badgeMap);
+      } else {
+        setTranslatedBadgeLabels(new Map());
+      }
+      
       setTranslationReady(true);
     };
 
@@ -751,7 +770,10 @@ export default function TrainingModuleDetailPage() {
                   {displayCourse.badges && displayCourse.badges.length > 0 ? (
                     displayCourse.badges.map((badgeId, index) => {
                       const Icon = getBadgeIcon(badgeId);
-                      const label = AVAILABLE_BADGES.find((b) => b.id === badgeId)?.label ?? badgeId;
+                      const originalLabel = AVAILABLE_BADGES.find((b) => b.id === badgeId)?.label ?? badgeId;
+                      const label = language === "ur" && translatedBadgeLabels.has(badgeId)
+                        ? translatedBadgeLabels.get(badgeId)!
+                        : originalLabel;
                       const isFirst = index === 0;
                       return (
                         <div

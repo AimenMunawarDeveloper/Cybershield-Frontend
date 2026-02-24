@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { ApiClient } from "@/lib/api";
 import Certificate from "@/components/Certificate";
 import { Award, Download, ArrowLeft, Loader2, Calendar, User, FileText, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CertificateData {
   _id: string;
@@ -27,10 +29,14 @@ interface CertificateData {
 export default function CertificatesPage() {
   const { getToken } = useAuth();
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, preTranslate, isTranslating } = useTranslation();
   const [certificates, setCertificates] = useState<CertificateData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCertificate, setSelectedCertificate] = useState<CertificateData | null>(null);
+  const [translationReady, setTranslationReady] = useState(false);
+  const [translatedCertificates, setTranslatedCertificates] = useState<CertificateData[]>([]);
 
   useEffect(() => {
     if (!getToken) return;
@@ -53,6 +59,139 @@ export default function CertificatesPage() {
     fetchCertificates();
   }, [getToken]);
 
+  // Pre-translate static strings when language changes (performance optimization)
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page for batch translation
+      const staticStrings = [
+        // Header
+        "Back to Dashboard",
+        "My Certificates",
+        "certificate",
+        "certificates",
+        "earned",
+        
+        // Empty state
+        "No Certificates Yet",
+        "Complete courses to earn certificates and showcase your achievements.",
+        "Browse Courses",
+        
+        // Certificate list
+        "View",
+        "Download",
+        
+        // Modal
+        "Certificate Details",
+        "Close",
+        "Download Certificate",
+        
+        // Error states
+        "Loading certificates...",
+        "Go to Dashboard",
+        
+        // Certificate text (for download)
+        "CERTIFICATE",
+        "OF ACHIEVEMENT",
+        "Course Level",
+        "Level",
+        "Course Creator",
+        "Certificate No:",
+        "Issued on",
+      ];
+
+      try {
+        await preTranslate(staticStrings);
+        setTranslationReady(true);
+      } catch (error) {
+        console.error("Error pre-translating page content:", error);
+        setTranslationReady(true); // Still allow page to render
+      }
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Translate dynamic certificate content when language or certificates change
+  useEffect(() => {
+    if (language === "en" || certificates.length === 0 || !translationReady) {
+      setTranslatedCertificates([]);
+      return;
+    }
+
+    const translateCertificates = async () => {
+      try {
+        const textsToTranslate: string[] = [];
+        const textMap: Array<{ type: string; certIndex: number; field?: string }> = [];
+
+        certificates.forEach((cert, index) => {
+          if (cert.courseTitle) {
+            textsToTranslate.push(cert.courseTitle);
+            textMap.push({ type: "courseTitle", certIndex: index });
+          }
+          if (cert.courseDescription) {
+            textsToTranslate.push(cert.courseDescription);
+            textMap.push({ type: "courseDescription", certIndex: index });
+          }
+          if (cert.course?.description) {
+            textsToTranslate.push(cert.course.description);
+            textMap.push({ type: "courseDesc", certIndex: index });
+          }
+        });
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedCertificates([]);
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Reconstruct certificates with translated content
+        const translated = certificates.map((cert, index) => {
+          const titleIndex = textMap.findIndex(m => m.type === "courseTitle" && m.certIndex === index);
+          const descIndex = textMap.findIndex(m => m.type === "courseDescription" && m.certIndex === index);
+          const courseDescIndex = textMap.findIndex(m => m.type === "courseDesc" && m.certIndex === index);
+
+          return {
+            ...cert,
+            courseTitle: titleIndex >= 0 
+              ? translatedTexts[textsToTranslate.indexOf(cert.courseTitle)]
+              : cert.courseTitle,
+            courseDescription: descIndex >= 0
+              ? translatedTexts[textsToTranslate.indexOf(cert.courseDescription || "")]
+              : cert.courseDescription,
+            course: cert.course ? {
+              ...cert.course,
+              description: courseDescIndex >= 0
+                ? translatedTexts[textsToTranslate.indexOf(cert.course.description || "")]
+                : cert.course.description,
+            } : cert.course,
+          };
+        });
+
+        setTranslatedCertificates(translated);
+      } catch (error) {
+        console.error("Error translating certificates:", error);
+        setTranslatedCertificates([]);
+      }
+    };
+
+    translateCertificates();
+  }, [certificates, language, translationReady]);
+
+  // Use translated certificates or fallback to original
+  const displayCertificates = useMemo(() => {
+    return language === "ur" && translatedCertificates.length > 0 ? translatedCertificates : certificates;
+  }, [translatedCertificates, certificates, language]);
+
   const handleDownload = async (certificate: CertificateData) => {
     try {
       const formatDate = (dateString: string) => {
@@ -64,11 +203,47 @@ export default function CertificatesPage() {
         });
       };
 
-      const courseLevel = certificate.course?.level || "";
-      const courseCreator = certificate.course?.createdByName || "Course Creator";
+      // Get translated text for certificate
+      const getTranslatedText = async (text: string): Promise<string> => {
+        if (language === "en") return text;
+        try {
+          const { translateService } = await import("@/services/translateService");
+          return await translateService.translateToUrdu(text);
+        } catch (error) {
+          console.error("Error translating text:", error);
+          return text;
+        }
+      };
+
+      // Use translated certificate if available
+      const certToUse = displayCertificates.find(c => c._id === certificate._id) || certificate;
+
+      const courseLevel = certToUse.course?.level || "";
+      const courseCreator = certToUse.course?.createdByName || t("Course Creator");
       const levelText = courseLevel 
-        ? `${courseLevel.charAt(0).toUpperCase() + courseLevel.slice(1)} Level`
-        : "Course Level";
+        ? `${courseLevel.charAt(0).toUpperCase() + courseLevel.slice(1)} ${await getTranslatedText("Level")}`
+        : await getTranslatedText(t("Course Level"));
+      
+      // Translate certificate text
+      const certificateTitle = await getTranslatedText("CERTIFICATE");
+      const achievementText = await getTranslatedText("OF ACHIEVEMENT");
+      const courseCreatorLabel = await getTranslatedText(t("Course Creator"));
+      const certificateNoLabel = await getTranslatedText(t("Certificate No:"));
+      const issuedOnLabel = await getTranslatedText(t("Issued on"));
+      
+      // Translate description and course title
+      // Use translated content if available, otherwise translate on the fly
+      const courseTitleToUse = language === "ur" && certToUse.courseTitle !== certificate.courseTitle
+        ? certToUse.courseTitle
+        : language === "ur" 
+          ? await getTranslatedText(certificate.courseTitle)
+          : certificate.courseTitle;
+      
+      // Always use the format: "Successfully completed the course xyz on xyz"
+      const descriptionBase = `Successfully completed the course "${courseTitleToUse}" on ${formatDate(certificate.completionDate)}.`;
+      const translatedDescription = language === "ur"
+        ? await getTranslatedText(descriptionBase)
+        : descriptionBase;
 
       // Create a canvas element
       const canvas = document.createElement('canvas');
@@ -135,12 +310,12 @@ export default function CertificatesPage() {
       // Draw "CERTIFICATE" title (text-6xl font-bold text-blue-900)
       ctx.fillStyle = '#1e3a8a'; // blue-900
       ctx.font = 'bold 240px Arial, sans-serif'; // text-6xl equivalent
-      ctx.fillText('CERTIFICATE', width / 2, 450);
+      ctx.fillText(certificateTitle, width / 2, 450);
 
       // Draw "OF ACHIEVEMENT" subtitle (text-2xl font-bold text-blue-600)
       ctx.fillStyle = '#2563eb'; // blue-600
       ctx.font = 'bold 96px Arial, sans-serif'; // text-2xl equivalent
-      ctx.fillText('OF ACHIEVEMENT', width / 2, 600);
+      ctx.fillText(achievementText, width / 2, 600);
 
       // Draw recipient name (text-5xl font-bold text-blue-900)
       ctx.fillStyle = '#1e3a8a'; // blue-900
@@ -159,9 +334,8 @@ export default function CertificatesPage() {
       // Draw description (text-lg text-gray-700)
       ctx.fillStyle = '#374151'; // gray-700
       ctx.font = '54px Arial, sans-serif'; // text-lg equivalent
-      const description = certificate.courseDescription || `Successfully completed the course "${certificate.courseTitle}" on ${formatDate(certificate.completionDate)}.`;
       const maxWidth = width * 0.7;
-      const lines = wrapText(ctx, description, maxWidth);
+      const lines = wrapText(ctx, translatedDescription, maxWidth);
       let yPos = 1350;
       lines.forEach((line: string) => {
         ctx.fillText(line, width / 2, yPos);
@@ -208,7 +382,7 @@ export default function CertificatesPage() {
       // Label (text-blue-600 text-xs)
       ctx.fillStyle = '#2563eb'; // blue-600
       ctx.font = '36px Arial, sans-serif'; // text-xs equivalent
-      ctx.fillText('Course Creator', width * 0.75, detailY - 40);
+      ctx.fillText(courseCreatorLabel, width * 0.75, detailY - 40);
       // Value (text-gray-800 text-sm font-medium)
       ctx.fillStyle = '#1f2937'; // gray-800
       ctx.font = '42px Arial, sans-serif'; // text-sm equivalent
@@ -232,11 +406,11 @@ export default function CertificatesPage() {
       // Certificate No (text-sm text-blue-700 font-mono)
       ctx.fillStyle = '#1e40af'; // blue-700
       ctx.font = '42px monospace'; // text-sm equivalent
-      ctx.fillText(`Certificate No: ${certificate.certificateNumber}`, width / 2, footerY + 80);
+      ctx.fillText(`${certificateNoLabel} ${certificate.certificateNumber}`, width / 2, footerY + 80);
       // Issued date (text-xs text-blue-600)
       ctx.fillStyle = '#2563eb'; // blue-600
       ctx.font = '36px Arial, sans-serif'; // text-xs equivalent
-      ctx.fillText(`Issued on ${formatDate(certificate.issuedDate)}`, width / 2, footerY + 140);
+      ctx.fillText(`${issuedOnLabel} ${formatDate(certificate.issuedDate)}`, width / 2, footerY + 140);
 
       // Draw decorative bottom line (matching component)
       const bottomLineGradient = ctx.createLinearGradient(width * 0.125, 0, width * 0.875, 0);
@@ -305,7 +479,7 @@ export default function CertificatesPage() {
       <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-[var(--neon-blue)] mx-auto mb-4" />
-          <p className="text-gray-600">Loading certificates...</p>
+          <p className="text-gray-600">{t("Loading certificates...")}</p>
         </div>
       </div>
     );
@@ -320,7 +494,7 @@ export default function CertificatesPage() {
             onClick={() => router.push("/dashboard")}
             className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)]"
           >
-            Go to Dashboard
+            {t("Go to Dashboard")}
           </button>
         </div>
       </div>
@@ -337,38 +511,38 @@ export default function CertificatesPage() {
             className="flex items-center gap-2 text-gray-600 hover:text-[var(--neon-blue)] mb-6 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            {t("Back to Dashboard")}
           </button>
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-lg bg-[var(--neon-blue)]/10 flex items-center justify-center">
               <Award className="w-5 h-5 text-[var(--neon-blue)]" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">My Certificates</h1>
+              <h1 className="text-2xl font-semibold text-gray-900">{t("My Certificates")}</h1>
             </div>
           </div>
           <p className="text-sm text-gray-600 ml-[3.25rem]">
-            {certificates.length} certificate{certificates.length !== 1 ? "s" : ""} earned
+            {displayCertificates.length} {displayCertificates.length !== 1 ? t("certificates") : t("certificate")} {t("earned")}
           </p>
         </div>
 
-        {certificates.length === 0 ? (
+        {displayCertificates.length === 0 ? (
           <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <Award className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Certificates Yet</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("No Certificates Yet")}</h3>
             <p className="text-sm text-gray-600 mb-6">
-              Complete courses to earn certificates and showcase your achievements.
+              {t("Complete courses to earn certificates and showcase your achievements.")}
             </p>
             <button
               onClick={() => router.push("/dashboard/training-modules")}
               className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
             >
-              Browse Courses
+              {t("Browse Courses")}
             </button>
           </div>
         ) : (
           <div className="space-y-4">
-            {certificates.map((cert) => (
+            {displayCertificates.map((cert) => (
               <div
                 key={cert._id}
                 className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-[var(--neon-blue)]/30 transition-all"
@@ -404,14 +578,14 @@ export default function CertificatesPage() {
                         onClick={() => setSelectedCertificate(cert)}
                         className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
                       >
-                        View
+                        {t("View")}
                       </button>
                       <button
                         onClick={() => handleDownload(cert)}
                         className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2"
                       >
                         <Download className="w-4 h-4" />
-                        Download
+                        {t("Download")}
                       </button>
                     </div>
                   </div>
@@ -432,7 +606,7 @@ export default function CertificatesPage() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">Certificate Details</h2>
+                <h2 className="text-lg font-semibold text-gray-900">{t("Certificate Details")}</h2>
                 <button
                   onClick={() => setSelectedCertificate(null)}
                   className="text-gray-400 hover:text-gray-600 transition-colors p-1"
@@ -443,26 +617,35 @@ export default function CertificatesPage() {
               </div>
               <Certificate
                 userName={selectedCertificate.userName}
-                courseTitle={selectedCertificate.courseTitle}
+                courseTitle={(() => {
+                  const cert = displayCertificates.find(c => c._id === selectedCertificate._id);
+                  return cert ? cert.courseTitle : selectedCertificate.courseTitle;
+                })()}
                 certificateNumber={selectedCertificate.certificateNumber}
                 issuedDate={selectedCertificate.issuedDate}
-                description={`Successfully completed the course "${selectedCertificate.courseTitle}" on ${new Date(selectedCertificate.completionDate).toLocaleDateString()}.`}
+                description={(() => {
+                  const cert = displayCertificates.find(c => c._id === selectedCertificate._id);
+                  const courseTitleToUse = cert?.courseTitle || selectedCertificate.courseTitle;
+                  const completionDate = new Date(selectedCertificate.completionDate).toLocaleDateString();
+                  return `Successfully completed the course "${courseTitleToUse}" on ${completionDate}.`;
+                })()}
                 courseLevel={selectedCertificate.course?.level}
                 courseCreator={selectedCertificate.course?.createdByName}
+                language={language}
               />
               <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
                 <button
                   onClick={() => setSelectedCertificate(null)}
                   className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium"
                 >
-                  Close
+                  {t("Close")}
                 </button>
                 <button
                   onClick={() => handleDownload(selectedCertificate)}
                   className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
-                  Download Certificate
+                  {t("Download Certificate")}
                 </button>
               </div>
             </div>

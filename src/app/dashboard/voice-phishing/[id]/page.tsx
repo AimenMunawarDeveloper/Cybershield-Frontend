@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter, useParams } from "next/navigation";
 import { ApiClient } from "@/lib/api";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   ArrowLeft,
   Clock,
@@ -129,11 +131,17 @@ function getScoreColor(score: number): string {
   return "text-red-400";
 }
 
-function getScoreLabel(score: number): string {
-  if (score >= 90) return "Excellent";
-  if (score >= 75) return "Good";
-  if (score >= 50) return "Fair";
-  return "Needs Improvement";
+function getScoreLabel(score: number, t?: (text: string) => string): string {
+  if (!t) {
+    if (score >= 90) return "Excellent";
+    if (score >= 75) return "Good";
+    if (score >= 50) return "Fair";
+    return "Needs Improvement";
+  }
+  if (score >= 90) return t("Excellent");
+  if (score >= 75) return t("Good");
+  if (score >= 50) return t("Fair");
+  return t("Needs Improvement");
 }
 
 interface UserProfile {
@@ -148,6 +156,8 @@ export default function CallDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const conversationId = params.id as string;
+  const { language } = useLanguage();
+  const { t, preTranslate, isTranslating } = useTranslation();
   
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -158,6 +168,8 @@ export default function CallDetailsPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [translationReady, setTranslationReady] = useState(false);
+  const [translatedConversation, setTranslatedConversation] = useState<Conversation | null>(null);
 
   useEffect(() => {
     if (isLoaded && user) {
@@ -169,6 +181,200 @@ export default function CallDetailsPage() {
   useEffect(() => {
     fetchConversationDetails();
   }, [conversationId]);
+
+  // Pre-translate static strings when language changes (performance optimization)
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page for batch translation
+      const staticStrings = [
+        // Header
+        "Back to Call History",
+        "Call Details",
+        
+        // Recording Player
+        "Call Recording",
+        "Listen to the full conversation",
+        "Recording is being processed or is not available yet. Please check back later.",
+        
+        // Score Card
+        "Security Score",
+        "Excellent",
+        "Good",
+        "Fair",
+        "Needs Improvement",
+        "Fell for phishing attempt",
+        "Resisted phishing attempt",
+        "Provided sensitive information:",
+        "Resistance Level:",
+        
+        // Analysis
+        "Analysis",
+        
+        // Transcript
+        "Transcript",
+        "No transcript available",
+        
+        // Call Info
+        "Call Information",
+        "Phishing",
+        "Normal",
+        
+        // Metadata
+        "Metadata",
+        "Connection:",
+        
+        // Error states
+        "Error",
+        "Conversation not found",
+        "Go Back",
+      ];
+
+      try {
+        await preTranslate(staticStrings);
+        setTranslationReady(true);
+      } catch (error) {
+        console.error("Error pre-translating page content:", error);
+        setTranslationReady(true); // Still allow page to render
+      }
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Translate dynamic conversation content when language or conversation changes
+  useEffect(() => {
+    if (language === "en" || !conversation || !translationReady) {
+      setTranslatedConversation(null);
+      return;
+    }
+
+    const translateConversation = async () => {
+      try {
+        const textsToTranslate: string[] = [];
+        const textMap: Array<{ type: string; field?: string; index?: number }> = [];
+
+        // Scenario description
+        if (conversation.scenarioDescription) {
+          textsToTranslate.push(conversation.scenarioDescription);
+          textMap.push({ type: "scenarioDescription" });
+        }
+
+        // Transcript messages
+        if (conversation.transcript && conversation.transcript.length > 0) {
+          conversation.transcript.forEach((msg, index) => {
+            if (msg.message) {
+              textsToTranslate.push(msg.message);
+              textMap.push({ type: "transcript", index });
+            }
+          });
+        }
+
+        // Full transcript
+        if (conversation.fullTranscript) {
+          textsToTranslate.push(conversation.fullTranscript);
+          textMap.push({ type: "fullTranscript" });
+        }
+
+        // Analysis rationale
+        if (conversation.scoreDetails?.analysisRationale) {
+          textsToTranslate.push(conversation.scoreDetails.analysisRationale);
+          textMap.push({ type: "analysisRationale" });
+        }
+
+        // Sensitive info types
+        if (conversation.scoreDetails?.sensitiveInfoTypes) {
+          conversation.scoreDetails.sensitiveInfoTypes.forEach((infoType, index) => {
+            textsToTranslate.push(infoType);
+            textMap.push({ type: "sensitiveInfoType", index });
+          });
+        }
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedConversation(null);
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Reconstruct conversation with translated content
+        const translated: Conversation = {
+          ...conversation,
+          scenarioDescription: (() => {
+            const descIndex = textMap.findIndex(m => m.type === "scenarioDescription");
+            if (descIndex >= 0) {
+              const originalIndex = textsToTranslate.indexOf(conversation.scenarioDescription);
+              return originalIndex >= 0 ? translatedTexts[originalIndex] : conversation.scenarioDescription;
+            }
+            return conversation.scenarioDescription;
+          })(),
+          transcript: conversation.transcript ? conversation.transcript.map((msg, index) => {
+            const msgIndex = textMap.findIndex(m => m.type === "transcript" && m.index === index);
+            if (msgIndex >= 0) {
+              const originalIndex = textsToTranslate.indexOf(msg.message);
+              return {
+                ...msg,
+                message: originalIndex >= 0 ? translatedTexts[originalIndex] : msg.message,
+              };
+            }
+            return msg;
+          }) : conversation.transcript,
+          fullTranscript: (() => {
+            const fullIndex = textMap.findIndex(m => m.type === "fullTranscript");
+            if (fullIndex >= 0) {
+              const originalIndex = textsToTranslate.indexOf(conversation.fullTranscript);
+              return originalIndex >= 0 ? translatedTexts[originalIndex] : conversation.fullTranscript;
+            }
+            return conversation.fullTranscript;
+          })(),
+          scoreDetails: conversation.scoreDetails ? {
+            ...conversation.scoreDetails,
+            analysisRationale: (() => {
+              const rationaleIndex = textMap.findIndex(m => m.type === "analysisRationale");
+              if (rationaleIndex >= 0) {
+                const originalIndex = textsToTranslate.indexOf(conversation.scoreDetails!.analysisRationale);
+                return originalIndex >= 0 ? translatedTexts[originalIndex] : conversation.scoreDetails!.analysisRationale;
+              }
+              return conversation.scoreDetails!.analysisRationale;
+            })(),
+            sensitiveInfoTypes: conversation.scoreDetails.sensitiveInfoTypes ? conversation.scoreDetails.sensitiveInfoTypes.map((infoType, index) => {
+              const typeIndex = textMap.findIndex(m => m.type === "sensitiveInfoType" && m.index === index);
+              if (typeIndex >= 0) {
+                const originalIndex = textsToTranslate.indexOf(infoType);
+                return originalIndex >= 0 ? translatedTexts[originalIndex] : infoType;
+              }
+              return infoType;
+            }) : conversation.scoreDetails.sensitiveInfoTypes,
+          } : conversation.scoreDetails,
+        };
+
+        setTranslatedConversation(translated);
+      } catch (error) {
+        console.error("Error translating conversation:", error);
+        setTranslatedConversation(null);
+      }
+    };
+
+    translateConversation();
+  }, [conversation, language, translationReady]);
+
+  // Use translated conversation or fallback to original
+  const displayConversation = useMemo(() => {
+    return language === "ur" && translatedConversation ? translatedConversation : conversation;
+  }, [translatedConversation, conversation, language]);
+
+  // Memoized score label function
+  const getDisplayScoreLabel = useCallback((score: number) => {
+    return getScoreLabel(score, t);
+  }, [t]);
 
   const fetchProfile = async () => {
     try {
@@ -195,7 +401,8 @@ export default function CallDetailsPage() {
   // Update time and duration for audio player
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !conversation?.recordingUrl) return;
+    const currentConversation = displayConversation || conversation;
+    if (!audio || !currentConversation?.recordingUrl) return;
 
     // Reset audio when URL changes
     audio.load();
@@ -228,7 +435,7 @@ export default function CallDetailsPage() {
       audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('error', handleError);
     };
-  }, [conversation?.recordingUrl]);
+  }, [conversation?.recordingUrl, displayConversation?.recordingUrl]);
 
   const formatTime = (seconds: number): string => {
     if (isNaN(seconds)) return '0:00';
@@ -323,13 +530,13 @@ export default function CallDetailsPage() {
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-white mb-2">Error</h2>
-            <p className="text-[var(--medium-grey)] mb-6">{error || "Conversation not found"}</p>
+            <h2 className="text-2xl font-semibold text-white mb-2">{t("Error")}</h2>
+            <p className="text-[var(--medium-grey)] mb-6">{error || t("Conversation not found")}</p>
             <button
               onClick={() => router.back()}
               className="px-6 py-3 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors"
             >
-              Go Back
+              {t("Go Back")}
             </button>
           </div>
         </div>
@@ -365,24 +572,24 @@ export default function CallDetailsPage() {
             className="flex items-center gap-2 text-[var(--light-blue)] hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span>Back to Call History</span>
+            <span>{t("Back to Call History")}</span>
           </button>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">Call Details</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-white">{t("Call Details")}</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8 md:space-y-10">
             {/* Recording Player */}
-            {conversation.recordingUrl ? (
+            {displayConversation?.recordingUrl ? (
               <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20 shadow-xl">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-xl bg-[var(--neon-blue)]/20 border border-[var(--neon-blue)]/30">
                     <Volume2 className="w-6 h-6 text-[var(--neon-blue)]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-white">Call Recording</h2>
-                    <p className="text-sm text-[var(--medium-grey)]">Listen to the full conversation</p>
+                    <h2 className="text-xl font-semibold text-white">{t("Call Recording")}</h2>
+                    <p className="text-sm text-[var(--medium-grey)]">{t("Listen to the full conversation")}</p>
                   </div>
                 </div>
                 
@@ -451,9 +658,9 @@ export default function CallDetailsPage() {
                   </div>
                   
                   {/* Audio Element (visually hidden but accessible) */}
-                  <audio
+                    <audio
                     ref={audioRef}
-                    src={conversation.recordingUrl}
+                    src={displayConversation.recordingUrl}
                     preload="auto"
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
@@ -475,66 +682,66 @@ export default function CallDetailsPage() {
                   />
                 </div>
               </div>
-            ) : conversation.elevenLabsConversationId ? (
+            ) : displayConversation?.elevenLabsConversationId ? (
               <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="p-2 rounded-xl bg-[var(--medium-grey)]/20 border border-[var(--medium-grey)]/30">
                     <Volume2 className="w-6 h-6 text-[var(--medium-grey)]" />
                   </div>
-                  <h2 className="text-xl font-semibold text-white">Call Recording</h2>
+                  <h2 className="text-xl font-semibold text-white">{t("Call Recording")}</h2>
                 </div>
                 <p className="text-[var(--medium-grey)] text-sm">
-                  Recording is being processed or is not available yet. Please check back later.
+                  {t("Recording is being processed or is not available yet. Please check back later.")}
                 </p>
               </div>
             ) : null}
 
             {/* Score Card */}
-            {conversation.score !== null && (
+            {displayConversation?.score !== null && displayConversation?.score !== undefined && (
               <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <Trophy className="w-8 h-8 text-yellow-400" />
-                    <h2 className="text-2xl font-semibold text-white">Security Score</h2>
+                    <h2 className="text-2xl font-semibold text-white">{t("Security Score")}</h2>
                   </div>
                   <span
-                    className={`text-5xl font-bold ${getScoreColor(conversation.score)}`}
+                    className={`text-5xl font-bold ${getScoreColor(displayConversation.score)}`}
                   >
-                    {conversation.score}
+                    {displayConversation.score}
                   </span>
                 </div>
                 <div className="text-center mb-6">
                   <p className="text-lg text-[var(--medium-grey)]">
-                    {getScoreLabel(conversation.score)}
+                    {getDisplayScoreLabel(displayConversation.score)}
                   </p>
                 </div>
 
-                {conversation.scoreDetails && (
+                {displayConversation.scoreDetails && (
                   <div className="space-y-4 pt-6 border-t border-[var(--medium-grey)]/20">
                     <div className="flex items-center gap-2">
-                      {conversation.scoreDetails.fellForPhishing ? (
+                      {displayConversation.scoreDetails.fellForPhishing ? (
                         <XCircle className="w-5 h-5 text-red-400" />
                       ) : (
                         <CheckCircle className="w-5 h-5 text-green-400" />
                       )}
                       <span className="text-white">
-                        {conversation.scoreDetails.fellForPhishing
-                          ? "Fell for phishing attempt"
-                          : "Resisted phishing attempt"}
+                        {displayConversation.scoreDetails.fellForPhishing
+                          ? t("Fell for phishing attempt")
+                          : t("Resisted phishing attempt")}
                       </span>
                     </div>
                     
-                    {conversation.scoreDetails.providedSensitiveInfo && (
+                    {displayConversation.scoreDetails.providedSensitiveInfo && (
                       <div className="text-red-400">
-                        Provided sensitive information:{" "}
-                        {conversation.scoreDetails.sensitiveInfoTypes.join(", ")}
+                        {t("Provided sensitive information:")}{" "}
+                        {displayConversation.scoreDetails.sensitiveInfoTypes?.join(", ")}
                       </div>
                     )}
                     
                     <div className="text-[var(--medium-grey)]">
-                      Resistance Level:{" "}
+                      {t("Resistance Level:")}{" "}
                       <span className="text-white capitalize">
-                        {conversation.scoreDetails.resistanceLevel}
+                        {displayConversation.scoreDetails.resistanceLevel}
                       </span>
                     </div>
                   </div>
@@ -543,14 +750,14 @@ export default function CallDetailsPage() {
             )}
 
             {/* Analysis Rationale */}
-            {conversation.scoreDetails?.analysisRationale && (
+            {displayConversation?.scoreDetails?.analysisRationale && (
               <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
                 <div className="flex items-center gap-3 mb-4">
                   <BarChart3 className="w-6 h-6 text-[var(--neon-blue)]" />
-                  <h2 className="text-xl font-semibold text-white">Analysis</h2>
+                  <h2 className="text-xl font-semibold text-white">{t("Analysis")}</h2>
                 </div>
                 <div className="text-sm text-[var(--medium-grey)] leading-relaxed">
-                  {formatMarkdown(conversation.scoreDetails.analysisRationale)}
+                  {formatMarkdown(displayConversation.scoreDetails.analysisRationale)}
                 </div>
               </div>
             )}
@@ -559,12 +766,12 @@ export default function CallDetailsPage() {
             <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
               <div className="flex items-center gap-3 mb-6">
                 <MessageSquare className="w-6 h-6 text-[var(--neon-blue)]" />
-                <h2 className="text-xl font-semibold text-white">Transcript</h2>
+                <h2 className="text-xl font-semibold text-white">{t("Transcript")}</h2>
               </div>
               
-              {conversation.transcript && conversation.transcript.length > 0 ? (
+              {displayConversation?.transcript && displayConversation.transcript.length > 0 ? (
                 <div className="space-y-4">
-                  {conversation.transcript.map((msg, index) => (
+                  {displayConversation.transcript.map((msg, index) => (
                     <div
                       key={index}
                       className={`flex gap-4 ${
@@ -593,15 +800,15 @@ export default function CallDetailsPage() {
                     </div>
                   ))}
                 </div>
-              ) : conversation.fullTranscript ? (
+              ) : displayConversation?.fullTranscript ? (
                 <div className="bg-[var(--navy-blue-lighter)]/50 rounded-xl p-4">
                   <p className="text-white whitespace-pre-wrap text-sm leading-relaxed">
-                    {conversation.fullTranscript}
+                    {displayConversation.fullTranscript}
                   </p>
                 </div>
               ) : (
                 <div className="text-center py-8 text-[var(--medium-grey)]">
-                  No transcript available
+                  {t("No transcript available")}
                 </div>
               )}
             </div>
@@ -613,7 +820,7 @@ export default function CallDetailsPage() {
             <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 border border-[var(--neon-blue)]/20">
               <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[var(--neon-blue)]" />
-                Call Information
+                {t("Call Information")}
               </h3>
               
               <div className="space-y-4">
@@ -621,49 +828,49 @@ export default function CallDetailsPage() {
                   <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm mb-1">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        conversation.scenarioType === "phishing"
+                        displayConversation?.scenarioType === "phishing"
                           ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
                           : "bg-green-500/20 text-green-400 border border-green-500/30"
                       }`}
                     >
-                      {conversation.scenarioType === "phishing" ? "Phishing" : "Normal"}
+                      {displayConversation?.scenarioType === "phishing" ? t("Phishing") : t("Normal")}
                     </span>
                   </div>
-                  <p className="text-white text-sm">{conversation.scenarioDescription}</p>
+                  <p className="text-white text-sm">{displayConversation?.scenarioDescription}</p>
                 </div>
 
                 <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm">
                   <Calendar className="w-4 h-4" />
-                  <span>{formatDate(conversation.createdAt)}</span>
+                  <span>{displayConversation ? formatDate(displayConversation.createdAt) : ""}</span>
                 </div>
 
-                {conversation.duration > 0 && (
+                {displayConversation && displayConversation.duration > 0 && (
                   <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm">
                     <Clock className="w-4 h-4" />
-                    <span>{formatDuration(conversation.duration)}</span>
+                    <span>{formatDuration(displayConversation.duration)}</span>
                   </div>
                 )}
 
                 <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm">
                   <Phone className="w-4 h-4" />
-                  <span className="capitalize">{conversation.status}</span>
+                  <span className="capitalize">{displayConversation?.status}</span>
                 </div>
               </div>
             </div>
 
             {/* Metadata Card */}
-            {conversation.metadata && (
+            {displayConversation?.metadata && (
               <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 border border-[var(--neon-blue)]/20">
-                <h3 className="text-lg font-semibold text-white mb-4">Metadata</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">{t("Metadata")}</h3>
                 <div className="space-y-2 text-sm">
-                  {conversation.metadata.connectionType && (
+                  {displayConversation.metadata.connectionType && (
                     <div className="text-[var(--medium-grey)]">
-                      Connection: <span className="text-white capitalize">{conversation.metadata.connectionType}</span>
+                      {t("Connection:")} <span className="text-white capitalize">{displayConversation.metadata.connectionType}</span>
                     </div>
                   )}
-                  {conversation.metadata.userAgent && (
+                  {displayConversation.metadata.userAgent && (
                     <div className="text-[var(--medium-grey)]">
-                      <div className="text-xs break-all">{conversation.metadata.userAgent}</div>
+                      <div className="text-xs break-all">{displayConversation.metadata.userAgent}</div>
                     </div>
                   )}
                 </div>

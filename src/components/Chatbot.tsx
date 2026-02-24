@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { MessageSquare, X, Send, Minimize2, Bot, User } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface Message {
   id: string;
@@ -185,30 +187,215 @@ const loadMessagesFromStorage = (): Message[] | null => {
   }
 };
 
-const getInitialMessages = (): Message[] => {
+const getInitialMessages = (language: "en" | "ur"): Message[] => {
   const stored = loadMessagesFromStorage();
   if (stored && stored.length > 0) {
     return stored;
   }
+  const initialMessage = language === "ur"
+    ? "ہیلو! میں سینٹرا ہوں، آپ کا سائبر شیلڈ اسسٹنٹ۔ میں آپ کی سائبرسیکیوریٹی کے سوالات میں کیسے مدد کر سکتا ہوں؟"
+    : "Hello! I'm Sentra, your CyberShield assistant. How can I help you with cybersecurity questions today?";
+  
   return [
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I'm Sentra, your CyberShield assistant. How can I help you with cybersecurity questions today?",
+      content: initialMessage,
       timestamp: new Date(),
     },
   ];
 };
 
 export default function Chatbot() {
+  const { language } = useLanguage();
+  const { t, preTranslate, isTranslating } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(getInitialMessages);
+  const [translationReady, setTranslationReady] = useState(false);
+  const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(language));
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { getToken } = useAuth();
+
+  // Pre-translate static strings when language changes
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      const staticStrings = [
+        "We typically reply in seconds",
+        "Type your message...",
+        "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+        "Hello! I'm Sentra, your CyberShield assistant. How can I help you with cybersecurity questions today?",
+      ];
+
+      try {
+        await preTranslate(staticStrings);
+        setTranslationReady(true);
+      } catch (error) {
+        console.error("Error pre-translating chatbot content:", error);
+        setTranslationReady(true);
+      }
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Update messages when language changes - translate all existing messages
+  useEffect(() => {
+    const stored = loadMessagesFromStorage();
+    const initialMessageEn = "Hello! I'm Sentra, your CyberShield assistant. How can I help you with cybersecurity questions today?";
+    const initialMessageUr = "ہیلو! میں سینٹرا ہوں، آپ کا سائبر شیلڈ اسسٹنٹ۔ میں آپ کی سائبرسیکیوریٹی کے سوالات میں کیسے مدد کر سکتا ہوں؟";
+    const correctInitialMessage = language === "ur" ? initialMessageUr : initialMessageEn;
+    
+    if (!stored || stored.length === 0) {
+      // No stored messages - create new initial message
+      const newMessage: Message = {
+        id: "1",
+        role: "assistant",
+        content: correctInitialMessage,
+        timestamp: new Date(),
+      };
+      setMessages([newMessage]);
+      saveMessagesToStorage([newMessage]);
+      return;
+    }
+
+    // Translate all messages when language changes
+    const translateMessages = async () => {
+      try {
+        // Check if first message is the initial greeting
+        const firstMessage = stored[0];
+        const isInitialGreeting = firstMessage && firstMessage.id === "1" && firstMessage.role === "assistant";
+        
+        // Collect all messages that need translation
+        const messagesToTranslate = stored.map((msg) => {
+          // Handle initial greeting specially
+          if (isInitialGreeting && msg.id === "1" && msg.role === "assistant") {
+            return correctInitialMessage;
+          }
+          return msg.content;
+        });
+
+        // Translate all messages based on target language
+        const { translateService } = await import("@/services/translateService");
+        
+        let translatedTexts: string[];
+        
+        if (language === "en") {
+          // Check if messages contain Urdu characters (indicating they're in Urdu)
+          const hasUrduChars = messagesToTranslate.some(text => 
+            /[\u0600-\u06FF]/.test(text) && text !== initialMessageEn && text !== initialMessageUr
+          );
+          
+          if (hasUrduChars) {
+            // Messages are in Urdu, translate to English using Google Translate API directly
+            // We'll use the translate method with auto-detection
+            const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_TRANSLATE_API_KEY || "";
+            const textsNeedingTranslation = messagesToTranslate.map((text, index) => {
+              // Handle initial greeting specially
+              if (isInitialGreeting && index === 0 && text === initialMessageUr) {
+                return null; // Will be handled separately
+              }
+              // Only translate if it contains Urdu characters
+              return /[\u0600-\u06FF]/.test(text) ? text : null;
+            });
+            
+            // Translate Urdu messages to English
+            const urduTexts = textsNeedingTranslation.filter((t): t is string => t !== null);
+            const translatedFromUrdu = urduTexts.length > 0 
+              ? await Promise.all(
+                  urduTexts.map(async (text) => {
+                    try {
+                      const response = await fetch(
+                        `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(API_KEY)}`,
+                        {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            q: [text],
+                            target: "en",
+                            source: "ur",
+                            format: "text",
+                          }),
+                        }
+                      );
+                      const result = await response.json();
+                      return result.data?.translations?.[0]?.translatedText || text;
+                    } catch (error) {
+                      console.error("Error translating from Urdu:", error);
+                      return text;
+                    }
+                  })
+                )
+              : [];
+            
+            // Reconstruct messages with translations
+            let urduIndex = 0;
+            translatedTexts = messagesToTranslate.map((text, index) => {
+              if (isInitialGreeting && index === 0 && text === initialMessageUr) {
+                return correctInitialMessage;
+              }
+              if (textsNeedingTranslation[index] !== null) {
+                return translatedFromUrdu[urduIndex++];
+              }
+              return text; // Already in English
+            });
+          } else {
+            // Messages are already in English, just update initial greeting if needed
+            translatedTexts = messagesToTranslate.map((text, index) => {
+              if (isInitialGreeting && index === 0 && text === initialMessageUr) {
+                return correctInitialMessage;
+              }
+              return text;
+            });
+          }
+        } else {
+          // Translate to Urdu
+          translatedTexts = await translateService.translateBatch(messagesToTranslate);
+          // Update initial greeting if needed
+          if (isInitialGreeting && translatedTexts[0] !== correctInitialMessage) {
+            translatedTexts[0] = correctInitialMessage;
+          }
+        }
+
+        // Reconstruct messages with translated content
+        const updatedMessages = stored.map((msg, index) => {
+          // Handle initial greeting
+          if (isInitialGreeting && index === 0 && msg.id === "1" && msg.role === "assistant") {
+            return { ...msg, content: correctInitialMessage };
+          }
+          // Translate other messages
+          return {
+            ...msg,
+            content: translatedTexts[index] || msg.content,
+          };
+        });
+
+        setMessages(updatedMessages);
+        saveMessagesToStorage(updatedMessages);
+      } catch (error) {
+        console.error("Error translating messages:", error);
+        // On error, at least update the initial message
+        const updatedMessages = stored.map((msg, index) => {
+          if (index === 0 && msg.id === "1" && msg.role === "assistant") {
+            return { ...msg, content: correctInitialMessage };
+          }
+          return msg;
+        });
+        setMessages(updatedMessages);
+      }
+    };
+
+    translateMessages();
+  }, [language]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -271,6 +458,7 @@ export default function Chatbot() {
         body: JSON.stringify({
           message: userMessage.content,
           conversationHistory,
+          language: language, // Send language preference to backend
         }),
       });
 
@@ -293,7 +481,9 @@ export default function Chatbot() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
+        content: language === "ur" 
+          ? t("Sorry, I'm having trouble connecting right now. Please try again in a moment.")
+          : "Sorry, I'm having trouble connecting right now. Please try again in a moment.",
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -322,14 +512,18 @@ export default function Chatbot() {
     setIsOpen(false);
     setIsMinimized(false);
     // Clear conversation history when user explicitly closes chat
-    const initialMessage: Message = {
+    const initialMessage = language === "ur"
+      ? "ہیلو! میں سینٹرا ہوں، آپ کا سائبر شیلڈ اسسٹنٹ۔ میں آپ کی سائبرسیکیوریٹی کے سوالات میں کیسے مدد کر سکتا ہوں؟"
+      : "Hello! I'm Sentra, your CyberShield assistant. How can I help you with cybersecurity questions today?";
+    
+    const message: Message = {
       id: "1",
       role: "assistant",
-      content: "Hello! I'm Sentra, your CyberShield assistant. How can I help you with cybersecurity questions today?",
+      content: initialMessage,
       timestamp: new Date(),
     };
-    setMessages([initialMessage]);
-    saveMessagesToStorage([initialMessage]);
+    setMessages([message]);
+    saveMessagesToStorage([message]);
   };
 
   return (
@@ -355,7 +549,7 @@ export default function Chatbot() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">Sentra</h3>
-                  <p className="text-xs text-white/80">We typically reply in seconds</p>
+                  <p className="text-xs text-white/80">{language === "ur" ? t("We typically reply in seconds") : "We typically reply in seconds"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -442,7 +636,7 @@ export default function Chatbot() {
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      placeholder="Type your message..."
+                      placeholder={language === "ur" ? t("Type your message...") : "Type your message..."}
                       className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-sm text-gray-900 placeholder:text-gray-500 bg-white"
                       disabled={isLoading}
                     />
