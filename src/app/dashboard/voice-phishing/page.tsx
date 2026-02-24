@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useConversation } from "@elevenlabs/react";
@@ -26,6 +26,8 @@ import {
   Trash2,
 } from "lucide-react";
 import NetworkBackground from "@/components/NetworkBackground";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Simple markdown formatter for analysis rationale
 function formatMarkdown(text: string): React.ReactElement[] {
@@ -132,6 +134,8 @@ export default function VoicePhishingPage() {
   const { getToken } = useAuth();
   const { user, isLoaded } = useUser();
   const router = useRouter();
+  const { language } = useLanguage();
+  const { t, preTranslate, isTranslating } = useTranslation();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [conversationId, setConversationId] = useState<string | null>(null);
@@ -169,6 +173,18 @@ export default function VoicePhishingPage() {
     type: "phishing" as "phishing" | "normal",
     firstMessage: "",
   });
+  const [translationReady, setTranslationReady] = useState(false);
+  const [translatedTemplates, setTranslatedTemplates] = useState<any[]>([]);
+  const [translatedConversations, setTranslatedConversations] = useState<Conversation[]>([]);
+  const [translatedScenario, setTranslatedScenario] = useState<{
+    type: "phishing" | "normal";
+    description: string;
+    firstMessage?: string;
+    variables?: {
+      scenario_type: string;
+      scenario_description: string;
+    };
+  } | null>(null);
 
   const conversation = useConversation({
     overrides: conversationOverrides,
@@ -229,7 +245,7 @@ export default function VoicePhishingPage() {
     },
     onError: (error: any) => {
       console.error("Conversation error:", error);
-      setError(error?.message || error?.toString() || "An error occurred during the conversation");
+      setError(error?.message || error?.toString() || t("An error occurred during the conversation"));
     },
   });
 
@@ -276,7 +292,7 @@ export default function VoicePhishingPage() {
         setPendingStart(null);
       } catch (error: any) {
         console.error("Failed to start session:", error);
-        setError(error.message || "Failed to start conversation");
+        setError(error.message || t("Failed to start conversation"));
         setLoading(false);
         setPendingStart(null);
       }
@@ -312,6 +328,270 @@ export default function VoicePhishingPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
+
+  // Pre-translate static strings when language changes (performance optimization)
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page for batch translation
+      const staticStrings = [
+        // Page header
+        "Voice Phishing Simulation",
+        "Test your ability to resist phishing attempts through voice calls",
+        
+        // Status messages
+        "Connecting...",
+        "Calculating score...",
+        "Call in progress...",
+        "Ready to start",
+        "Setting up your voice phishing simulation",
+        "Analyzing your conversation and generating your security score",
+        "Listen carefully and respond to the caller",
+        "Click the microphone to start a call",
+        
+        // Scenario types
+        "Phishing Scenario",
+        "Normal Scenario",
+        "Phishing",
+        "Normal",
+        
+        // Score labels
+        "Not scored",
+        "Excellent",
+        "Good",
+        "Fair",
+        "Poor",
+        "Very Poor",
+        
+        // Score details
+        "Call Completed",
+        "Fell for phishing attempt",
+        "Resisted phishing attempt",
+        "Provided sensitive information:",
+        "Resistance Level:",
+        
+        // Buttons
+        "Start New Call",
+        "Transcript",
+        "Conversation Transcript",
+        "Waiting for conversation to start...",
+        "Start a call to see the transcript here",
+        "You",
+        "Agent",
+        
+        // Templates section
+        "Scenario Templates",
+        "Create Template",
+        "No templates found",
+        "Create your first scenario template",
+        "Edit Template",
+        "Create Template",
+        "Title",
+        "Enter template title",
+        "Description",
+        "Enter scenario description",
+        "Type",
+        "First Message",
+        "Enter the first message the agent will say",
+        "Update Template",
+        "Cancel",
+        
+        // Call history
+        "Call History",
+        "No previous calls",
+        "Your call history will appear here",
+        
+        // Error messages
+        "Authentication required. Please log in again.",
+        "Failed to initiate conversation",
+        "Microphone access denied. Please allow microphone access.",
+        "ElevenLabs agent ID not configured. Please set NEXT_PUBLIC_ELEVENLABS_AGENT_ID in your environment variables.",
+        "Failed to start conversation",
+        "Request timed out. The analysis is taking longer than expected. Please try again.",
+        "Failed to end conversation. Please check your connection and try again.",
+        "An error occurred during the conversation",
+        "Are you sure you want to delete this template?",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Translate dynamic template content when language or templates change
+  useEffect(() => {
+    if (language === "en" || templates.length === 0 || !translationReady) {
+      setTranslatedTemplates(templates);
+      return;
+    }
+
+    const translateTemplates = async () => {
+      try {
+        const textsToTranslate: string[] = [];
+        const textMap: Array<{ type: string; templateIndex: number; field: string }> = [];
+
+        templates.forEach((template, index) => {
+          if (template.title) {
+            textsToTranslate.push(template.title);
+            textMap.push({ type: "title", templateIndex: index, field: "title" });
+          }
+          if (template.description) {
+            textsToTranslate.push(template.description);
+            textMap.push({ type: "description", templateIndex: index, field: "description" });
+          }
+          if (template.firstMessage) {
+            textsToTranslate.push(template.firstMessage);
+            textMap.push({ type: "firstMessage", templateIndex: index, field: "firstMessage" });
+          }
+        });
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedTemplates(templates);
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Reconstruct templates with translated content
+        const translated = templates.map((template, index) => {
+          const titleIndex = textMap.findIndex(m => m.type === "title" && m.templateIndex === index);
+          const descriptionIndex = textMap.findIndex(m => m.type === "description" && m.templateIndex === index);
+          const firstMessageIndex = textMap.findIndex(m => m.type === "firstMessage" && m.templateIndex === index);
+
+          return {
+            ...template,
+            title: titleIndex >= 0 ? translatedTexts[textsToTranslate.indexOf(template.title || "")] : template.title,
+            description: descriptionIndex >= 0 ? translatedTexts[textsToTranslate.indexOf(template.description || "")] : template.description,
+            firstMessage: firstMessageIndex >= 0 ? translatedTexts[textsToTranslate.indexOf(template.firstMessage || "")] : template.firstMessage,
+          };
+        });
+
+        setTranslatedTemplates(translated);
+      } catch (error) {
+        console.error("Error translating templates:", error);
+        setTranslatedTemplates(templates);
+      }
+    };
+
+    translateTemplates();
+  }, [templates, language, translationReady]);
+
+  // Translate dynamic conversation history when language or conversations change
+  useEffect(() => {
+    if (language === "en" || conversationHistory.length === 0 || !translationReady) {
+      setTranslatedConversations(conversationHistory);
+      return;
+    }
+
+    const translateConversations = async () => {
+      try {
+        const textsToTranslate: string[] = [];
+        const textMap: Array<{ type: string; convIndex: number }> = [];
+
+        conversationHistory.forEach((conv, index) => {
+          if (conv.scenarioDescription) {
+            textsToTranslate.push(conv.scenarioDescription);
+            textMap.push({ type: "scenarioDescription", convIndex: index });
+          }
+        });
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedConversations(conversationHistory);
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Reconstruct conversations with translated content
+        const translated = conversationHistory.map((conv, index) => {
+          const descIndex = textMap.findIndex(m => m.type === "scenarioDescription" && m.convIndex === index);
+          return {
+            ...conv,
+            scenarioDescription: descIndex >= 0 
+              ? translatedTexts[textsToTranslate.indexOf(conv.scenarioDescription || "")]
+              : conv.scenarioDescription,
+          };
+        });
+
+        setTranslatedConversations(translated);
+      } catch (error) {
+        console.error("Error translating conversations:", error);
+        setTranslatedConversations(conversationHistory);
+      }
+    };
+
+    translateConversations();
+  }, [conversationHistory, language, translationReady]);
+
+  // Use translated data or fallback to original
+  const displayTemplates = useMemo(() => {
+    return language === "ur" && translatedTemplates.length > 0 ? translatedTemplates : templates;
+  }, [translatedTemplates, templates, language]);
+
+  const displayConversations = useMemo(() => {
+    return language === "ur" && translatedConversations.length > 0 ? translatedConversations : conversationHistory;
+  }, [translatedConversations, conversationHistory, language]);
+
+  // Translate current scenario when language or scenario changes
+  useEffect(() => {
+    if (language === "en" || !scenario || !translationReady) {
+      setTranslatedScenario(null);
+      return;
+    }
+
+    const translateScenario = async () => {
+      try {
+        const textsToTranslate: string[] = [];
+        if (scenario.description) {
+          textsToTranslate.push(scenario.description);
+        }
+        if (scenario.firstMessage) {
+          textsToTranslate.push(scenario.firstMessage);
+        }
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedScenario(null);
+          return;
+        }
+
+        // Batch translate
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        setTranslatedScenario({
+          ...scenario,
+          description: scenario.description 
+            ? translatedTexts[textsToTranslate.indexOf(scenario.description)]
+            : scenario.description,
+          firstMessage: scenario.firstMessage
+            ? translatedTexts[textsToTranslate.indexOf(scenario.firstMessage)]
+            : scenario.firstMessage,
+        });
+      } catch (error) {
+        console.error("Error translating scenario:", error);
+        setTranslatedScenario(null);
+      }
+    };
+
+    translateScenario();
+  }, [scenario, language, translationReady]);
+
+  // Use translated scenario or fallback to original
+  const displayScenario = useMemo(() => {
+    return language === "ur" && translatedScenario ? translatedScenario : scenario;
+  }, [translatedScenario, scenario, language]);
 
   const fetchTemplates = async () => {
     try {
@@ -364,7 +644,7 @@ export default function VoicePhishingPage() {
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
-    if (!confirm("Are you sure you want to delete this template?")) return;
+    if (!confirm(t("Are you sure you want to delete this template?"))) return;
 
     try {
       const token = await getToken();
@@ -467,7 +747,7 @@ export default function VoicePhishingPage() {
 
       const token = await getToken();
       if (!token) {
-        setError("Authentication required. Please log in again.");
+        setError(t("Authentication required. Please log in again."));
         return;
       }
 
@@ -488,7 +768,7 @@ export default function VoicePhishingPage() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        throw new Error(data.message || "Failed to initiate conversation");
+        throw new Error(data.message || t("Failed to initiate conversation"));
       }
 
       setConversationId(data.data.conversationId);
@@ -498,13 +778,13 @@ export default function VoicePhishingPage() {
       try {
         await navigator.mediaDevices.getUserMedia({ audio: true });
       } catch (micError) {
-        throw new Error("Microphone access denied. Please allow microphone access.");
+        throw new Error(t("Microphone access denied. Please allow microphone access."));
       }
 
       const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
       
       if (!agentId) {
-        throw new Error("ElevenLabs agent ID not configured. Please set NEXT_PUBLIC_ELEVENLABS_AGENT_ID in your environment variables.");
+        throw new Error(t("ElevenLabs agent ID not configured. Please set NEXT_PUBLIC_ELEVENLABS_AGENT_ID in your environment variables."));
       }
 
       const overrides: any = {
@@ -524,7 +804,7 @@ export default function VoicePhishingPage() {
       });
     } catch (error: any) {
       console.error("Failed to initiate conversation:", error);
-      setError(error.message || "Failed to start conversation");
+      setError(error.message || t("Failed to start conversation"));
       setLoading(false);
     }
   };
@@ -576,7 +856,7 @@ export default function VoicePhishingPage() {
       // End conversation on backend and get score
       const token = await getToken();
       if (!token) {
-        setError("Authentication required. Please log in again.");
+        setError(t("Authentication required. Please log in again."));
         setCalculatingScore(false);
         return;
       }
@@ -623,7 +903,7 @@ export default function VoicePhishingPage() {
       } catch (fetchError: any) {
         clearTimeout(timeoutId);
         if (fetchError.name === 'AbortError') {
-          setError("Request timed out. The analysis is taking longer than expected. Please try again.");
+          setError(t("Request timed out. The analysis is taking longer than expected. Please try again."));
         } else {
           throw fetchError;
         }
@@ -632,7 +912,7 @@ export default function VoicePhishingPage() {
       }
     } catch (error: any) {
       console.error("Failed to end conversation:", error);
-      setError(error.message || "Failed to end conversation. Please check your connection and try again.");
+      setError(error.message || t("Failed to end conversation. Please check your connection and try again."));
       setCalculatingScore(false);
     }
   };
@@ -654,14 +934,14 @@ export default function VoicePhishingPage() {
     return "text-red-400";
   };
 
-  const getScoreLabel = (score: number | null) => {
-    if (score === null) return "Not scored";
-    if (score >= 90) return "Excellent";
-    if (score >= 75) return "Good";
-    if (score >= 50) return "Fair";
-    if (score >= 25) return "Poor";
-    return "Very Poor";
-  };
+  const getScoreLabel = useCallback((score: number | null) => {
+    if (score === null) return t("Not scored");
+    if (score >= 90) return t("Excellent");
+    if (score >= 75) return t("Good");
+    if (score >= 50) return t("Fair");
+    if (score >= 25) return t("Poor");
+    return t("Very Poor");
+  }, [t]);
 
   // Show loading state while profile is loading
   if (profileLoading) {
@@ -691,9 +971,9 @@ export default function VoicePhishingPage() {
             <Phone className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Voice Phishing Simulation</h1>
+            <h1 className="text-2xl font-bold text-white">{t("Voice Phishing Simulation")}</h1>
             <p className="text-[var(--medium-grey)] text-sm">
-              Test your ability to resist phishing attempts through voice calls
+              {t("Test your ability to resist phishing attempts through voice calls")}
             </p>
           </div>
         </div>
@@ -815,36 +1095,36 @@ export default function VoicePhishingPage() {
                   <div className="text-center space-y-2">
                     <h2 className="text-xl md:text-2xl font-semibold text-white">
                       {loading 
-                        ? "Connecting..." 
+                        ? t("Connecting...") 
                         : calculatingScore 
-                          ? "Calculating score..." 
+                          ? t("Calculating score...") 
                           : isConnected 
-                            ? "Call in progress..." 
-                            : "Ready to start"}
+                            ? t("Call in progress...") 
+                            : t("Ready to start")}
                     </h2>
                     <p className="text-[var(--light-blue)] text-sm md:text-base">
                       {loading 
-                        ? "Setting up your voice phishing simulation" 
+                        ? t("Setting up your voice phishing simulation") 
                         : calculatingScore
-                          ? "Analyzing your conversation and generating your security score"
+                          ? t("Analyzing your conversation and generating your security score")
                         : isConnected 
-                          ? "Listen carefully and respond to the caller" 
-                          : "Click the microphone to start a call"
+                          ? t("Listen carefully and respond to the caller") 
+                          : t("Click the microphone to start a call")
                       }
                     </p>
                   </div>
 
                   {/* Scenario Info Badge - Only show for admins */}
-                  {scenario && isAdmin && (
+                  {displayScenario && isAdmin && (
                     <div className="px-4 py-2 bg-[var(--navy-blue-lighter)]/80 rounded-full border border-[var(--neon-blue)]/30">
                       <div className="flex items-center gap-2">
-                        {scenario.type === "phishing" ? (
+                        {displayScenario.type === "phishing" ? (
                           <AlertTriangle className="w-4 h-4 text-yellow-400" />
                         ) : (
                           <CheckCircle className="w-4 h-4 text-green-400" />
                         )}
                         <span className="text-sm text-white">
-                          {scenario.type === "phishing" ? "Phishing Scenario" : "Normal Scenario"}
+                          {displayScenario.type === "phishing" ? t("Phishing Scenario") : t("Normal Scenario")}
                         </span>
                       </div>
                     </div>
@@ -900,7 +1180,7 @@ export default function VoicePhishingPage() {
                     <Trophy className="w-12 h-12 text-yellow-400" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-semibold text-white mb-2">Call Completed</h3>
+                    <h3 className="text-xl font-semibold text-white mb-2">{t("Call Completed")}</h3>
                     <div className={`text-6xl font-bold mb-2 ${getScoreColor(score)}`}>
                       {score}
                     </div>
@@ -917,18 +1197,18 @@ export default function VoicePhishingPage() {
                           )}
                           <span className="text-white">
                             {scoreDetails.fellForPhishing
-                              ? "Fell for phishing attempt"
-                              : "Resisted phishing attempt"}
+                              ? t("Fell for phishing attempt")
+                              : t("Resisted phishing attempt")}
                           </span>
                         </div>
                         {scoreDetails.providedSensitiveInfo && (
                           <div className="text-red-400">
-                            Provided sensitive information:{" "}
+                            {t("Provided sensitive information:")}{" "}
                             {scoreDetails.sensitiveInfoTypes.join(", ")}
                           </div>
                         )}
                         <div className="text-[var(--medium-grey)]">
-                          Resistance Level:{" "}
+                          {t("Resistance Level:")}{" "}
                           <span className="text-white capitalize">
                             {scoreDetails.resistanceLevel}
                           </span>
@@ -945,7 +1225,7 @@ export default function VoicePhishingPage() {
                     onClick={cancelCall}
                     className="w-full px-6 py-4 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold text-lg shadow-lg shadow-[var(--neon-blue)]/30"
                   >
-                    Start New Call
+                    {t("Start New Call")}
                   </button>
                 </div>
               )}
@@ -961,14 +1241,14 @@ export default function VoicePhishingPage() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <FileText className="w-6 h-6 text-[var(--neon-blue)]" />
-              <h3 className="text-xl font-semibold text-white">Scenario Templates</h3>
+              <h3 className="text-xl font-semibold text-white">{t("Scenario Templates")}</h3>
             </div>
             <button
               onClick={handleCreateTemplate}
               className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors"
             >
               <Plus className="w-5 h-5" />
-              <span>Create Template</span>
+              <span>{t("Create Template")}</span>
             </button>
           </div>
 
@@ -976,17 +1256,17 @@ export default function VoicePhishingPage() {
             <div className="text-center py-12">
               <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
             </div>
-          ) : templates.length === 0 ? (
+          ) : displayTemplates.length === 0 ? (
             <div className="text-center py-12">
               <FileText className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4 opacity-50" />
-              <p className="text-[var(--medium-grey)]">No templates found</p>
+              <p className="text-[var(--medium-grey)]">{t("No templates found")}</p>
               <p className="text-[var(--medium-grey)] text-sm mt-1">
-                Create your first scenario template
+                {t("Create your first scenario template")}
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {templates.map((template) => (
+              {displayTemplates.map((template) => (
                 <div
                   key={template._id}
                   className="p-4 bg-[var(--navy-blue-lighter)]/80 rounded-xl border border-[var(--neon-blue)]/10 hover:border-[var(--neon-blue)]/30 transition-all group hover:scale-[1.02]"
@@ -999,7 +1279,7 @@ export default function VoicePhishingPage() {
                           : "bg-green-500/20 text-green-400 border border-green-500/30"
                       }`}
                     >
-                      {template.type === "phishing" ? "Phishing" : "Normal"}
+                      {template.type === "phishing" ? t("Phishing") : t("Normal")}
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -1036,18 +1316,18 @@ export default function VoicePhishingPage() {
         <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <Clock className="w-6 h-6 text-[var(--neon-blue)]" />
-            <h3 className="text-xl font-semibold text-white">Call History</h3>
+            <h3 className="text-xl font-semibold text-white">{t("Call History")}</h3>
           </div>
           
-          {conversationHistory.length === 0 ? (
+          {displayConversations.length === 0 ? (
             <div className="text-center py-12">
               <Phone className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4 opacity-50" />
-              <p className="text-[var(--medium-grey)]">No previous calls</p>
-              <p className="text-[var(--medium-grey)] text-sm mt-1">Your call history will appear here</p>
+              <p className="text-[var(--medium-grey)]">{t("No previous calls")}</p>
+              <p className="text-[var(--medium-grey)] text-sm mt-1">{t("Your call history will appear here")}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {conversationHistory.map((conv) => (
+              {displayConversations.map((conv) => (
                 <div
                   key={conv._id}
                   onClick={() => router.push(`/dashboard/voice-phishing/${conv._id}`)}
@@ -1061,7 +1341,7 @@ export default function VoicePhishingPage() {
                           : "bg-green-500/20 text-green-400 border border-green-500/30"
                       }`}
                     >
-                      {conv.scenarioType === "phishing" ? "Phishing" : "Normal"}
+                      {conv.scenarioType === "phishing" ? t("Phishing") : t("Normal")}
                     </span>
                     {conv.score !== null && (
                       <span
@@ -1102,7 +1382,7 @@ export default function VoicePhishingPage() {
           }`}
         >
           <MessageSquare className="w-5 h-5" />
-          <span className="font-medium">Transcript</span>
+          <span className="font-medium">{t("Transcript")}</span>
           {messages.length > 0 && (
             <span className="w-5 h-5 bg-[var(--neon-blue)] rounded-full text-xs flex items-center justify-center">
               {messages.length}
@@ -1122,7 +1402,7 @@ export default function VoicePhishingPage() {
           <div className="p-4 border-b border-[var(--neon-blue)]/20 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-[var(--neon-blue)]" />
-              <h3 className="font-semibold text-white">Conversation Transcript</h3>
+              <h3 className="font-semibold text-white">{t("Conversation Transcript")}</h3>
             </div>
             <button
               onClick={() => setShowTranscript(false)}
@@ -1135,8 +1415,8 @@ export default function VoicePhishingPage() {
             {messages.length === 0 ? (
               <p className="text-sm text-[var(--medium-grey)] text-center py-8">
                 {isConnected
-                  ? "Waiting for conversation to start..."
-                  : "Start a call to see the transcript here"}
+                  ? t("Waiting for conversation to start...")
+                  : t("Start a call to see the transcript here")}
               </p>
             ) : (
               messages.map((msg, index) => (
@@ -1154,7 +1434,7 @@ export default function VoicePhishingPage() {
                     }`}
                   >
                     <div className="text-xs opacity-70 mb-1">
-                      {msg.role === "user" ? "You" : "Agent"}
+                      {msg.role === "user" ? t("You") : t("Agent")}
                     </div>
                     <div className="text-sm">{msg.message}</div>
                   </div>
@@ -1172,7 +1452,7 @@ export default function VoicePhishingPage() {
           <div className="bg-[var(--navy-blue)] rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[var(--neon-blue)]/30">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-white">
-                {editingTemplate ? "Edit Template" : "Create Template"}
+                {editingTemplate ? t("Edit Template") : t("Create Template")}
               </h2>
               <button
                 onClick={() => setShowTemplateModal(false)}
@@ -1184,7 +1464,7 @@ export default function VoicePhishingPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Title</label>
+                <label className="block text-sm font-medium text-white mb-2">{t("Title")}</label>
                 <input
                   type="text"
                   value={templateForm.title}
@@ -1192,25 +1472,25 @@ export default function VoicePhishingPage() {
                     setTemplateForm({ ...templateForm, title: e.target.value })
                   }
                   className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                  placeholder="Enter template title"
+                  placeholder={t("Enter template title")}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Description</label>
+                <label className="block text-sm font-medium text-white mb-2">{t("Description")}</label>
                 <textarea
                   value={templateForm.description}
                   onChange={(e) =>
                     setTemplateForm({ ...templateForm, description: e.target.value })
                   }
                   className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                  placeholder="Enter scenario description"
+                  placeholder={t("Enter scenario description")}
                   rows={3}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white mb-2">Type</label>
+                <label className="block text-sm font-medium text-white mb-2">{t("Type")}</label>
                 <select
                   value={templateForm.type}
                   onChange={(e) =>
@@ -1221,14 +1501,14 @@ export default function VoicePhishingPage() {
                   }
                   className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white focus:outline-none focus:border-[var(--neon-blue)]"
                 >
-                  <option value="phishing">Phishing</option>
-                  <option value="normal">Normal</option>
+                  <option value="phishing">{t("Phishing")}</option>
+                  <option value="normal">{t("Normal")}</option>
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-white mb-2">
-                  First Message
+                  {t("First Message")}
                 </label>
                 <textarea
                   value={templateForm.firstMessage}
@@ -1236,7 +1516,7 @@ export default function VoicePhishingPage() {
                     setTemplateForm({ ...templateForm, firstMessage: e.target.value })
                   }
                   className="w-full px-4 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--neon-blue)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                  placeholder="Enter the first message the agent will say"
+                  placeholder={t("Enter the first message the agent will say")}
                   rows={4}
                 />
               </div>
@@ -1246,13 +1526,13 @@ export default function VoicePhishingPage() {
                   onClick={handleSaveTemplate}
                   className="flex-1 px-6 py-3 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold"
                 >
-                  {editingTemplate ? "Update Template" : "Create Template"}
+                  {editingTemplate ? t("Update Template") : t("Create Template")}
                 </button>
                 <button
                   onClick={() => setShowTemplateModal(false)}
                   className="flex-1 px-6 py-3 bg-[var(--navy-blue-lighter)] text-white rounded-xl hover:bg-[var(--navy-blue-lighter)]/80 transition-colors font-semibold"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
               </div>
             </div>
