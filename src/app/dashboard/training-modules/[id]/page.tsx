@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
@@ -26,6 +26,8 @@ import { ApiClient } from "@/lib/api";
 import type { Course, CourseModule } from "@/lib/coursesData";
 import { getBadgeIcon, AVAILABLE_BADGES } from "@/lib/courseBadges";
 import ProgressRadialChart from "@/components/ProgressRadialChart";
+import { useTranslation } from "@/hooks/useTranslation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
@@ -46,6 +48,8 @@ export default function TrainingModuleDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { getToken } = useAuth();
+  const { language } = useLanguage();
+  const { t, preTranslate, isTranslating } = useTranslation();
   const courseId = params.id as string;
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   const [activeTab, setActiveTab] = useState<"overview" | "curriculum">("overview");
@@ -56,6 +60,8 @@ export default function TrainingModuleDetailPage() {
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [certificate, setCertificate] = useState<any | null>(null);
   const [loadingCertificate, setLoadingCertificate] = useState(false);
+  const [translationReady, setTranslationReady] = useState(false);
+  const [translatedCourse, setTranslatedCourse] = useState<Course | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,7 +88,7 @@ export default function TrainingModuleDetailPage() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load course");
+          setError(err instanceof Error ? err.message : t("Failed to load course"));
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -104,15 +110,202 @@ export default function TrainingModuleDetailPage() {
     return () => window.removeEventListener("focus", onFocus);
   }, [courseId, getToken]);
 
+  // Use translated course or fallback to original (must be declared early)
+  const displayCourse = useMemo(() => translatedCourse || course, [translatedCourse, course]);
+
+  // Pre-translate static strings when language changes (performance optimization)
+  useEffect(() => {
+    const preTranslatePageContent = async () => {
+      if (language === "en") {
+        setTranslationReady(true);
+        return;
+      }
+
+      setTranslationReady(false);
+
+      // Collect all static strings on the page for batch translation
+      const staticStrings = [
+        // Navigation
+        "Back to Training Modules",
+        "Catalog",
+        "Course",
+        
+        // Description
+        "No description.",
+        "Read less",
+        "Read more",
+        "Created by",
+        "Complete",
+        
+        // Badges
+        "FREE",
+        "SELF-PACED",
+        "MODULE",
+        "MODULES",
+        "QUIZ",
+        "QUIZZES",
+        "ONLINE",
+        
+        // Progress
+        "Your progress",
+        "Overall completion rate",
+        "completed",
+        "of",
+        
+        // Certificate
+        "Certificate Earned",
+        "Certificate Available",
+        "Earn a Certificate",
+        "You've successfully completed this course and earned a certificate.",
+        "Complete all modules to earn your certificate.",
+        "more to earn your certificate.",
+        "View Certificate",
+        "Issued on",
+        "Generating...",
+        "Generate Certificate",
+        "Complete course to unlock",
+        "Added",
+        
+        // Tabs
+        "Overview",
+        "Curriculum",
+        "Here's what you will learn.",
+        "Course Curriculum",
+        
+        // Module Quiz
+        "Module Quiz",
+        
+        // Achievements
+        "Achievements",
+        "Badges you can earn in this course.",
+        "No badges added yet",
+        
+        // Skills
+        "Skills You Will Learn",
+        "more",
+        "Complete the course",
+        
+        // Loading/Error
+        "Loading course...",
+        "Course not found.",
+        "Failed to load course",
+        
+        // Section labels
+        "Section",
+      ];
+
+      await preTranslate(staticStrings);
+      setTranslationReady(true);
+    };
+
+    preTranslatePageContent();
+  }, [language, preTranslate]);
+
+  // Translate dynamic course content when language or course changes
+  useEffect(() => {
+    if (language === "en" || !course) {
+      setTranslatedCourse(course);
+      return;
+    }
+
+    if (!translationReady) {
+      return;
+    }
+
+    const translateCourseContent = async () => {
+      try {
+        // Collect all dynamic texts for batch translation
+        const textsToTranslate: string[] = [];
+        const textMap: Array<{ type: string; path: string[] }> = [];
+
+        // Course title and description
+        if (course.courseTitle) {
+          textsToTranslate.push(course.courseTitle);
+          textMap.push({ type: "courseTitle", path: [] });
+        }
+        if (course.description) {
+          textsToTranslate.push(course.description);
+          textMap.push({ type: "description", path: [] });
+        }
+
+        // Module titles and section titles
+        course.modules?.forEach((mod, modIdx) => {
+          if (mod.title) {
+            textsToTranslate.push(mod.title);
+            textMap.push({ type: "moduleTitle", path: [modIdx.toString()] });
+          }
+
+          mod.sections?.forEach((section, secIdx) => {
+            if (section.title) {
+              textsToTranslate.push(section.title);
+              textMap.push({ type: "sectionTitle", path: [modIdx.toString(), secIdx.toString()] });
+            }
+          });
+        });
+
+        if (textsToTranslate.length === 0) {
+          setTranslatedCourse(course);
+          return;
+        }
+
+        // Batch translate all texts
+        const { translateService } = await import("@/services/translateService");
+        const translatedTexts = await translateService.translateBatch(textsToTranslate);
+
+        // Reconstruct course with translated content
+        const translated: Course = {
+          ...course,
+          courseTitle: course.courseTitle && textMap.find(m => m.type === "courseTitle")
+            ? translatedTexts[textsToTranslate.indexOf(course.courseTitle)]
+            : course.courseTitle,
+          description: course.description && textMap.find(m => m.type === "description")
+            ? translatedTexts[textsToTranslate.indexOf(course.description)]
+            : course.description,
+          modules: course.modules?.map((mod, modIdx) => {
+            const moduleTitleIndex = textMap.findIndex(m => m.type === "moduleTitle" && m.path[0] === modIdx.toString());
+            const translatedModuleTitle = moduleTitleIndex >= 0
+              ? translatedTexts[textsToTranslate.indexOf(mod.title || "")]
+              : mod.title;
+
+            return {
+              ...mod,
+              title: translatedModuleTitle,
+              sections: mod.sections?.map((section, secIdx) => {
+                const sectionTitleIndex = textMap.findIndex(
+                  m => m.type === "sectionTitle" && m.path[0] === modIdx.toString() && m.path[1] === secIdx.toString()
+                );
+                const translatedSectionTitle = sectionTitleIndex >= 0
+                  ? translatedTexts[textsToTranslate.indexOf(section.title || "")]
+                  : section.title;
+
+                return {
+                  ...section,
+                  title: translatedSectionTitle,
+                };
+              }),
+            };
+          }),
+        };
+
+        setTranslatedCourse(translated);
+      } catch (error) {
+        console.error("Error translating course content:", error);
+        setTranslatedCourse(course);
+      }
+    };
+
+    translateCourseContent();
+  }, [course, language, translationReady]);
+
   // Check for certificate when course is completed
   useEffect(() => {
-    if (!getToken || !courseId || !course) {
+    if (!getToken || !courseId || !displayCourse) {
       setCertificate(null);
       return;
     }
 
     // Calculate progress
-    const modules: CourseModule[] = course.modules || [];
+    const modules: CourseModule[] = displayCourse.modules || [];
     const totalItems = modules.reduce(
       (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
       0
@@ -142,30 +335,30 @@ export default function TrainingModuleDetailPage() {
     };
 
     checkCertificate();
-  }, [getToken, courseId, course, completedIds]);
+  }, [getToken, courseId, displayCourse, completedIds]);
 
-  const toggleModule = (moduleId: string) => {
+  const toggleModule = useCallback((moduleId: string) => {
     setExpandedModules((prev) => {
       const next = new Set(prev);
       if (next.has(moduleId)) next.delete(moduleId);
       else next.add(moduleId);
       return next;
     });
-  };
+  }, []);
 
-  const goToSection = (moduleIndex: number, sectionIndex: number) => {
+  const goToSection = useCallback((moduleIndex: number, sectionIndex: number) => {
     router.push(`/dashboard/training-modules/${courseId}/${moduleIndex}-${sectionIndex}`);
-  };
+  }, [router, courseId]);
 
-  const goToQuiz = (moduleIndex: number) => {
+  const goToQuiz = useCallback((moduleIndex: number) => {
     router.push(`/dashboard/training-modules/${courseId}/${moduleIndex}-quiz`);
-  };
+  }, [router, courseId]);
 
-  if (loading || !course) {
+  if (loading || !displayCourse) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">{loading ? "Loading course..." : "Course not found."}</p>
+          <p className="text-gray-600">{loading ? t("Loading course...") : t("Course not found.")}</p>
         </div>
       </div>
     );
@@ -179,7 +372,7 @@ export default function TrainingModuleDetailPage() {
     );
   }
 
-  const modules: CourseModule[] = course.modules || [];
+  const modules: CourseModule[] = displayCourse.modules || [];
   const totalItems = modules.reduce(
     (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
     0
@@ -199,7 +392,7 @@ export default function TrainingModuleDetailPage() {
           className="mb-6 flex items-center gap-2 text-gray-600 hover:text-[var(--neon-blue)] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Training Modules</span>
+          <span>{t("Back to Training Modules")}</span>
         </button>
 
         <div className="mb-6 text-sm text-gray-600">
@@ -207,37 +400,37 @@ export default function TrainingModuleDetailPage() {
             className="hover:text-[var(--neon-blue)] cursor-pointer"
             onClick={() => router.push("/dashboard/training-modules")}
           >
-            Catalog
+            {t("Catalog")}
           </span>{" "}
           <span className="mx-2">/</span>{" "}
-          <span className="text-gray-900">{course.courseTitle}</span>
+          <span className="text-gray-900">{displayCourse.courseTitle}</span>
         </div>
 
         <div className="mb-6">
           <div className="inline-block px-3 py-1 bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] rounded-md text-sm font-medium mb-4">
-            Course
+            {t("Course")}
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            {course.courseTitle}
+            {displayCourse.courseTitle}
           </h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
-              {course.createdBy && (
+              {displayCourse.createdBy && (
                 <p className="text-sm text-gray-600 mb-2">
-                  Created by {course.createdBy.displayName || course.createdBy.email || "Unknown"}
-                  {course.createdAt && (
+                  {t("Created by")} {displayCourse.createdBy.displayName || displayCourse.createdBy.email || "Unknown"}
+                  {displayCourse.createdAt && (
                     <span className="ml-2">
-                      · {new Date(course.createdAt).toLocaleDateString()}
+                      · {new Date(displayCourse.createdAt).toLocaleDateString()}
                     </span>
                   )}
                 </p>
               )}
               <div className="text-gray-700 mb-6">
                 {(() => {
-                  const desc = course.description || "No description.";
+                  const desc = displayCourse.description || t("No description.");
                   const { visible, remaining, isLong } = truncateByWords(desc, DESCRIPTION_WORD_LIMIT);
                   if (!isLong) return <p>{desc}</p>;
                   return (
@@ -250,7 +443,7 @@ export default function TrainingModuleDetailPage() {
                             onClick={() => setDescriptionExpanded(false)}
                             className="ml-1 text-[var(--neon-blue)] hover:underline font-medium"
                           >
-                            Read less
+                            {t("Read less")}
                           </button>
                         </>
                       ) : (
@@ -262,7 +455,7 @@ export default function TrainingModuleDetailPage() {
                             onClick={() => setDescriptionExpanded(true)}
                             className="text-[var(--neon-blue)] hover:underline font-medium"
                           >
-                            Read more
+                            {t("Read more")}
                           </button>
                         </>
                       )}
@@ -276,7 +469,7 @@ export default function TrainingModuleDetailPage() {
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-4">
               <Image
                 src={DEFAULT_IMAGE}
-                alt={course.courseTitle}
+                alt={displayCourse.courseTitle}
                 fill
                 className="object-cover"
               />
@@ -285,38 +478,38 @@ export default function TrainingModuleDetailPage() {
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <div className="flex items-center gap-1 text-gray-700">
                 <Lock className="w-3 h-3 text-[var(--neon-blue)]" />
-                <span className="text-xs font-medium">FREE</span>
+                <span className="text-xs font-medium">{t("FREE")}</span>
               </div>
               <div className="flex items-center gap-1 text-gray-700">
                 <Clock className="w-3 h-3 text-[var(--neon-blue)]" />
-                <span className="text-xs font-medium">SELF-PACED</span>
+                <span className="text-xs font-medium">{t("SELF-PACED")}</span>
               </div>
               <div className="flex items-center gap-1 text-gray-700">
                 <BarChart3 className="w-3 h-3 text-[var(--neon-blue)]" />
                 <span className="text-xs font-medium">
-                  {modules.length} MODULE{modules.length !== 1 ? "S" : ""}
+                  {modules.length} {modules.length !== 1 ? t("MODULES") : t("MODULE")}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-gray-700">
                 <FlaskConical className="w-3 h-3 text-[var(--neon-blue)]" />
                 <span className="text-xs font-medium">
                   {modules.reduce((acc, m) => acc + (m.quiz?.length ?? 0), 0)}{" "}
-                  {modules.reduce((acc, m) => acc + (m.quiz?.length ?? 0), 0) === 1 ? "QUIZ" : "QUIZZES"}
+                  {modules.reduce((acc, m) => acc + (m.quiz?.length ?? 0), 0) === 1 ? t("QUIZ") : t("QUIZZES")}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-gray-700">
                 <Monitor className="w-3 h-3 text-[var(--neon-blue)]" />
-                <span className="text-xs font-medium">ONLINE</span>
+                <span className="text-xs font-medium">{t("ONLINE")}</span>
               </div>
             </div>
             {/* Progress - circular like dashboard */}
             {totalItems > 0 && (
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-0.5">
-                  Your progress
+                  {t("Your progress")}
                 </h3>
                 <p className="text-xs text-gray-500 mb-4">
-                  Overall completion rate
+                  {t("Overall completion rate")}
                 </p>
                 <div className="flex flex-col items-center mb-4">
                   <ProgressRadialChart
@@ -330,7 +523,7 @@ export default function TrainingModuleDetailPage() {
                     {progressPercent}%
                   </p>
                   <p className="text-xs text-gray-500">
-                    {completedCount} of {totalItems} completed
+                    {completedCount} {t("of")} {totalItems} {t("completed")}
                   </p>
                 </div>
               </div>
@@ -360,14 +553,14 @@ export default function TrainingModuleDetailPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-gray-900 mb-1.5">
-                        {certificate ? "Certificate Earned" : progressPercent === 100 ? "Certificate Available" : "Earn a Certificate"}
+                        {certificate ? t("Certificate Earned") : progressPercent === 100 ? t("Certificate Available") : t("Earn a Certificate")}
                       </h3>
                       <p className="text-sm text-gray-600 mb-4 leading-relaxed">
                         {certificate 
-                          ? "You've successfully completed this course and earned a certificate."
+                          ? t("You've successfully completed this course and earned a certificate.")
                           : progressPercent === 100
-                          ? "Complete all modules to earn your certificate."
-                          : `Complete ${100 - progressPercent}% more to earn your certificate.`
+                          ? t("Complete all modules to earn your certificate.")
+                          : `${t("Complete")} ${100 - progressPercent}% ${t("more to earn your certificate.")}`
                         }
                       </p>
                       {certificate ? (
@@ -377,11 +570,11 @@ export default function TrainingModuleDetailPage() {
                             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
                           >
                             <ExternalLink className="w-4 h-4" />
-                            View Certificate
+                            {t("View Certificate")}
                           </button>
                           <div className="flex items-center gap-2 text-xs text-gray-500">
                             <CheckCircle className="w-3.5 h-3.5 text-[var(--neon-blue)]" />
-                            <span>Issued on {new Date(certificate.issuedDate).toLocaleDateString()}</span>
+                            <span>{t("Issued on")} {new Date(certificate.issuedDate).toLocaleDateString()}</span>
                           </div>
                         </div>
                       ) : progressPercent === 100 ? (
@@ -407,19 +600,19 @@ export default function TrainingModuleDetailPage() {
                           {loadingCertificate ? (
                             <>
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                              Generating...
+                              {t("Generating...")}
                             </>
                           ) : (
                             <>
                               <Award className="w-4 h-4" />
-                              Generate Certificate
+                              {t("Generate Certificate")}
                             </>
                           )}
                         </button>
                       ) : (
                         <div className="flex items-center gap-2 text-sm text-gray-500">
                           <Lock className="w-4 h-4" />
-                          <span>Complete course to unlock</span>
+                          <span>{t("Complete course to unlock")}</span>
                         </div>
                       )}
                     </div>
@@ -427,10 +620,10 @@ export default function TrainingModuleDetailPage() {
                 </div>
               </div>
             </div>
-            {course.createdAt && (
+            {displayCourse.createdAt && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Clock className="w-4 h-4" />
-                <span>Added {new Date(course.createdAt).toLocaleDateString()}</span>
+                <span>{t("Added")} {new Date(displayCourse.createdAt).toLocaleDateString()}</span>
               </div>
             )}
           </div>
@@ -447,7 +640,7 @@ export default function TrainingModuleDetailPage() {
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            Overview
+            {t("Overview")}
           </button>
           <button
             onClick={() => setActiveTab("curriculum")}
@@ -457,7 +650,7 @@ export default function TrainingModuleDetailPage() {
                 : "text-gray-600 hover:text-gray-900"
             }`}
           >
-            Curriculum
+            {t("Curriculum")}
           </button>
         </div>
 
@@ -466,7 +659,7 @@ export default function TrainingModuleDetailPage() {
             {(activeTab === "overview" || activeTab === "curriculum") && (
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  {activeTab === "overview" ? "Here's what you will learn." : "Course Curriculum"}
+                  {activeTab === "overview" ? t("Here's what you will learn.") : t("Course Curriculum")}
                 </h2>
                 <div className="space-y-2">
                   {modules.map((module, moduleIndex) => {
@@ -517,7 +710,7 @@ export default function TrainingModuleDetailPage() {
                                     ) : (
                                       <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                                     )}
-                                    {section.title || `Section ${sectionIndex + 1}`}
+                                    {section.title || `${t("Section")} ${sectionIndex + 1}`}
                                   </button>
                                 );
                               })}
@@ -531,7 +724,7 @@ export default function TrainingModuleDetailPage() {
                                 ) : (
                                   <FileQuestion className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
                                 )}
-                                <span>Module Quiz</span>
+                                <span>{t("Module Quiz")}</span>
                               </button>
                             )}
                           </div>
@@ -549,14 +742,14 @@ export default function TrainingModuleDetailPage() {
               {/* Achievements Section - Badges (from course) */}
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  Achievements
+                  {t("Achievements")}
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Badges you can earn in this course.
+                  {t("Badges you can earn in this course.")}
                 </p>
                 <div className="grid grid-cols-3 gap-3">
-                  {course.badges && course.badges.length > 0 ? (
-                    course.badges.map((badgeId, index) => {
+                  {displayCourse.badges && displayCourse.badges.length > 0 ? (
+                    displayCourse.badges.map((badgeId, index) => {
                       const Icon = getBadgeIcon(badgeId);
                       const label = AVAILABLE_BADGES.find((b) => b.id === badgeId)?.label ?? badgeId;
                       const isFirst = index === 0;
@@ -600,10 +793,10 @@ export default function TrainingModuleDetailPage() {
                           <Award className="w-6 h-6 text-[var(--electric-blue)] flex-shrink-0" />
                         </div>
                         <span className="text-[10px] font-semibold text-[var(--electric-blue)] text-center leading-tight line-clamp-2 px-0.5">
-                          {course.courseTitle.split(" ").slice(0, 2).join(" ") || "Course"}
+                          {displayCourse.courseTitle.split(" ").slice(0, 2).join(" ") || t("Course")}
                         </span>
                       </div>
-                      <p className="col-span-2 text-xs text-gray-500 self-center">No badges added yet</p>
+                      <p className="col-span-2 text-xs text-gray-500 self-center">{t("No badges added yet")}</p>
                     </>
                   )}
                 </div>
@@ -612,7 +805,7 @@ export default function TrainingModuleDetailPage() {
               {/* Skills / Topics */}
               <div>
                 <h3 className="text-lg font-bold text-gray-900 mb-4">
-                  Skills You Will Learn
+                  {t("Skills You Will Learn")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {modules.slice(0, 6).map((m, i) => (
@@ -620,27 +813,27 @@ export default function TrainingModuleDetailPage() {
                       key={m._id || i}
                       className="px-3 py-1.5 bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] rounded-md text-sm font-medium"
                     >
-                      {m.title || `Module ${i + 1}`}
+                      {m.title || `${t("Module")} ${i + 1}`}
                     </span>
                   ))}
                   {modules.length > 6 && (
                     <span className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-md text-sm">
-                      +{modules.length - 6} more
+                      +{modules.length - 6} {t("more")}
                     </span>
                   )}
                   {modules.length === 0 && (
                     <span className="px-3 py-1.5 bg-gray-100 text-gray-500 rounded-md text-sm">
-                      Complete the course
+                      {t("Complete the course")}
                     </span>
                   )}
                 </div>
               </div>
 
-              {course.createdBy && (
+              {displayCourse.createdBy && (
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5 text-[var(--neon-blue)]" />
                   <span className="text-sm text-gray-700">
-                    {course.createdBy.displayName || course.createdBy.email}
+                    {displayCourse.createdBy.displayName || displayCourse.createdBy.email}
                   </span>
                 </div>
               )}

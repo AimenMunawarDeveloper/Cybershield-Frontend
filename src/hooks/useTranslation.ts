@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { translateService } from "@/services/translateService";
 
@@ -16,6 +16,14 @@ export function useTranslation() {
   const [translations, setTranslations] = useState<Map<string, string>>(new Map());
   const [isTranslating, setIsTranslating] = useState(false);
   const [pendingTranslations, setPendingTranslations] = useState<Set<string>>(new Set());
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     // Clear translations when language changes to English
@@ -41,11 +49,13 @@ export function useTranslation() {
     if (translateService.isCached(text)) {
       // Get from cache and update local state
       translateService.translateToUrdu(text).then((translated) => {
-        setTranslations((prev) => {
-          const newMap = new Map(prev);
-          newMap.set(text, translated);
-          return newMap;
-        });
+        if (isMountedRef.current) {
+          setTranslations((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(text, translated);
+            return newMap;
+          });
+        }
       });
       return text; // Return cached on next render
     }
@@ -57,29 +67,33 @@ export function useTranslation() {
 
       // Trigger async translation
       translateService.translateToUrdu(text).then((translated) => {
-        setTranslations((prev) => {
-          const newMap = new Map(prev);
-          newMap.set(text, translated);
-          return newMap;
-        });
-        setPendingTranslations((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(text);
-          if (newSet.size === 0) {
-            setIsTranslating(false);
-          }
-          return newSet;
-        });
+        if (isMountedRef.current) {
+          setTranslations((prev) => {
+            const newMap = new Map(prev);
+            newMap.set(text, translated);
+            return newMap;
+          });
+          setPendingTranslations((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(text);
+            if (newSet.size === 0) {
+              setIsTranslating(false);
+            }
+            return newSet;
+          });
+        }
       }).catch((error) => {
         console.error("Translation error:", error);
-        setPendingTranslations((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(text);
-          if (newSet.size === 0) {
-            setIsTranslating(false);
-          }
-          return newSet;
-        });
+        if (isMountedRef.current) {
+          setPendingTranslations((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(text);
+            if (newSet.size === 0) {
+              setIsTranslating(false);
+            }
+            return newSet;
+          });
+        }
       });
     }
 
@@ -100,11 +114,13 @@ export function useTranslation() {
 
     try {
       const translated = await translateService.translateToUrdu(text);
-      setTranslations((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(text, translated);
-        return newMap;
-      });
+      if (isMountedRef.current) {
+        setTranslations((prev) => {
+          const newMap = new Map(prev);
+          newMap.set(text, translated);
+          return newMap;
+        });
+      }
       return translated;
     } catch (error) {
       console.error("Translation error:", error);
@@ -135,18 +151,22 @@ export function useTranslation() {
       // Use batch translation for better performance
       const translatedTexts = await translateService.translateBatch(textsToTranslate);
 
-      // Update local state with all translations
-      setTranslations((prev) => {
-        const newMap = new Map(prev);
-        textsToTranslate.forEach((text, index) => {
-          newMap.set(text, translatedTexts[index]);
+      // Update local state with all translations (only if still mounted)
+      if (isMountedRef.current) {
+        setTranslations((prev) => {
+          const newMap = new Map(prev);
+          textsToTranslate.forEach((text, index) => {
+            newMap.set(text, translatedTexts[index]);
+          });
+          return newMap;
         });
-        return newMap;
-      });
+      }
     } catch (error) {
       console.error("Pre-translation error:", error);
     } finally {
-      setIsTranslating(false);
+      if (isMountedRef.current) {
+        setIsTranslating(false);
+      }
     }
   }, [language, translations]);
 
