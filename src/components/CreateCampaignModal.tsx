@@ -293,7 +293,7 @@ export default function CreateCampaignModal({
                 }))
               }
               className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
-              placeholder={t("https://your-domain.com/verify")}
+              placeholder={(process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://www-login.vercel.app") + "/ke"}
               required
             />
           </div>

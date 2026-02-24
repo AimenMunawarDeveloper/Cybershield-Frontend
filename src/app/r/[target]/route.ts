@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const LANDING_BASE = "https://www-login.vercel.app";
+// Use local www for testing when NEXT_PUBLIC_LANDING_BASE_URL is set (e.g. http://localhost:3001)
+const LANDING_BASE = process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://www-login.vercel.app";
 
 /**
  * Redirect /r/[target] to the fake landing page.

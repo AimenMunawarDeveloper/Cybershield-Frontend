@@ -792,7 +792,7 @@ export default function CreateUnifiedCampaignModal({
                     value={emailLandingPage}
                     onChange={(e) => setEmailLandingPage(e.target.value)}
                     className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                    placeholder={t("Landing Page URL (optional)")}
+                    placeholder={(process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://www-login.vercel.app") + "/ke"}
                   />
                 </div>
               )}
@@ -869,7 +869,7 @@ export default function CreateUnifiedCampaignModal({
                     value={whatsappLandingPage}
                     onChange={(e) => setWhatsappLandingPage(e.target.value)}
                     className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
-                    placeholder={t("Landing Page URL")}
+                    placeholder={(process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://www-login.vercel.app") + "/ke"}
                     required={whatsappEnabled}
                   />
                 </div>
