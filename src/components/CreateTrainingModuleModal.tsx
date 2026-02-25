@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
   X,
@@ -26,6 +26,9 @@ export interface MediaItem {
   url: string;
   alt?: string;
   caption?: string;
+  publicId?: string; // Cloudinary public ID (for images or legacy videos)
+  subtitleUrl?: string; // URL with subtitle overlay (for legacy Cloudinary videos)
+  youtubeId?: string; // YouTube video ID (for videos uploaded to YouTube)
 }
 
 // Section inside a module (content only; URLs etc.)
@@ -104,7 +107,7 @@ export default function CreateTrainingModuleModal({
   const [level, setLevel] = useState<"basic" | "advanced">("basic");
   const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   const [modules, setModules] = useState<CourseModule[]>([emptyModule()]);
-  const [expandedModule, setExpandedModule] = useState<number>(0);
+  const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set([0]));
   const [expandedQuiz, setExpandedQuiz] = useState<number | null>(null);
   const [translationReady, setTranslationReady] = useState(false);
   const [translatedFormData, setTranslatedFormData] = useState<{
@@ -113,6 +116,9 @@ export default function CreateTrainingModuleModal({
     modules: CourseModule[];
   } | null>(null);
   const [translatedBadgeLabels, setTranslatedBadgeLabels] = useState<Map<string, string>>(new Map());
+  const formInitializedRef = useRef(false);
+  const previousInitialDataRef = useRef<string | null>(null); // Store serialized version for comparison
+  const isInitializingRef = useRef(false); // Prevent concurrent initializations
 
   const isEditMode = Boolean(courseId && initialData);
 
@@ -388,10 +394,24 @@ export default function CreateTrainingModuleModal({
     translateFormContent();
   }, [initialData, language, translationReady, isOpen]);
 
-  // Update form fields when translated data is ready or when initialData changes
+  // Initialize form only when modal opens or initialData actually changes (not on every render)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      // Reset initialization flag when modal closes
+      formInitializedRef.current = false;
+      previousInitialDataRef.current = null;
+      isInitializingRef.current = false;
+      return;
+    }
     
+    // Prevent concurrent initializations
+    if (isInitializingRef.current) return;
+    
+    // CRITICAL: Only initialize ONCE when modal opens, never re-initialize while modal is open
+    // This prevents losing user data (like uploaded files) when parent component re-renders
+    // and recreates initialData object
+    if (!formInitializedRef.current) {
+      isInitializingRef.current = true;
     if (initialData) {
       // Use translated data if available and language is Urdu, otherwise use original
       const dataToUse = language === "ur" && translatedFormData 
@@ -434,7 +454,7 @@ export default function CreateTrainingModuleModal({
           }))
         : [emptyModule()];
       setModules(mods);
-      setExpandedModule(0);
+        setExpandedModules(new Set([0]));
       setExpandedQuiz(null);
     } else {
       setCourseTitle("");
@@ -442,10 +462,18 @@ export default function CreateTrainingModuleModal({
       setLevel("basic");
       setSelectedBadges([]);
       setModules([emptyModule()]);
-      setExpandedModule(0);
+        setExpandedModules(new Set([0]));
       setExpandedQuiz(null);
     }
-  }, [isOpen, initialData, translatedFormData, language]);
+      
+      formInitializedRef.current = true;
+      isInitializingRef.current = false;
+    }
+  }, [isOpen, initialData, courseId]); // courseId included to detect when editing different courses
+
+  // NEVER update modules after initialization - only update top-level fields if needed
+  // This effect should NOT run after the user starts editing to prevent data loss
+  // Translation updates should only happen during initial form load, not during editing
 
   const toggleBadge = (badgeId: string) => {
     setSelectedBadges((prev) =>
@@ -454,13 +482,29 @@ export default function CreateTrainingModuleModal({
   };
 
   const addModule = () => {
+    const newIndex = modules.length;
     setModules((prev) => [...prev, emptyModule()]);
-    setExpandedModule(modules.length);
+    setExpandedModules((prev) => new Set([...prev, newIndex]));
   };
 
   const removeModule = (index: number) => {
     setModules((prev) => prev.filter((_, i) => i !== index));
-    setExpandedModule((prev) => (prev >= index && prev > 0 ? prev - 1 : prev));
+    setExpandedModules((prev) => {
+      const newSet = new Set<number>();
+      prev.forEach((expandedIdx) => {
+        if (expandedIdx < index) {
+          newSet.add(expandedIdx);
+        } else if (expandedIdx > index) {
+          newSet.add(expandedIdx - 1);
+        }
+        // If expandedIdx === index, don't add it (module is being removed)
+      });
+      // Ensure at least one module is expanded if any modules remain
+      if (newSet.size === 0 && modules.length > 1) {
+        newSet.add(0);
+      }
+      return newSet;
+    });
     if (expandedQuiz !== null && expandedQuiz >= index) {
       setExpandedQuiz(expandedQuiz === index ? null : expandedQuiz - 1);
     }
@@ -473,8 +517,13 @@ export default function CreateTrainingModuleModal({
   };
 
   const addSection = (moduleIndex: number) => {
-    const mod = modules[moduleIndex];
-    updateModule(moduleIndex, { sections: [...mod.sections, emptySection()] });
+    setModules((prev) => {
+      const mod = prev[moduleIndex];
+      if (!mod) return prev;
+      return prev.map((m, i) => 
+        i === moduleIndex ? { ...m, sections: [...mod.sections, emptySection()] } : m
+      );
+    });
   };
 
   const updateSection = (
@@ -482,17 +531,32 @@ export default function CreateTrainingModuleModal({
     sectionIndex: number,
     patch: Partial<ModuleSection>
   ) => {
-    const mod = modules[moduleIndex];
+    setModules((prev) => {
+      const mod = prev[moduleIndex];
+      if (!mod) return prev;
     const sections = [...mod.sections];
-    sections[sectionIndex] = { ...sections[sectionIndex], ...patch };
-    updateModule(moduleIndex, { sections });
+      const currentSection = sections[sectionIndex];
+      // Explicitly preserve all section properties
+      sections[sectionIndex] = {
+        title: currentSection?.title || '',
+        material: currentSection?.material || '',
+        urls: currentSection?.urls || [],
+        media: currentSection?.media || [],
+        ...patch, // Apply patch after preserving existing values
+      };
+      return prev.map((m, i) => (i === moduleIndex ? { ...m, sections } : m));
+    });
   };
 
   const removeSection = (moduleIndex: number, sectionIndex: number) => {
-    const mod = modules[moduleIndex];
-    if (mod.sections.length <= 1) return;
+    setModules((prev) => {
+      const mod = prev[moduleIndex];
+      if (!mod || mod.sections.length <= 1) return prev;
     const sections = mod.sections.filter((_, i) => i !== sectionIndex);
-    updateModule(moduleIndex, { sections });
+      return prev.map((m, i) => 
+        i === moduleIndex ? { ...m, sections } : m
+      );
+    });
   };
 
   const addSectionUrl = (moduleIndex: number, sectionIndex: number) => {
@@ -558,10 +622,18 @@ export default function CreateTrainingModuleModal({
       }
 
       const data = await response.json();
-      const section = modules[moduleIndex].sections[sectionIndex];
+      
+      // Use functional update to ensure we have the latest state
+      setModules((prev) => {
+        const mod = prev[moduleIndex];
+        if (!mod) return prev;
+        const section = mod.sections[sectionIndex];
+        if (!section) return prev;
       const media = section.media || [];
       
-      updateSection(moduleIndex, sectionIndex, {
+        const updatedSections = [...mod.sections];
+        updatedSections[sectionIndex] = {
+          ...section,
         media: [
           ...media,
           {
@@ -569,8 +641,16 @@ export default function CreateTrainingModuleModal({
             url: data.url,
             alt: file.name,
             caption: '',
+            publicId: data.publicId,
+            subtitleUrl: data.subtitleUrl, // For legacy Cloudinary videos
+            youtubeId: data.youtubeId, // For YouTube videos
           },
         ],
+        };
+        
+        return prev.map((m, i) => 
+          i === moduleIndex ? { ...m, sections: updatedSections } : m
+        );
       });
     } catch (error) {
       console.error('Upload error:', error);
@@ -583,16 +663,30 @@ export default function CreateTrainingModuleModal({
         return next;
       });
     }
-  }, [getToken, modules, t]);
+  }, [getToken, t]);
 
   const removeMedia = (
     moduleIndex: number,
     sectionIndex: number,
     mediaIndex: number
   ) => {
-    const section = modules[moduleIndex].sections[sectionIndex];
+    setModules((prev) => {
+      const mod = prev[moduleIndex];
+      if (!mod) return prev;
+      const section = mod.sections[sectionIndex];
+      if (!section) return prev;
     const media = (section.media || []).filter((_, i) => i !== mediaIndex);
-    updateSection(moduleIndex, sectionIndex, { media });
+      
+      const updatedSections = [...mod.sections];
+      updatedSections[sectionIndex] = {
+        ...section,
+        media,
+      };
+      
+      return prev.map((m, i) => 
+        i === moduleIndex ? { ...m, sections: updatedSections } : m
+      );
+    });
   };
 
   const updateMedia = (
@@ -601,10 +695,24 @@ export default function CreateTrainingModuleModal({
     mediaIndex: number,
     patch: Partial<MediaItem>
   ) => {
-    const section = modules[moduleIndex].sections[sectionIndex];
+    setModules((prev) => {
+      const mod = prev[moduleIndex];
+      if (!mod) return prev;
+      const section = mod.sections[sectionIndex];
+      if (!section) return prev;
     const media = [...(section.media || [])];
     media[mediaIndex] = { ...media[mediaIndex], ...patch };
-    updateSection(moduleIndex, sectionIndex, { media });
+      
+      const updatedSections = [...mod.sections];
+      updatedSections[sectionIndex] = {
+        ...section,
+        media,
+      };
+      
+      return prev.map((m, i) => 
+        i === moduleIndex ? { ...m, sections: updatedSections } : m
+      );
+    });
   };
 
   const addQuizToModule = (moduleIndex: number) => {
@@ -723,8 +831,10 @@ export default function CreateTrainingModuleModal({
     setLevel("basic");
     setSelectedBadges([]);
     setModules([emptyModule()]);
-    setExpandedModule(0);
+    setExpandedModules(new Set([0]));
     setExpandedQuiz(null);
+    formInitializedRef.current = false;
+    previousInitialDataRef.current = null;
   };
 
   if (!isOpen) return null;
@@ -875,7 +985,7 @@ export default function CreateTrainingModuleModal({
 
             <div className="space-y-2">
               {modules.map((mod, moduleIndex) => {
-                const isExpanded = expandedModule === moduleIndex;
+                const isExpanded = expandedModules.has(moduleIndex);
                 const isQuizExpanded = expandedQuiz === moduleIndex;
                 return (
                   <div
@@ -885,9 +995,23 @@ export default function CreateTrainingModuleModal({
                     {/* Module header - accordion */}
                     <div
                       className="flex items-center gap-3 px-4 py-3 bg-[var(--navy-blue-lighter)]/50 border-b border-[var(--medium-grey)]/50 cursor-pointer"
-                      onClick={() =>
-                        setExpandedModule(isExpanded ? -1 : moduleIndex)
-                      }
+                      onClick={() => {
+                        setExpandedModules((prev) => {
+                          const newSet = new Set(prev);
+                          if (isExpanded) {
+                            newSet.delete(moduleIndex);
+                            // Ensure at least one module remains expanded if there are multiple modules
+                            if (newSet.size === 0 && modules.length > 1) {
+                              // Keep the first other module expanded
+                              const otherIndex = modules.findIndex((_, i) => i !== moduleIndex);
+                              if (otherIndex >= 0) newSet.add(otherIndex);
+                            }
+                          } else {
+                            newSet.add(moduleIndex);
+                          }
+                          return newSet;
+                        });
+                      }}
                     >
                       <div className="w-6 h-6 rounded-full bg-[var(--neon-blue)]/30 flex items-center justify-center flex-shrink-0">
                         <div className="w-2 h-2 rounded-full bg-[var(--neon-blue)]" />
@@ -1032,7 +1156,7 @@ export default function CreateTrainingModuleModal({
                                   {section.media && section.media.length > 0 && (
                                     <div className="space-y-2 mb-3">
                                       {section.media.map((mediaItem, mediaIndex) => (
-                                        <div key={mediaIndex} className="flex items-start gap-2 p-2 bg-[var(--navy-blue-lighter)]/30 rounded border border-[var(--medium-grey)]/30">
+                                        <div key={`${moduleIndex}-${sectionIndex}-${mediaIndex}-${mediaItem.url}`} className="flex items-start gap-2 p-2 bg-[var(--navy-blue-lighter)]/30 rounded border border-[var(--medium-grey)]/30">
                                           {mediaItem.type === 'image' ? (
                                             <img
                                               src={mediaItem.url}
@@ -1044,6 +1168,7 @@ export default function CreateTrainingModuleModal({
                                               src={mediaItem.url}
                                               className="w-20 h-20 object-cover rounded flex-shrink-0"
                                               controls={false}
+                                              muted
                                             />
                                           )}
                                           <div className="flex-1 min-w-0">
@@ -1077,6 +1202,19 @@ export default function CreateTrainingModuleModal({
                                   )}
                                   
                                   {/* Upload Buttons */}
+                                  {(() => {
+                                    // Check if this specific section is uploading
+                                    // Key format: `${moduleIndex}-${sectionIndex}-${file.name}`
+                                    const isThisSectionUploading = Object.keys(uploading).some(key => {
+                                      const parts = key.split('-');
+                                      if (parts.length < 2) return false;
+                                      const modIdx = parseInt(parts[0], 10);
+                                      const secIdx = parseInt(parts[1], 10);
+                                      return modIdx === moduleIndex && secIdx === sectionIndex && uploading[key];
+                                    });
+                                    
+                                    return (
+                                      <>
                                   <div className="flex gap-2">
                                     <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded cursor-pointer border border-[var(--neon-blue)]/30">
                                       <ImageIcon className="w-3 h-3" />
@@ -1091,7 +1229,7 @@ export default function CreateTrainingModuleModal({
                                             handleMediaUpload(moduleIndex, sectionIndex, file);
                                           }
                                         }}
-                                        disabled={Object.values(uploading).some(v => v)}
+                                              disabled={isThisSectionUploading}
                                       />
                                     </label>
                                     <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded cursor-pointer border border-[var(--neon-blue)]/30">
@@ -1107,16 +1245,19 @@ export default function CreateTrainingModuleModal({
                                             handleMediaUpload(moduleIndex, sectionIndex, file);
                                           }
                                         }}
-                                        disabled={Object.values(uploading).some(v => v)}
+                                              disabled={isThisSectionUploading}
                                       />
                                     </label>
                                   </div>
-                                  {Object.values(uploading).some(v => v) && (
+                                        {isThisSectionUploading && (
                                     <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
                                       <Loader2 className="w-3 h-3 animate-spin" />
                                       <span>{t("Uploading...")}</span>
                                     </div>
                                   )}
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                               </div>
                             </div>
