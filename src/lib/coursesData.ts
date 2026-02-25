@@ -8,6 +8,9 @@ export interface MediaItem {
   url: string;
   alt?: string;
   caption?: string;
+  publicId?: string; // Cloudinary public ID (for images or legacy videos)
+  subtitleUrl?: string; // URL with subtitle overlay (for legacy Cloudinary videos)
+  youtubeId?: string; // YouTube video ID (for videos uploaded to YouTube)
 }
 
 export interface ModuleSection {

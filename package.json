@@ -25,6 +25,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-paginate": "^8.3.0",
+    "react-player": "^3.4.0",
     "recharts": "^3.2.1",
     "tailwind-merge": "^3.3.1",
     "tsparticles-slim": "^2.12.0"

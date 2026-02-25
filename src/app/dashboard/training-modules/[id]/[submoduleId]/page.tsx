@@ -28,6 +28,7 @@ import { ApiClient } from "@/lib/api";
 import type { Course, CourseModule, ModuleSection, QuizQuestion } from "@/lib/coursesData";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import VideoPlayer from "@/components/VideoPlayer";
 
 // Format inline markdown (bold, italic, code)
 function formatInlineMarkdown(text: string): React.ReactElement[] {
@@ -1235,19 +1236,7 @@ export default function SubmodulePage() {
                             </figure>
                           ) : (
                             <figure className="w-full">
-                              <div className="relative w-full aspect-video rounded-xl overflow-hidden shadow-lg bg-gray-100">
-                                <video
-                                  src={mediaItem.url}
-                                  controls
-                                  className="w-full h-full object-contain"
-                                  onError={(e) => {
-                                    console.error('Video failed to load:', mediaItem.url);
-                                    e.currentTarget.style.display = 'none';
-                                  }}
-                                >
-                                  Your browser does not support the video tag.
-                                </video>
-                              </div>
+                              <VideoPlayer mediaItem={mediaItem} />
                               {mediaItem.caption && (
                                 <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
                                   {translatedMediaCaptions.get(idx) || mediaItem.caption}
