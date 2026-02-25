@@ -42,6 +42,15 @@ function courseToInitialData(course: Course): TrainingModuleData {
   };
 }
 
+interface UserProfile {
+  _id: string;
+  email: string;
+  displayName: string;
+  role: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
+  orgId?: string;
+  orgName?: string;
+}
+
 export default function TrainingModulesPage() {
   const router = useRouter();
   const { getToken } = useAuth();
@@ -59,6 +68,26 @@ export default function TrainingModulesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [translationReady, setTranslationReady] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  // Fetch user profile to check permissions
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const api = new ApiClient(getToken!);
+        const profile = await api.getUserProfile();
+        setUserProfile(profile);
+      } catch (err) {
+        console.error("Failed to fetch user profile:", err);
+      }
+    };
+    if (getToken) {
+      fetchUserProfile();
+    }
+  }, [getToken]);
+
+  // Check if user can perform CRUD operations
+  const canPerformCRUD = userProfile?.role === "system_admin" || userProfile?.role === "client_admin";
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -397,13 +426,15 @@ export default function TrainingModulesPage() {
                 {t("Explore Our Course Catalog")}
               </h2>
               <div className="flex items-center gap-4">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="inline-flex items-center gap-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors shadow"
-                >
-                  <Plus className="w-4 h-4" />
-                  {t("New Training Module")}
-                </button>
+                {canPerformCRUD && (
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-flex items-center gap-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors shadow"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {t("New Training Module")}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -600,37 +631,39 @@ export default function TrainingModulesPage() {
                             </div>
                           </div>
                         </div>
-                        <div
-                          className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Find original course for editing
-                              const originalCourse = courses.find(c => c._id === course._id);
-                              if (originalCourse) openEditModal(originalCourse);
-                            }}
-                            className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-[var(--neon-blue)]"
-                            title={t("Edit")}
+                        {canPerformCRUD && (
+                          <div
+                            className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <Pencil className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Find original course for deletion
-                              const originalCourse = courses.find(c => c._id === course._id);
-                              if (originalCourse) setCourseToDelete(originalCourse);
-                            }}
-                            className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-red-500"
-                            title={t("Delete")}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Find original course for editing
+                                const originalCourse = courses.find(c => c._id === course._id);
+                                if (originalCourse) openEditModal(originalCourse);
+                              }}
+                              className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-[var(--neon-blue)]"
+                              title={t("Edit")}
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Find original course for deletion
+                                const originalCourse = courses.find(c => c._id === course._id);
+                                if (originalCourse) setCourseToDelete(originalCourse);
+                              }}
+                              className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-red-500"
+                              title={t("Delete")}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     ))}
                 </div>
@@ -643,16 +676,16 @@ export default function TrainingModulesPage() {
                   courses={translatedCourses}
                   loading={loading}
                   error={error}
-                  onEdit={(translatedCourse) => {
+                  onEdit={canPerformCRUD ? ((translatedCourse) => {
                     // Find original course for editing
                     const originalCourse = courses.find(c => c._id === translatedCourse._id);
                     if (originalCourse) openEditModal(originalCourse);
-                  }}
-                  onDelete={(translatedCourse) => {
+                  }) : undefined}
+                  onDelete={canPerformCRUD ? ((translatedCourse) => {
                     // Find original course for deletion
                     const originalCourse = courses.find(c => c._id === translatedCourse._id);
                     if (originalCourse) setCourseToDelete(originalCourse);
-                  }}
+                  }) : undefined}
                 />
               </div>
             )

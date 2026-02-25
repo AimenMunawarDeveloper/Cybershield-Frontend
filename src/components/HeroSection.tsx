@@ -16,10 +16,14 @@ const ModuleCard = ({
     title: string;
     description: string;
     image?: string;
-  };
+  } | null | undefined;
   featured: boolean;
   t: (text: string) => string;
 }) => {
+  if (!module) {
+    return null;
+  }
+
   return (
     <div className="relative group bg-white rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
       {featured && (
@@ -30,15 +34,15 @@ const ModuleCard = ({
       <div className="overflow-hidden rounded-lg mb-4">
         <img
           src={module.image || "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
-          alt={module.title}
+          alt={module.title || "Course"}
           className="w-full h-64 object-cover transform transition-transform duration-300 group-hover:scale-110"
           loading="lazy"
         />
       </div>
       <h3 className="text-xl font-semibold text-gray-800 mb-2">
-        {module.title}
+        {module.title || ""}
       </h3>
-      <p className="text-gray-600 mb-4">{module.description}</p>
+      <p className="text-gray-600 mb-4">{module.description || ""}</p>
       <div className="flex items-center justify-end">
         <button className="flex items-center space-x-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-lg hover:bg-[var(--medium-blue)] transition-colors">
           <Shield />
@@ -203,11 +207,18 @@ export default function HeroSection({ courses = [], translationReady = true }: H
               {(translatedModules.length > 0 || modules.length > 0) && (
                 <>
                   <div className="transition-opacity duration-500 ease-in-out">
-                    <ModuleCard
-                      module={translatedModules.length > 0 ? translatedModules[currentSlide] : modules[currentSlide]}
-                      featured={false}
-                      t={t}
-                    />
+                    {(() => {
+                      const displayModules = translatedModules.length > 0 ? translatedModules : modules;
+                      const currentModule = displayModules[currentSlide];
+                      if (!currentModule) return null;
+                      return (
+                        <ModuleCard
+                          module={currentModule}
+                          featured={false}
+                          t={t}
+                        />
+                      );
+                    })()}
                   </div>
 
                   <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
@@ -242,24 +253,35 @@ export default function HeroSection({ courses = [], translationReady = true }: H
                   </div>
 
                   <div className="absolute top-1/2 -translate-y-1/2 w-full pointer-events-none">
-                    <div className="absolute -left-4 opacity-20 transform -translate-x-full scale-90 blur-sm">
-                      <ModuleCard
-                        module={
-                          displayModules[
-                            (currentSlide - 1 + displayModules.length) % displayModules.length
-                          ]
-                        }
-                        featured={false}
-                        t={t}
-                      />
-                    </div>
-                    <div className="absolute -right-4 opacity-20 transform translate-x-full scale-90 blur-sm">
-                      <ModuleCard
-                        module={displayModules[(currentSlide + 1) % displayModules.length]}
-                        featured={false}
-                        t={t}
-                      />
-                    </div>
+                    {(() => {
+                      const prevIndex = (currentSlide - 1 + displayModules.length) % displayModules.length;
+                      const nextIndex = (currentSlide + 1) % displayModules.length;
+                      const prevModule = displayModules[prevIndex];
+                      const nextModule = displayModules[nextIndex];
+                      
+                      return (
+                        <>
+                          {prevModule && (
+                            <div className="absolute -left-4 opacity-20 transform -translate-x-full scale-90 blur-sm">
+                              <ModuleCard
+                                module={prevModule}
+                                featured={false}
+                                t={t}
+                              />
+                            </div>
+                          )}
+                          {nextModule && (
+                            <div className="absolute -right-4 opacity-20 transform translate-x-full scale-90 blur-sm">
+                              <ModuleCard
+                                module={nextModule}
+                                featured={false}
+                                t={t}
+                              />
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 </>
               )}
