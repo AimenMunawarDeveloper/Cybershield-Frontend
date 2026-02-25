@@ -81,9 +81,7 @@ export default function TrainingModulesPage() {
         console.error("Failed to fetch user profile:", err);
       }
     };
-    if (getToken) {
-      fetchUserProfile();
-    }
+    fetchUserProfile();
   }, [getToken]);
 
   // Check if user can perform CRUD operations
