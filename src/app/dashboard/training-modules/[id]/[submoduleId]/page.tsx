@@ -263,6 +263,10 @@ function formatContent(material: string, translateFn?: (text: string) => string)
   return parts;
 }
 
+// Quiz timer: basic = 10 min, advanced = 15 min
+const QUIZ_TIME_BASIC_SEC = 10 * 60;
+const QUIZ_TIME_ADVANCED_SEC = 15 * 60;
+
 function parseSubmoduleId(submoduleId: string): { moduleIndex: number; sectionIndex: number | "quiz" } | null {
   if (!submoduleId) return null;
   if (submoduleId.endsWith("-quiz")) {
@@ -328,11 +332,42 @@ export default function SubmodulePage() {
   const [quizResults, setQuizResults] = useState<Record<number, boolean>>({});
   const [sidebarExpanded, setSidebarExpanded] = useState<Set<number>>(new Set());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Quiz timer: start screen, then countdown; stop when time runs out
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizTimeRemainingSec, setQuizTimeRemainingSec] = useState(0);
+  const [quizTimeExpired, setQuizTimeExpired] = useState(false);
+  // Persist last quiz score so it stays visible after marking complete (isRead)
+  const [lastQuizScore, setLastQuizScore] = useState<{ correctCount: number; total: number; scorePercent: number; passed: boolean } | null>(null);
   const isRead = (submoduleIdParam: string) => completedIds.includes(submoduleIdParam);
   const allQuizAttempted =
     quizQuestions.length > 0 &&
     quizQuestions.every((_, qi) => Object.prototype.hasOwnProperty.call(quizSelections, qi));
-  
+
+  // Quiz duration: advanced = 15 min, basic (or missing) = 10 min
+  const quizDurationSec = displayCourse?.level === "advanced" ? QUIZ_TIME_ADVANCED_SEC : QUIZ_TIME_BASIC_SEC;
+  const quizDurationMinutes = Math.floor(quizDurationSec / 60);
+
+  const startQuiz = useCallback(() => {
+    setQuizStarted(true);
+    setQuizTimeRemainingSec(quizDurationSec);
+    setQuizTimeExpired(false);
+  }, [quizDurationSec]);
+
+  // Countdown timer: when quiz has started, decrement every second; at 0, stop quiz
+  useEffect(() => {
+    if (!isQuiz || !quizStarted || quizTimeExpired) return;
+    const interval = setInterval(() => {
+      setQuizTimeRemainingSec((prev) => {
+        if (prev <= 1) {
+          setQuizTimeExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isQuiz, quizStarted, quizTimeExpired]);
+
   const checkQuizAnswers = () => {
     const results: Record<number, boolean> = {};
     quizQuestions.forEach((q, qi) => {
@@ -348,8 +383,22 @@ export default function SubmodulePage() {
     setQuizSelections({});
     setShowQuizResults(false);
     setQuizResults({});
+    setLastQuizScore(null);
     setMarkReadError(null);
+    setQuizStarted(false);
+    setQuizTimeRemainingSec(0);
+    setQuizTimeExpired(false);
   };
+
+  // Persist score when results are shown so it stays visible after isRead becomes true
+  useEffect(() => {
+    if (isQuiz && showQuizResults && quizQuestions.length > 0 && Object.keys(quizResults).length > 0) {
+      const correctCount = Object.values(quizResults).filter(Boolean).length;
+      const total = quizQuestions.length;
+      const scorePercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+      setLastQuizScore({ correctCount, total, scorePercent, passed: scorePercent > 50 });
+    }
+  }, [isQuiz, showQuizResults, quizResults, quizQuestions.length]);
   
   const toggleComplete = async () => {
     if (markingRead) return;
@@ -358,16 +407,21 @@ export default function SubmodulePage() {
       return;
     }
     
-    // For quizzes, validate answers first
+    // For quizzes, validate answers first; progress counts only if passed (score > 50%)
     if (isQuiz && !isRead(submoduleId) && !showQuizResults) {
       if (!allQuizAttempted) {
         setMarkReadError(t("Please answer all questions before submitting."));
         return;
       }
-      
-      const allCorrect = checkQuizAnswers();
-      if (!allCorrect) {
-        setMarkReadError(t("Some answers are incorrect. Please review and try again."));
+      setQuizTimeExpired(true);
+      checkQuizAnswers();
+      const correctCount = quizQuestions.reduce((acc, _, qi) => 
+        acc + (quizSelections[qi] === quizQuestions[qi].correctIndex ? 1 : 0), 0);
+      const total = quizQuestions.length;
+      const scorePercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+      const passed = scorePercent > 50;
+      if (!passed) {
+        setMarkReadError(t("You need to pass (score above 50%) to complete this quiz. Review and retake."));
         return;
       }
     }
@@ -384,7 +438,7 @@ export default function SubmodulePage() {
           retakeQuiz();
         }
       } else {
-        // Mark as complete (only if quiz is correct or not a quiz)
+        // Mark as complete (for quiz: only reached here if passed)
       const res = await api.markCourseProgressComplete(courseId, submoduleId);
       setCompletedIds(res.completed ?? [...completedIds, submoduleId]);
       
@@ -500,6 +554,12 @@ export default function SubmodulePage() {
         "Submitting…",
         "Retake Quiz",
         "Complete Quiz",
+        "Start Quiz",
+        "You have",
+        "minutes to complete this quiz.",
+        "Time's up!",
+        "The quiz has ended. Submit your answers to see your score.",
+        "remaining",
         
         // Quiz
         "No questions in this quiz.",
@@ -509,7 +569,13 @@ export default function SubmodulePage() {
         "to submit.",
         "Please answer all questions before submitting.",
         "Some answers are incorrect. Please review and try again.",
+        "You need to pass (score above 50%) to complete this quiz. Review and retake.",
         "All answers are correct! Great job!",
+        "Score",
+        "You scored",
+        "out of",
+        "Pass",
+        "Fail",
         
         // Certificate notification
         "Certificate Earned! 🎉",
@@ -991,19 +1057,68 @@ export default function SubmodulePage() {
             )}
         {isQuiz ? (
               <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                {/* Start Quiz screen */}
+                {!quizStarted ? (
+                  <div className="px-8 py-12 text-center">
+                    <div className="max-w-md mx-auto">
+                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 flex items-center justify-center mx-auto mb-6">
+                        <FileQuestion className="w-10 h-10 text-[var(--neon-blue)]" />
+                      </div>
+                      <h1 className="text-2xl font-bold text-gray-900 mb-2">{t("Module Quiz")}</h1>
+                      {currentModule?.title && (
+                        <p className="text-gray-600 mb-6">{currentModule.title}</p>
+                      )}
+                      <p className="text-gray-700 mb-2">
+                        {t("You have")} <strong>{quizDurationMinutes}</strong> {t("minutes to complete this quiz.")}
+                      </p>
+                      <p className="text-sm text-gray-500 mb-8">
+                        {quizQuestions.length} {quizQuestions.length === 1 ? t("question") : t("questions")}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={startQuiz}
+                        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
+                      >
+                        <PlayCircle className="w-6 h-6" />
+                        {t("Start Quiz")}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                <>
                 <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 px-8 py-6 border-b border-gray-200">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
-                      <FileQuestion className="w-7 h-7 text-white" />
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
+                        <FileQuestion className="w-7 h-7 text-white" />
+                      </div>
+                      <div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-1">{t("Module Quiz")}</h1>
+                        {currentModule?.title && (
+                          <p className="text-sm text-gray-600">{currentModule.title}</p>
+                        )}
+                      </div>
+                    </div>
+                    {/* Timer */}
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg font-semibold ${
+                      quizTimeExpired ? "bg-red-100 text-red-800" : quizTimeRemainingSec <= 60 ? "bg-amber-100 text-amber-800" : "bg-white/80 text-gray-800"
+                    }`}>
+                      <Clock className="w-5 h-5" />
+                      {quizTimeExpired ? (
+                        <span>{t("Time's up!")}</span>
+                      ) : (
+                        <span>
+                          {Math.floor(quizTimeRemainingSec / 60)}:{(quizTimeRemainingSec % 60).toString().padStart(2, "0")} {t("remaining")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-1">{t("Module Quiz")}</h1>
-                  {currentModule?.title && (
-                        <p className="text-sm text-gray-600">{currentModule.title}</p>
-                  )}
-                </div>
-              </div>
-                </div>
+                {quizTimeExpired && (
+                  <div className="px-8 py-3 bg-amber-50 border-b border-amber-200 text-amber-800 text-sm font-medium">
+                    {t("The quiz has ended. Submit your answers to see your score.")}
+                  </div>
+                )}
                 <div className="px-8 py-8">
               {quizQuestions.length === 0 ? (
                     <div className="text-center py-12">
@@ -1037,11 +1152,11 @@ export default function SubmodulePage() {
                               <button
                                 type="button"
                                         onClick={() => {
-                                          if (!showQuizResults) {
+                                          if (!showQuizResults && !quizTimeExpired) {
                                             setQuizSelections((prev) => ({ ...prev, [qi]: ci }));
                                 }
                                         }}
-                                        disabled={showQuizResults}
+                                        disabled={showQuizResults || quizTimeExpired}
                                         className={`w-full flex items-center gap-4 px-6 py-4 rounded-lg text-left transition-all min-h-[3.5rem] disabled:opacity-100 disabled:cursor-default ${
                                   isSelected
                                             ? showCorrect
@@ -1101,41 +1216,64 @@ export default function SubmodulePage() {
                 </div>
               )}
 
-              {/* Quiz submit */}
+              {/* Quiz submit / results: show when quiz in progress (Submit) or after quiz (score + retake) */}
                   <div className="mt-10 pt-8 border-t border-gray-200">
                     <div className="space-y-4">
-                {isRead(submoduleId) ? (
-                        <div className="space-y-3">
-                          <button
-                            type="button"
-                            onClick={toggleComplete}
-                            disabled={markingRead}
-                            className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
-                          >
-                            <RotateCcw className="w-5 h-5 shrink-0" />
-                            <span>{markingRead ? t("Updating…") : t("Retake Quiz")}</span>
-                          </button>
-                        </div>
-                      ) : showQuizResults ? (
+                {(showQuizResults || isRead(submoduleId)) ? (
                         <div className="space-y-4">
-                          {Object.values(quizResults).every(r => r) ? (
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
-                                <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
-                                <span className="!text-green-800 font-medium">{t("All answers are correct! Great job!")}</span>
-                              </div>
+                          {(() => {
+                            const score = showQuizResults && Object.keys(quizResults).length > 0
+                              ? (() => {
+                                  const correctCount = Object.values(quizResults).filter(Boolean).length;
+                                  const total = quizQuestions.length;
+                                  const scorePercent = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+                                  return { correctCount, total, scorePercent, passed: scorePercent > 50 };
+                                })()
+                              : lastQuizScore;
+                            return score ? (
+                              <>
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
+                                  <div>
+                                    <p className="text-sm font-medium text-gray-600 mb-0.5">{t("Score")}</p>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                      {t("You scored")} {score.correctCount} {t("out of")} {score.total} ({score.scorePercent}%)
+                                    </p>
+                                  </div>
+                                  <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold ${score.passed ? "bg-green-100 text-green-800 border border-green-200" : "bg-red-100 text-red-800 border border-red-200"}`}>
+                                    {score.passed ? (
+                                      <>
+                                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                                        <span>{t("Pass")}</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <X className="w-5 h-5 shrink-0" />
+                                        <span>{t("Fail")}</span>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                                {showQuizResults && Object.values(quizResults).every(r => r) && (
+                                  <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+                                    <span className="!text-green-800 font-medium">{t("All answers are correct! Great job!")}</span>
+                                  </div>
+                                )}
+                              </>
+                            ) : null;
+                          })()}
+                          <div className="space-y-3">
+                            {isRead(submoduleId) ? (
                               <button
                                 type="button"
                                 onClick={toggleComplete}
                                 disabled={markingRead}
                                 className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
-                    <CheckCircle2 className="w-5 h-5 shrink-0" />
-                                <span>{markingRead ? t("Submitting…") : t("Complete Quiz")}</span>
+                                <RotateCcw className="w-5 h-5 shrink-0" />
+                                <span>{markingRead ? t("Updating…") : t("Retake Quiz")}</span>
                               </button>
-                            </div>
-                          ) : (
-                            <div className="space-y-3">
+                            ) : (
                               <button
                                 type="button"
                                 onClick={retakeQuiz}
@@ -1144,23 +1282,28 @@ export default function SubmodulePage() {
                                 <RotateCcw className="w-5 h-5 shrink-0" />
                                 <span>{t("Retake Quiz")}</span>
                               </button>
-                            </div>
-                          )}
+                            )}
+                          </div>
                         </div>
                 ) : (
                   <>
                     <button
                       type="button"
                             onClick={toggleComplete}
-                      disabled={!allQuizAttempted || markingRead}
+                      disabled={(!allQuizAttempted && !quizTimeExpired) || markingRead}
                             className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--neon-blue)] shadow-md hover:shadow-lg"
                     >
                       <Check className="w-5 h-5 shrink-0" />
                             <span>{markingRead ? t("Submitting…") : t("Submit Quiz")}</span>
                     </button>
-                    {!allQuizAttempted && quizQuestions.length > 0 && (
+                    {!allQuizAttempted && !quizTimeExpired && quizQuestions.length > 0 && (
                             <p className="text-sm text-gray-600">
                               {t("Please answer all")} {quizQuestions.length} {quizQuestions.length !== 1 ? t("questions") : t("question")} {t("to submit.")}
+                      </p>
+                    )}
+                    {quizTimeExpired && (
+                      <p className="text-sm text-amber-700 font-medium">
+                        {t("The quiz has ended. Submit your answers to see your score.")}
                       </p>
                     )}
                   </>
@@ -1173,6 +1316,8 @@ export default function SubmodulePage() {
                     </div>
               </div>
             </div>
+                </>
+                )}
           </article>
         ) : currentSection ? (
               <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
