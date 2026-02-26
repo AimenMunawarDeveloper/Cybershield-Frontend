@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus, FilePlus } from "lucide-react";
+import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus, FilePlus, Eye } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
@@ -34,6 +34,7 @@ interface EmailRecord {
   subject: string;
   status: "sent" | "failed";
   createdAt: string;
+  openedAt?: string;
   error?: string;
 }
 
@@ -739,19 +740,27 @@ export default function EmailPhishingPage() {
                           <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
                             <p className="text-white font-semibold truncate">
                               {t(email.subject)}
                             </p>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
-                                email.status === "sent"
-                                  ? "bg-green-900/30 text-green-400 border border-green-500/30"
-                                  : "bg-red-900/30 text-red-400 border border-red-500/30"
-                              }`}
-                            >
-                              {email.status === "sent" ? t("Sent") : t("Failed")}
-                            </span>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {email.openedAt && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-blue-900/30 text-blue-400 border border-blue-500/30 flex items-center gap-1">
+                                  <Eye className="w-3 h-3" />
+                                  {t("Opened")}
+                                </span>
+                              )}
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  email.status === "sent"
+                                    ? "bg-green-900/30 text-green-400 border border-green-500/30"
+                                    : "bg-red-900/30 text-red-400 border border-red-500/30"
+                                }`}
+                              >
+                                {email.status === "sent" ? t("Sent") : t("Failed")}
+                              </span>
+                            </div>
                           </div>
                           <div className="space-y-1">
                             <p className="text-sm text-[var(--medium-grey)] truncate">
@@ -764,6 +773,12 @@ export default function EmailPhishingPage() {
                               <Clock className="w-3 h-3" />
                               <span>{formatDate(email.createdAt)}</span>
                             </div>
+                            {email.openedAt && (
+                              <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
+                                <Eye className="w-3 h-3" />
+                                <span>{t("First opened at")} {formatDate(email.openedAt)}</span>
+                              </div>
+                            )}
                           </div>
                           {email.error && (
                             <p className="text-xs text-red-400 mt-2">
