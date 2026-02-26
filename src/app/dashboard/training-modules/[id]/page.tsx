@@ -377,9 +377,9 @@ export default function TrainingModuleDetailPage() {
 
   if (loading || !displayCourse) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">{loading ? t("Loading course...") : t("Course not found.")}</p>
+          <p className="text-muted-foreground">{loading ? t("Loading course...") : t("Course not found.")}</p>
         </div>
       </div>
     );
@@ -387,8 +387,8 @@ export default function TrainingModuleDetailPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center text-red-600">{error}</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center text-destructive">{error}</div>
       </div>
     );
   }
@@ -406,32 +406,32 @@ export default function TrainingModuleDetailPage() {
       : completedIds.includes(`${moduleIndex}-${sectionIndex}`);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <button
           onClick={() => router.push("/dashboard/training-modules")}
-          className="mb-6 flex items-center gap-2 text-gray-600 hover:text-[var(--neon-blue)] transition-colors"
+          className="mb-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>{t("Back to Training Modules")}</span>
         </button>
 
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-muted-foreground">
           <span
-            className="hover:text-[var(--neon-blue)] cursor-pointer"
+            className="hover:text-primary cursor-pointer"
             onClick={() => router.push("/dashboard/training-modules")}
           >
             {t("Catalog")}
           </span>{" "}
           <span className="mx-2">/</span>{" "}
-          <span className="text-gray-900">{displayCourse.courseTitle}</span>
+          <span className="text-foreground">{displayCourse.courseTitle}</span>
         </div>
 
         <div className="mb-6">
-          <div className="inline-block px-3 py-1 bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] rounded-md text-sm font-medium mb-4">
+          <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-md text-sm font-medium mb-4">
             {t("Course")}
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold text-foreground mb-2">
             {displayCourse.courseTitle}
           </h1>
         </div>
@@ -441,7 +441,7 @@ export default function TrainingModuleDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             <div>
               {displayCourse.createdBy && (
-                <p className="text-sm text-gray-600 mb-2">
+                <p className="text-sm text-muted-foreground mb-2">
                   {t("Created by")} {displayCourse.createdBy.displayName || displayCourse.createdBy.email || "Unknown"}
                   {displayCourse.createdAt && (
                     <span className="ml-2">
@@ -450,7 +450,7 @@ export default function TrainingModuleDetailPage() {
                   )}
                 </p>
               )}
-              <div className="text-gray-700">
+              <div className="text-foreground">
                 {(() => {
                   const desc = displayCourse.description || t("No description.");
                   const { visible, remaining, isLong } = truncateByWords(desc, DESCRIPTION_WORD_LIMIT);
@@ -463,7 +463,7 @@ export default function TrainingModuleDetailPage() {
                           <button
                             type="button"
                             onClick={() => setDescriptionExpanded(false)}
-                            className="ml-1 text-[var(--neon-blue)] hover:underline font-medium"
+                            className="ml-1 text-primary hover:underline font-medium"
                           >
                             {t("Read less")}
                           </button>
@@ -475,7 +475,7 @@ export default function TrainingModuleDetailPage() {
                           <button
                             type="button"
                             onClick={() => setDescriptionExpanded(true)}
-                            className="text-[var(--neon-blue)] hover:underline font-medium"
+                            className="text-primary hover:underline font-medium"
                           >
                             {t("Read more")}
                           </button>
@@ -488,38 +488,38 @@ export default function TrainingModuleDetailPage() {
             </div>
 
             {/* Course Summary Badges - below description */}
-            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-gray-100">
-              <div className="flex items-center gap-1.5 text-gray-700">
-                <BarChart3 className="w-4 h-4 text-[var(--neon-blue)]" />
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-border">
+              <div className="flex items-center gap-1.5 text-foreground">
+                <BarChart3 className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">
                   {modules.length} {modules.length !== 1 ? t("MODULES") : t("MODULE")}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-gray-700">
-                <FlaskConical className="w-4 h-4 text-[var(--neon-blue)]" />
+              <div className="flex items-center gap-1.5 text-foreground">
+                <FlaskConical className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">
                   {modules.filter((m) => (m.quiz?.length ?? 0) > 0).length}{" "}
                   {modules.filter((m) => (m.quiz?.length ?? 0) > 0).length === 1 ? t("QUIZ") : t("QUIZZES")}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-gray-700">
+              <div className="flex items-center gap-1.5 text-foreground">
                 {displayCourse?.level === "advanced" ? (
-                  <GraduationCap className="w-4 h-4 text-[var(--neon-blue)]" />
+                  <GraduationCap className="w-4 h-4 text-primary" />
                 ) : (
-                  <Layers className="w-4 h-4 text-[var(--neon-blue)]" />
+                  <Layers className="w-4 h-4 text-primary" />
                 )}
                 <span className="text-sm font-medium uppercase">
                   {displayCourse?.level === "advanced" ? t("Advanced") : t("Basic")}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-gray-700">
-                <Monitor className="w-4 h-4 text-[var(--neon-blue)]" />
+              <div className="flex items-center gap-1.5 text-foreground">
+                <Monitor className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">{t("ONLINE")}</span>
               </div>
             </div>
 
             {displayCourse.createdAt && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
                 <span>{t("Added")} {new Date(displayCourse.createdAt).toLocaleDateString()}</span>
               </div>
@@ -528,7 +528,7 @@ export default function TrainingModuleDetailPage() {
 
           {/* Right (1/3): image + certificate below, button on right */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="relative w-full rounded-xl overflow-hidden shadow-md bg-gray-100 aspect-video">
+            <div className="relative w-full rounded-xl overflow-hidden shadow-md bg-muted aspect-video">
               <Image
                 src={DEFAULT_IMAGE}
                 alt={displayCourse.courseTitle}
@@ -540,31 +540,31 @@ export default function TrainingModuleDetailPage() {
             </div>
 
             {/* Certificate Section - below image, button right-aligned */}
-            <div className={`border rounded-xl overflow-hidden transition-all bg-white ${
+            <div className={`border rounded-xl overflow-hidden transition-all bg-card ${
               certificate 
-                ? "border-[var(--neon-blue)]/30 shadow-sm" 
+                ? "border-primary/30 shadow-sm" 
                 : progressPercent === 100
-                ? "border-[var(--neon-blue)]/20"
-                : "border-gray-200"
+                ? "border-primary/20"
+                : "border-border"
             }`}>
               <div className="p-4">
                 <div className="flex items-start gap-3">
                   <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                     certificate 
-                      ? "bg-[var(--neon-blue)]" 
+                      ? "bg-primary" 
                       : progressPercent === 100
-                      ? "bg-[var(--neon-blue)]/80"
-                      : "bg-gray-100"
+                      ? "bg-primary/80"
+                      : "bg-muted"
                   }`}>
                     <Award className={`w-5 h-5 ${
-                      certificate || progressPercent === 100 ? "text-white" : "text-gray-400"
+                      certificate || progressPercent === 100 ? "text-primary-foreground" : "text-muted-foreground"
                     }`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-1">
+                    <h3 className="text-sm font-semibold text-foreground mb-1">
                       {certificate ? t("Certificate Earned") : progressPercent === 100 ? t("Certificate Available") : t("Earn a Certificate")}
                     </h3>
-                    <p className="text-xs text-gray-600 mb-3 leading-relaxed">
+                    <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
                       {certificate 
                         ? t("You've successfully completed this course and earned a certificate.")
                         : progressPercent === 100
@@ -576,13 +576,13 @@ export default function TrainingModuleDetailPage() {
                       <div className="flex flex-col gap-2 items-end">
                         <button
                           onClick={() => router.push(`/dashboard/certificates`)}
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-colors text-sm font-medium"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           {t("View Certificate")}
                         </button>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                          <CheckCircle className="w-3.5 h-3.5 text-[var(--neon-blue)]" />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <CheckCircle className="w-3.5 h-3.5 text-primary" />
                           <span>{t("Issued on")} {new Date(certificate.issuedDate).toLocaleDateString()}</span>
                         </div>
                       </div>
@@ -605,7 +605,7 @@ export default function TrainingModuleDetailPage() {
                             }
                           }}
                           disabled={loadingCertificate}
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loadingCertificate ? (
                             <>
@@ -622,7 +622,7 @@ export default function TrainingModuleDetailPage() {
                       </div>
                     ) : (
                       <div className="flex justify-end">
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           <Lock className="w-3.5 h-3.5" />
                           <span>{t("Complete course to unlock")}</span>
                         </div>
@@ -635,15 +635,15 @@ export default function TrainingModuleDetailPage() {
           </div>
         </div>
 
-        <div className="mb-8 pb-6 border-b border-gray-200" />
+        <div className="mb-8 pb-6 border-b border-border" />
 
-        <div className="flex gap-8 mb-8 border-b border-gray-200">
+        <div className="flex gap-8 mb-8 border-b border-border">
           <button
             onClick={() => setActiveTab("overview")}
             className={`pb-4 px-1 font-medium transition-colors ${
               activeTab === "overview"
-                ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
-                : "text-gray-600 hover:text-gray-900"
+                ? "text-primary border-b-2 border-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {t("Overview")}
@@ -652,8 +652,8 @@ export default function TrainingModuleDetailPage() {
             onClick={() => setActiveTab("curriculum")}
             className={`pb-4 px-1 font-medium transition-colors ${
               activeTab === "curriculum"
-                ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
-                : "text-gray-600 hover:text-gray-900"
+                ? "text-primary border-b-2 border-primary"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {t("Curriculum")}
@@ -664,7 +664,7 @@ export default function TrainingModuleDetailPage() {
           <div className="flex-1">
             {(activeTab === "overview" || activeTab === "curriculum") && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl font-bold text-foreground mb-6">
                   {activeTab === "overview" ? t("Here's what you will learn.") : t("Course Curriculum")}
                 </h2>
                 <div className="space-y-2">
@@ -678,43 +678,43 @@ export default function TrainingModuleDetailPage() {
                         key={moduleId}
                         className={`border rounded-lg overflow-hidden transition-all ${
                           isExpanded
-                            ? "border-[var(--neon-blue)] shadow-md"
-                            : "border-gray-200 hover:border-gray-300"
+                            ? "border-primary shadow-md"
+                            : "border-border hover:border-border"
                         }`}
                       >
                         <button
                           onClick={() => toggleModule(moduleId)}
-                          className="w-full px-4 py-4 bg-white hover:bg-gray-50 transition-colors flex items-center justify-between text-left cursor-pointer"
+                          className="w-full px-4 py-4 bg-card hover:bg-muted transition-colors flex items-center justify-between text-left cursor-pointer"
                         >
                           <div className="flex items-center gap-3 flex-1">
-                            <div className="w-8 h-8 rounded-full bg-[var(--neon-blue)]/10 flex items-center justify-center flex-shrink-0">
-                              <div className="w-2 h-2 bg-[var(--neon-blue)] rounded-full" />
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                              <div className="w-2 h-2 bg-primary rounded-full" />
                             </div>
-                            <span className="text-base font-medium text-gray-900">
+                            <span className="text-base font-medium text-foreground">
                               {module.title || `Module ${moduleIndex + 1}`}
                             </span>
                           </div>
                           {isExpanded ? (
-                            <ChevronDown className="w-5 h-5 text-[var(--neon-blue)]" />
+                            <ChevronDown className="w-5 h-5 text-primary" />
                           ) : (
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                            <ChevronRight className="w-5 h-5 text-muted-foreground" />
                           )}
                         </button>
 
                         {isExpanded && (
-                          <div className="bg-gray-50 border-t border-gray-200">
+                          <div className="bg-muted/50 border-t border-border">
                             {sections.map((section, sectionIndex) => {
                                 const done = isCompleted(moduleIndex, sectionIndex);
                                 return (
                                   <button
                                     key={section._id || sectionIndex}
                                     onClick={() => goToSection(moduleIndex, sectionIndex)}
-                                    className="w-full px-4 py-3 pl-14 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-[var(--neon-blue)] transition-colors flex items-center gap-2 border-b border-gray-100 last:border-b-0"
+                                    className="w-full px-4 py-3 pl-14 text-left text-sm text-foreground hover:bg-muted hover:text-primary transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                                   >
                                     {done ? (
-                                      <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                                      <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
                                     ) : (
-                                      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                                     )}
                                     {section.title || `${t("Section")} ${sectionIndex + 1}`}
                                   </button>
@@ -723,12 +723,12 @@ export default function TrainingModuleDetailPage() {
                             {hasQuiz && (
                               <button
                                 onClick={() => goToQuiz(moduleIndex)}
-                                className="w-full px-4 py-3 pl-14 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-[var(--neon-blue)] transition-colors flex items-center gap-2 border-b border-gray-100 last:border-b-0"
+                                className="w-full px-4 py-3 pl-14 text-left text-sm text-foreground hover:bg-muted hover:text-primary transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                               >
                                 {isCompleted(moduleIndex, "quiz") ? (
-                                  <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                                  <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
                                 ) : (
-                                  <FileQuestion className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                                  <FileQuestion className="w-4 h-4 text-primary flex-shrink-0" />
                                 )}
                                 <span>{t("Module Quiz")}</span>
                               </button>
@@ -748,10 +748,10 @@ export default function TrainingModuleDetailPage() {
               {/* Your progress - first */}
               {totalItems > 0 && (
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-0.5">
+                  <h3 className="text-lg font-semibold text-foreground mb-0.5">
                     {t("Your progress")}
                   </h3>
-                  <p className="text-xs text-gray-500 mb-4">
+                  <p className="text-xs text-muted-foreground mb-4">
                     {t("Overall completion rate")}
                   </p>
                   <div className="flex flex-col items-center mb-4">
@@ -761,11 +761,11 @@ export default function TrainingModuleDetailPage() {
                       showIcon={true}
                     />
                   </div>
-                  <div className="bg-gray-100 rounded-lg p-4 text-center">
-                    <p className="text-2xl font-bold text-gray-900">
+                  <div className="bg-muted rounded-lg p-4 text-center">
+                    <p className="text-2xl font-bold text-foreground">
                       {progressPercent}%
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-muted-foreground">
                       {completedCount} {t("of")} {totalItems} {t("completed")}
                     </p>
                   </div>
@@ -774,10 +774,10 @@ export default function TrainingModuleDetailPage() {
 
               {/* Achievements Section - Badges (from course) */}
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                <h3 className="text-lg font-bold text-foreground mb-2">
                   {t("Achievements")}
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   {t("Badges you can earn in this course.")}
                 </p>
                 <div className="grid grid-cols-3 gap-3">
@@ -794,27 +794,27 @@ export default function TrainingModuleDetailPage() {
                           key={badgeId}
                           className={`flex flex-col items-center justify-center rounded-xl border-2 p-3 min-h-[5.5rem] transition-shadow hover:shadow-md ${
                             isFirst
-                              ? "bg-gradient-to-br from-[var(--electric-blue)]/20 to-[var(--medium-blue)]/20 border-[var(--electric-blue)]"
-                              : "bg-[var(--neon-blue)]/10 border-[var(--neon-blue)]/40"
+                              ? "bg-gradient-to-br from-primary/20 to-primary/20 border-primary"
+                              : "bg-primary/10 border-primary/40"
                           }`}
                           title={label}
                         >
                           <div
                             className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
-                              isFirst ? "bg-[var(--electric-blue)]/20" : "bg-[var(--neon-blue)]/20"
+                              isFirst ? "bg-primary/20" : "bg-primary/20"
                             }`}
                           >
                             {Icon ? (
                               <Icon
                                 className={`w-6 h-6 flex-shrink-0 ${
-                                  isFirst ? "text-[var(--electric-blue)]" : "text-[var(--neon-blue)]"
+                                  isFirst ? "text-primary" : "text-primary"
                                 }`}
                               />
                             ) : null}
                           </div>
                           <span
                             className={`text-[10px] font-semibold text-center leading-tight line-clamp-2 px-0.5 ${
-                              isFirst ? "text-[var(--electric-blue)]" : "text-[var(--neon-blue)]"
+                              isFirst ? "text-primary" : "text-primary"
                             }`}
                           >
                             {label}
@@ -824,15 +824,15 @@ export default function TrainingModuleDetailPage() {
                     })
                   ) : (
                     <>
-                      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-[var(--electric-blue)] bg-gradient-to-br from-[var(--electric-blue)]/20 to-[var(--medium-blue)]/20 p-3 min-h-[5.5rem]">
-                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--electric-blue)]/20 mb-2">
-                          <Award className="w-6 h-6 text-[var(--electric-blue)] flex-shrink-0" />
+                      <div className="flex flex-col items-center justify-center rounded-xl border-2 border-primary bg-gradient-to-br from-primary/20 to-primary/20 p-3 min-h-[5.5rem]">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/20 mb-2">
+                          <Award className="w-6 h-6 text-primary flex-shrink-0" />
                         </div>
-                        <span className="text-[10px] font-semibold text-[var(--electric-blue)] text-center leading-tight line-clamp-2 px-0.5">
+                        <span className="text-[10px] font-semibold text-primary text-center leading-tight line-clamp-2 px-0.5">
                           {displayCourse.courseTitle.split(" ").slice(0, 2).join(" ") || t("Course")}
                         </span>
                       </div>
-                      <p className="col-span-2 text-xs text-gray-500 self-center">{t("No badges added yet")}</p>
+                      <p className="col-span-2 text-xs text-muted-foreground self-center">{t("No badges added yet")}</p>
                     </>
                   )}
                 </div>
@@ -840,25 +840,25 @@ export default function TrainingModuleDetailPage() {
 
               {/* Skills / Topics */}
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                <h3 className="text-lg font-bold text-foreground mb-4">
                   {t("Skills You Will Learn")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {modules.slice(0, 6).map((m, i) => (
                     <span
                       key={m._id || i}
-                      className="px-3 py-1.5 bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] rounded-md text-sm font-medium"
+                      className="px-3 py-1.5 bg-primary/10 text-primary rounded-md text-sm font-medium"
                     >
                       {m.title || `${t("Module")} ${i + 1}`}
                     </span>
                   ))}
                   {modules.length > 6 && (
-                    <span className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-md text-sm">
+                    <span className="px-3 py-1.5 bg-muted text-muted-foreground rounded-md text-sm">
                       +{modules.length - 6} {t("more")}
                     </span>
                   )}
                   {modules.length === 0 && (
-                    <span className="px-3 py-1.5 bg-gray-100 text-gray-500 rounded-md text-sm">
+                    <span className="px-3 py-1.5 bg-muted text-muted-foreground rounded-md text-sm">
                       {t("Complete the course")}
                     </span>
                   )}
@@ -867,8 +867,8 @@ export default function TrainingModuleDetailPage() {
 
               {displayCourse.createdBy && (
                 <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-[var(--neon-blue)]" />
-                  <span className="text-sm text-gray-700">
+                  <User className="w-5 h-5 text-primary" />
+                  <span className="text-sm text-foreground">
                     {displayCourse.createdBy.displayName || displayCourse.createdBy.email}
                   </span>
                 </div>
@@ -880,7 +880,7 @@ export default function TrainingModuleDetailPage() {
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-8 right-8 w-12 h-12 bg-[var(--neon-blue)] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[var(--medium-blue)] transition-colors z-50"
+        className="fixed bottom-8 right-8 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg hover:opacity-90 transition-colors z-50"
         aria-label="Scroll to top"
       >
         <ArrowUp className="w-5 h-5" />

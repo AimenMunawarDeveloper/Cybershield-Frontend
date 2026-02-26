@@ -48,9 +48,9 @@ export default function ProgressRadialChart({
               x2="100%"
               y2="100%"
             >
-              <stop offset="0%" stopColor="#00D4FF" stopOpacity={1} />
-              <stop offset="50%" stopColor="#0099CC" stopOpacity={1} />
-              <stop offset="100%" stopColor="#0066AA" stopOpacity={1} />
+              <stop offset="0%" stopColor="var(--progress-gradient-start)" stopOpacity={1} />
+              <stop offset="50%" stopColor="var(--progress-gradient-mid)" stopOpacity={1} />
+              <stop offset="100%" stopColor="var(--progress-gradient-end)" stopOpacity={1} />
             </linearGradient>
           </defs>
           <RadialBar
@@ -64,9 +64,9 @@ export default function ProgressRadialChart({
       {/* Center content */}
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
         {showIcon ? (
-          <div className="w-12 h-12 bg-[var(--neon-blue)] rounded-full flex items-center justify-center border-2 border-white">
+          <div className="w-12 h-12 bg-icon-bg rounded-full flex items-center justify-center border-2 border-foreground/20">
             <svg
-              className="w-6 h-6 text-white"
+              className="w-6 h-6 text-icon-fg"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -81,11 +81,11 @@ export default function ProgressRadialChart({
           </div>
         ) : showScore ? (
           <div className="text-center">
-            <p className="text-xs text-[var(--medium-grey)] mb-1">Awareness</p>
-            <p className="text-lg font-bold text-white">
+            <p className="text-xs text-muted-foreground mb-1">Awareness</p>
+            <p className="text-lg font-bold text-foreground">
               {scoreValue.toFixed(1)}
             </p>
-            <p className="text-xs text-[var(--medium-grey)]">Score</p>
+            <p className="text-xs text-muted-foreground">Score</p>
           </div>
         ) : null}
       </div>

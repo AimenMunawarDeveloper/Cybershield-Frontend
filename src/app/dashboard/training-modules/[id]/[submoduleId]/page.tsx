@@ -81,19 +81,19 @@ function formatInlineMarkdown(text: string): React.ReactElement[] {
     // Add the formatted segment
     if (segment.type === 'bold') {
       parts.push(
-        <strong key={`bold-${key++}`} className="font-semibold text-gray-900">
+        <strong key={`bold-${key++}`} className="font-semibold text-foreground">
           {segment.content}
         </strong>
       );
     } else if (segment.type === 'italic') {
       parts.push(
-        <em key={`italic-${key++}`} className="text-gray-700">
+        <em key={`italic-${key++}`} className="text-foreground">
           {segment.content}
         </em>
       );
     } else if (segment.type === 'code') {
       parts.push(
-        <code key={`code-${key++}`} className="px-1.5 py-0.5 bg-gray-100 text-[var(--neon-blue)] rounded text-sm font-mono">
+        <code key={`code-${key++}`} className="px-1.5 py-0.5 bg-muted text-primary rounded text-sm font-mono">
           {segment.content}
         </code>
       );
@@ -127,7 +127,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
         parts.push(
           <ol key={`list-${key++}`} className="list-decimal list-inside space-y-2 my-4 ml-4">
             {listItems.map((item, idx) => (
-              <li key={idx} className="pl-2 text-gray-800 leading-relaxed">
+              <li key={idx} className="pl-2 text-foreground leading-relaxed">
                 {formatInlineMarkdown(item)}
               </li>
             ))}
@@ -137,7 +137,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
         parts.push(
           <ul key={`list-${key++}`} className="list-disc list-inside space-y-2 my-4 ml-4">
             {listItems.map((item, idx) => (
-              <li key={idx} className="pl-2 text-gray-800 leading-relaxed">
+              <li key={idx} className="pl-2 text-foreground leading-relaxed">
                 {formatInlineMarkdown(item)}
               </li>
             ))}
@@ -186,8 +186,8 @@ function formatContent(material: string, translateFn?: (text: string) => string)
           <div className="flex items-start gap-3">
             <Icon className={`w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5`} />
             <div className="flex-1">
-              <p className="font-semibold text-gray-900 mb-1">{translateFn ? translateFn(type) : type}</p>
-              <div className="text-gray-800 leading-relaxed">{formatInlineMarkdown(content)}</div>
+              <p className="font-semibold text-foreground mb-1">{translateFn ? translateFn(type) : type}</p>
+              <div className="text-foreground leading-relaxed">{formatInlineMarkdown(content)}</div>
             </div>
           </div>
         </div>
@@ -200,7 +200,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       flushList();
       const headingText = trimmed.substring(3).trim();
       parts.push(
-        <h3 key={`h3-${key++}`} className="text-xl font-bold text-gray-900 mt-6 mb-3">
+        <h3 key={`h3-${key++}`} className="text-xl font-bold text-foreground mt-6 mb-3">
           {formatInlineMarkdown(headingText)}
         </h3>
       );
@@ -210,7 +210,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       flushList();
       const headingText = trimmed.substring(2).trim();
       parts.push(
-        <h2 key={`h2-${key++}`} className="text-2xl font-bold text-gray-900 mt-8 mb-4 border-b border-gray-200 pb-2">
+        <h2 key={`h2-${key++}`} className="text-2xl font-bold text-foreground mt-8 mb-4 border-b border-border pb-2">
           {formatInlineMarkdown(headingText)}
         </h2>
       );
@@ -220,7 +220,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       flushList();
       const headingText = trimmed.substring(1).trim();
       parts.push(
-        <h1 key={`h1-${key++}`} className="text-3xl font-bold text-gray-900 mt-8 mb-4">
+        <h1 key={`h1-${key++}`} className="text-3xl font-bold text-foreground mt-8 mb-4">
           {formatInlineMarkdown(headingText)}
         </h1>
       );
@@ -253,7 +253,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
     // Regular paragraph
     flushList();
     parts.push(
-      <p key={`p-${key++}`} className="text-gray-800 leading-relaxed mb-6 text-lg">
+      <p key={`p-${key++}`} className="text-foreground leading-relaxed mb-6 text-lg">
         {formatInlineMarkdown(trimmed)}
       </p>
     );
@@ -576,6 +576,10 @@ export default function SubmodulePage() {
         "out of",
         "Pass",
         "Fail",
+        "Marks",
+        "Question",
+        "Correct",
+        "Incorrect",
         
         // Certificate notification
         "Certificate Earned! 🎉",
@@ -830,40 +834,40 @@ export default function SubmodulePage() {
 
   if (loading || !displayCourse) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <p className="text-gray-500">{t("Loading...")}</p>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">{t("Loading...")}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-red-600">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       {/* Sidebar Navigation */}
       <aside
         className={`${
           sidebarCollapsed ? "w-0" : "w-80"
-        } bg-white border-r border-gray-200 transition-all duration-300 overflow-hidden flex-shrink-0 sticky top-0 h-screen overflow-y-auto`}
+        } bg-card border-r border-border transition-all duration-300 overflow-hidden flex-shrink-0 sticky top-0 h-screen overflow-y-auto`}
       >
         <div className="p-6">
           {/* Course Header */}
           <div className="mb-6">
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-[var(--neon-blue)] transition-colors mb-3"
+              className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors mb-3"
             >
               <ArrowLeft className="w-4 h-4" />
               {t("Back to course")}
             </button>
-            <h2 className="text-lg font-bold text-gray-900 line-clamp-2 mb-2">{displayCourse.courseTitle}</h2>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
+            <h2 className="text-lg font-bold text-foreground line-clamp-2 mb-2">{displayCourse.courseTitle}</h2>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 <span>{getTotalItems()} {t("items")}</span>
@@ -877,13 +881,13 @@ export default function SubmodulePage() {
 
           {/* Progress Bar */}
           <div className="mb-6">
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-muted rounded-full overflow-hidden">
               <div
-                className="h-full bg-[var(--neon-blue)] transition-all duration-300"
+                className="h-full bg-primary transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {getCompletedCount()} {t("of")} {getTotalItems()} {t("completed")}
             </p>
           </div>
@@ -897,42 +901,42 @@ export default function SubmodulePage() {
               const isCurrentModule = modIdx === moduleIndex;
 
               return (
-                <div key={mod._id || modIdx} className="border border-gray-200 rounded-lg overflow-hidden">
+                <div key={mod._id || modIdx} className="border border-border rounded-lg overflow-hidden">
                   <button
                     onClick={() => toggleSidebarModule(modIdx)}
                     className={`w-full px-4 py-3 flex items-center justify-between text-left transition-colors ${
                       isCurrentModule
-                        ? "bg-[var(--neon-blue)]/10 border-l-4 border-l-[var(--neon-blue)]"
-                        : "hover:bg-gray-50"
+                        ? "bg-primary/10 border-l-4 border-l-primary"
+                        : "hover:bg-muted"
                     }`}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <div
                         className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
                           isCurrentModule
-                            ? "bg-[var(--neon-blue)] text-white"
-                            : "bg-gray-200 text-gray-600"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
                         }`}
                       >
                         <span className="text-xs font-semibold">{modIdx + 1}</span>
                       </div>
                       <span
                         className={`text-sm font-medium truncate ${
-                          isCurrentModule ? "text-[var(--neon-blue)]" : "text-gray-900"
+                          isCurrentModule ? "text-primary" : "text-foreground"
                         }`}
                       >
                         {mod.title || `Module ${modIdx + 1}`}
                       </span>
                     </div>
                     {isExpanded ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                     )}
                   </button>
 
                   {isExpanded && (
-                    <div className="bg-gray-50 border-t border-gray-200">
+                    <div className="bg-muted/50 border-t border-border">
                       {sections.map((section, secIdx) => {
                         const sectionId = `${modIdx}-${secIdx}`;
                         const isCurrent = modIdx === moduleIndex && secIdx === sectionIndex;
@@ -942,16 +946,16 @@ export default function SubmodulePage() {
                           <button
                             key={section._id || secIdx}
                             onClick={() => router.push(`/dashboard/training-modules/${courseId}/${sectionId}`)}
-                            className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 last:border-0 ${
+                            className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-border last:border-0 ${
                               isCurrent
-                                ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
-                                : "text-gray-700 hover:bg-gray-100"
+                                ? "bg-primary/5 text-primary font-medium"
+                                : "text-foreground hover:bg-muted"
                             }`}
                           >
                             {isCompleted ? (
-                              <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                              <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
                             ) : (
-                              <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              <Circle className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                             )}
                             <span className="truncate">{section.title || `Section ${secIdx + 1}`}</span>
                           </button>
@@ -962,14 +966,14 @@ export default function SubmodulePage() {
                           onClick={() => router.push(`/dashboard/training-modules/${courseId}/${modIdx}-quiz`)}
                           className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors ${
                             modIdx === moduleIndex && isQuiz
-                              ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
-                              : "text-gray-700 hover:bg-gray-100"
+                              ? "bg-primary/5 text-primary font-medium"
+                              : "text-foreground hover:bg-muted"
                           }`}
                         >
                           {isRead(`${modIdx}-quiz`) ? (
-                            <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                            <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
                           ) : (
-                            <FileQuestion className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                            <FileQuestion className="w-4 h-4 text-primary flex-shrink-0" />
                           )}
                           <span>{t("Module Quiz")}</span>
                         </button>
@@ -986,27 +990,27 @@ export default function SubmodulePage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <header className="bg-card border-b border-border sticky top-0 z-20">
           <div className="px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
                 aria-label="Toggle sidebar"
               >
-                <BookOpen className="w-5 h-5 text-gray-600" />
+                <BookOpen className="w-5 h-5 text-muted-foreground" />
               </button>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">{displayCourse.courseTitle}</h1>
+                <h1 className="text-lg font-semibold text-foreground">{displayCourse.courseTitle}</h1>
                 {currentModule && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground">
                     {currentModule.title} {isQuiz ? `• ${t("Module Quiz")}` : currentSection ? `• ${currentSection.title}` : ""}
                   </p>
                 )}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-muted-foreground">
                 {moduleIndex + 1} {t("of")} {displayCourse.modules.length} {t("modules")}
             </span>
           </div>
@@ -1018,27 +1022,27 @@ export default function SubmodulePage() {
           <div className="max-w-4xl mx-auto px-6 py-8">
             {/* Certificate Generated Notification - Cisco Style with Cybershield Colors */}
             {certificateGenerated && (
-              <div className="mb-6 bg-white border border-[var(--neon-blue)]/30 rounded-lg p-5 shadow-sm">
+              <div className="mb-6 bg-card border border-primary/30 rounded-lg p-5 shadow-sm">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--neon-blue)] flex items-center justify-center">
-                    <Award className="w-6 h-6 text-white" />
+                  <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
+                    <Award className="w-6 h-6 text-primary-foreground" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-semibold text-gray-900 mb-1.5">{t("Certificate Earned! 🎉")}</h3>
-                    <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                    <h3 className="text-base font-semibold text-foreground mb-1.5">{t("Certificate Earned! 🎉")}</h3>
+                    <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
                       {t("Congratulations! You've successfully completed this course and earned a certificate of completion.")}
                     </p>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => router.push("/dashboard/certificates")}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-colors text-sm font-medium"
                       >
                         <Award className="w-4 h-4" />
                         {t("View Certificate")}
                       </button>
                       <button
                         onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--neon-blue)] text-[var(--neon-blue)] rounded-md hover:bg-[var(--neon-blue)]/5 transition-colors text-sm font-medium"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-primary text-primary rounded-md hover:bg-primary/5 transition-colors text-sm font-medium"
                       >
                         <ArrowLeft className="w-4 h-4" />
                         {t("Back to Course")}
@@ -1047,7 +1051,7 @@ export default function SubmodulePage() {
                   </div>
                   <button
                     onClick={() => setCertificateGenerated(false)}
-                    className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    className="flex-shrink-0 text-muted-foreground hover:text-muted-foreground transition-colors p-1"
                     aria-label="Close notification"
                   >
                     <X className="w-5 h-5" />
@@ -1056,28 +1060,28 @@ export default function SubmodulePage() {
               </div>
             )}
         {isQuiz ? (
-              <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <article className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
                 {/* Start Quiz screen */}
                 {!quizStarted ? (
                   <div className="px-8 py-12 text-center">
                     <div className="max-w-md mx-auto">
-                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 flex items-center justify-center mx-auto mb-6">
-                        <FileQuestion className="w-10 h-10 text-[var(--neon-blue)]" />
+                      <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6">
+                        <FileQuestion className="w-10 h-10 text-primary" />
                       </div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-2">{t("Module Quiz")}</h1>
+                      <h1 className="text-2xl font-bold text-foreground mb-2">{t("Module Quiz")}</h1>
                       {currentModule?.title && (
-                        <p className="text-gray-600 mb-6">{currentModule.title}</p>
+                        <p className="text-muted-foreground mb-6">{currentModule.title}</p>
                       )}
-                      <p className="text-gray-700 mb-2">
+                      <p className="text-foreground mb-2">
                         {t("You have")} <strong>{quizDurationMinutes}</strong> {t("minutes to complete this quiz.")}
                       </p>
-                      <p className="text-sm text-gray-500 mb-8">
+                      <p className="text-sm text-muted-foreground mb-8">
                         {quizQuestions.length} {quizQuestions.length === 1 ? t("question") : t("questions")}
                       </p>
                       <button
                         type="button"
                         onClick={startQuiz}
-                        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
+                        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
                       >
                         <PlayCircle className="w-6 h-6" />
                         {t("Start Quiz")}
@@ -1086,22 +1090,22 @@ export default function SubmodulePage() {
                   </div>
                 ) : (
                 <>
-                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 px-8 py-6 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-primary/10 to-primary/10 px-8 py-6 border-b border-border">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
-                        <FileQuestion className="w-7 h-7 text-white" />
+                      <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                        <FileQuestion className="w-7 h-7 text-primary-foreground" />
                       </div>
                       <div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">{t("Module Quiz")}</h1>
+                        <h1 className="text-2xl font-bold text-foreground mb-1">{t("Module Quiz")}</h1>
                         {currentModule?.title && (
-                          <p className="text-sm text-gray-600">{currentModule.title}</p>
+                          <p className="text-sm text-muted-foreground">{currentModule.title}</p>
                         )}
                       </div>
                     </div>
                     {/* Timer */}
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg font-semibold ${
-                      quizTimeExpired ? "bg-red-100 text-red-800" : quizTimeRemainingSec <= 60 ? "bg-amber-100 text-amber-800" : "bg-white/80 text-gray-800"
+                      quizTimeExpired ? "bg-red-100 text-red-800" : quizTimeRemainingSec <= 60 ? "bg-amber-100 text-amber-800" : "bg-card/80 text-foreground"
                     }`}>
                       <Clock className="w-5 h-5" />
                       {quizTimeExpired ? (
@@ -1122,22 +1126,22 @@ export default function SubmodulePage() {
                 <div className="px-8 py-8">
               {quizQuestions.length === 0 ? (
                     <div className="text-center py-12">
-                      <FileQuestion className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">{t("No questions in this quiz.")}</p>
+                      <FileQuestion className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground text-lg">{t("No questions in this quiz.")}</p>
                     </div>
               ) : (
                     <div className="space-y-10">
                   {quizQuestions.map((q, qi) => (
                     <section
                       key={q._id || qi}
-                          className={qi < quizQuestions.length - 1 ? "pb-10 border-b border-gray-200" : ""}
+                          className={qi < quizQuestions.length - 1 ? "pb-10 border-b border-border" : ""}
                         >
                           <div className={`flex items-start gap-4 mb-10 ${qi > 0 ? "pt-8" : ""}`}>
-                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[var(--neon-blue)]/10 flex items-center justify-center">
-                              <span className="text-[var(--neon-blue)] font-bold text-lg">{qi + 1}</span>
+                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <span className="text-primary font-bold text-lg">{qi + 1}</span>
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-xl font-semibold text-gray-900 leading-relaxed mb-6">
+                              <h3 className="text-xl font-semibold text-foreground leading-relaxed mb-6">
                                 {q.question}
                               </h3>
                       <ul className="space-y-3">
@@ -1163,10 +1167,10 @@ export default function SubmodulePage() {
                                               ? "bg-green-50 text-green-800 font-medium border-2 border-green-500 shadow-sm disabled:text-green-800"
                                               : isIncorrect
                                               ? "bg-red-50 text-red-800 font-medium border-2 border-red-500 shadow-sm disabled:text-red-800"
-                                              : "bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium border-2 border-[var(--neon-blue)] shadow-sm disabled:text-[var(--neon-blue)]"
+                                              : "bg-primary/10 text-primary font-medium border-2 border-primary shadow-sm disabled:text-primary"
                                             : showCorrect
                                             ? "bg-green-50 text-green-800 border-2 border-green-500 disabled:text-green-800"
-                                            : "bg-white text-gray-700 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:text-gray-700"
+                                            : "bg-white text-foreground border-2 border-border hover:bg-muted hover:border-border disabled:text-foreground"
                                         } ${showQuizResults ? "cursor-default" : "cursor-pointer"}`}
                               >
                                 <span
@@ -1176,10 +1180,10 @@ export default function SubmodulePage() {
                                                 ? "bg-green-500 text-white"
                                                 : isIncorrect
                                                 ? "bg-red-500 text-white"
-                                                : "bg-[var(--neon-blue)] text-white"
+                                                : "bg-primary text-primary-foreground"
                                               : showCorrect
                                               ? "bg-green-500 text-white border-2 border-green-600"
-                                              : "bg-gray-100 text-gray-700 border-2 border-gray-300"
+                                              : "bg-muted text-foreground border-2 border-border"
                                   }`}
                                 >
                                   {String.fromCharCode(65 + ci)}
@@ -1217,9 +1221,9 @@ export default function SubmodulePage() {
               )}
 
               {/* Quiz submit / results: show when quiz in progress (Submit) or after quiz (score + retake) */}
-                  <div className="mt-10 pt-8 border-t border-gray-200">
+                  <div className="mt-10 pt-8 border-t border-border">
                     <div className="space-y-4">
-                {(showQuizResults || isRead(submoduleId)) ? (
+                {(showQuizResults || (isRead(submoduleId) && !quizStarted)) ? (
                         <div className="space-y-4">
                           {(() => {
                             const score = showQuizResults && Object.keys(quizResults).length > 0
@@ -1232,10 +1236,10 @@ export default function SubmodulePage() {
                               : lastQuizScore;
                             return score ? (
                               <>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-gray-50 border border-border">
                                   <div>
-                                    <p className="text-sm font-medium text-gray-600 mb-0.5">{t("Score")}</p>
-                                    <p className="text-2xl font-bold text-gray-900">
+                                    <p className="text-sm font-medium text-muted-foreground mb-0.5">{t("Score")}</p>
+                                    <p className="text-2xl font-bold text-foreground">
                                       {t("You scored")} {score.correctCount} {t("out of")} {score.total} ({score.scorePercent}%)
                                     </p>
                                   </div>
@@ -1259,6 +1263,26 @@ export default function SubmodulePage() {
                                     <span className="!text-green-800 font-medium">{t("All answers are correct! Great job!")}</span>
                                   </div>
                                 )}
+                                {/* Per-question marks breakdown */}
+                                {showQuizResults && Object.keys(quizResults).length > 0 && (
+                                  <div className="rounded-xl border border-border bg-card p-4">
+                                    <p className="text-sm font-semibold text-foreground mb-3">{t("Marks")}</p>
+                                    <div className="grid gap-2 sm:grid-cols-2">
+                                      {quizQuestions.map((_, qi) => {
+                                        const correct = quizResults[qi];
+                                        return (
+                                          <div
+                                            key={qi}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${correct ? "bg-green-50 text-green-800 border border-green-200" : "bg-red-50 text-red-800 border border-red-200"}`}
+                                          >
+                                            {correct ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <X className="w-4 h-4 shrink-0" />}
+                                            <span>{t("Question")} {qi + 1}: {correct ? t("Correct") : t("Incorrect")}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
                               </>
                             ) : null;
                           })()}
@@ -1268,7 +1292,7 @@ export default function SubmodulePage() {
                                 type="button"
                                 onClick={toggleComplete}
                                 disabled={markingRead}
-                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
                                 <RotateCcw className="w-5 h-5 shrink-0" />
                                 <span>{markingRead ? t("Updating…") : t("Retake Quiz")}</span>
@@ -1277,7 +1301,7 @@ export default function SubmodulePage() {
                               <button
                                 type="button"
                                 onClick={retakeQuiz}
-                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
                                 <RotateCcw className="w-5 h-5 shrink-0" />
                                 <span>{t("Retake Quiz")}</span>
@@ -1290,14 +1314,14 @@ export default function SubmodulePage() {
                     <button
                       type="button"
                             onClick={toggleComplete}
-                      disabled={(!allQuizAttempted && !quizTimeExpired) || markingRead}
-                            className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--neon-blue)] shadow-md hover:shadow-lg"
+                      disabled={!allQuizAttempted || markingRead}
+                            className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary shadow-md hover:shadow-lg"
                     >
                       <Check className="w-5 h-5 shrink-0" />
                             <span>{markingRead ? t("Submitting…") : t("Submit Quiz")}</span>
                     </button>
                     {!allQuizAttempted && !quizTimeExpired && quizQuestions.length > 0 && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-muted-foreground">
                               {t("Please answer all")} {quizQuestions.length} {quizQuestions.length !== 1 ? t("questions") : t("question")} {t("to submit.")}
                       </p>
                     )}
@@ -1320,19 +1344,19 @@ export default function SubmodulePage() {
                 )}
           </article>
         ) : currentSection ? (
-              <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <article className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
                 {/* Section Header */}
-                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 px-8 py-6 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-primary/10 to-primary/10 px-8 py-6 border-b border-border">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
-                      <BookOpen className="w-7 h-7 text-white" />
+                    <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center shadow-lg">
+                      <BookOpen className="w-7 h-7 text-primary-foreground" />
                 </div>
                 <div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                      <h1 className="text-2xl font-bold text-foreground mb-1">
                     {currentSection.title || t("Section")}
                   </h1>
                   {currentModule?.title && (
-                        <p className="text-sm text-gray-600">{currentModule.title}</p>
+                        <p className="text-sm text-muted-foreground">{currentModule.title}</p>
                   )}
                 </div>
                   </div>
@@ -1342,7 +1366,7 @@ export default function SubmodulePage() {
                 <div className="px-8 py-8">
                   {(currentSection.material || translatedSectionMaterial) && (
                     <article className="max-w-none mb-8 prose prose-lg prose-gray max-w-none">
-                      <div className="text-gray-800 leading-relaxed space-y-6">
+                      <div className="text-foreground leading-relaxed space-y-6">
                         {formatContent(
                           translatedSectionMaterial || currentSection.material || "",
                           t
@@ -1374,7 +1398,7 @@ export default function SubmodulePage() {
                                 }}
                               />
                               {mediaItem.caption && (
-                                <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
+                                <figcaption className="text-sm text-muted-foreground text-center mt-3 italic">
                                   {translatedMediaCaptions.get(idx) || mediaItem.caption}
                                 </figcaption>
                               )}
@@ -1383,7 +1407,7 @@ export default function SubmodulePage() {
                             <figure className="w-full">
                               <VideoPlayer mediaItem={mediaItem} />
                               {mediaItem.caption && (
-                                <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
+                                <figcaption className="text-sm text-muted-foreground text-center mt-3 italic">
                                   {translatedMediaCaptions.get(idx) || mediaItem.caption}
                                 </figcaption>
                               )}
@@ -1395,9 +1419,9 @@ export default function SubmodulePage() {
               )}
 
               {(currentSection.urls?.length ?? 0) > 0 && (
-                    <div className="mt-8 pt-8 border-t border-gray-200">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <LinkIcon className="w-5 h-5 text-[var(--neon-blue)]" />
+                    <div className="mt-8 pt-8 border-t border-border">
+                      <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                        <LinkIcon className="w-5 h-5 text-primary" />
                         {t("Additional Resources")}
                   </h2>
                       <ul className="space-y-3">
@@ -1407,10 +1431,10 @@ export default function SubmodulePage() {
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                              className="flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-[var(--neon-blue)]/5 border border-gray-200 hover:border-[var(--neon-blue)]/30 rounded-lg transition-colors group"
+                              className="flex items-center gap-3 px-4 py-3 bg-muted hover:bg-primary/5 border border-border hover:border-primary/30 rounded-lg transition-colors group"
                         >
-                              <LinkIcon className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
-                              <span className="text-[var(--neon-blue)] hover:underline break-all text-sm font-medium group-hover:text-[var(--medium-blue)]">
+                              <LinkIcon className="w-4 h-4 text-primary flex-shrink-0" />
+                              <span className="text-primary hover:underline break-all text-sm font-medium group-hover:text-primary">
                           {url}
                               </span>
                         </a>
@@ -1422,20 +1446,20 @@ export default function SubmodulePage() {
 
               {!currentSection.material && !(currentSection.urls?.length) && (
                     <div className="text-center py-12">
-                      <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">{t("No content available for this section.")}</p>
+                      <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground text-lg">{t("No content available for this section.")}</p>
                     </div>
               )}
 
               {/* Mark as read */}
-                  <div className="mt-10 pt-8 border-t border-gray-200">
+                  <div className="mt-10 pt-8 border-t border-border">
                     <div>
                 {isRead(submoduleId) ? (
                         <button
                           type="button"
                           onClick={toggleComplete}
                           disabled={markingRead}
-                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                         >
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
                           <span>{markingRead ? t("Updating…") : t("Mark as Incomplete")}</span>
@@ -1445,10 +1469,10 @@ export default function SubmodulePage() {
                     type="button"
                           onClick={toggleComplete}
                     disabled={markingRead}
-                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-primary bg-white hover:bg-primary transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                   >
-                          <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white transition-colors" />
-                          <span className="text-[var(--neon-blue)] group-hover:text-white transition-colors">{markingRead ? t("Saving…") : t("Mark as Complete")}</span>
+                          <Circle className="w-5 h-5 shrink-0 text-primary group-hover:text-primary-foreground transition-colors" />
+                          <span className="text-primary group-hover:text-primary-foreground transition-colors">{markingRead ? t("Saving…") : t("Mark as Complete")}</span>
                   </button>
                 )}
                 {markReadError && (
@@ -1461,9 +1485,9 @@ export default function SubmodulePage() {
             </div>
           </article>
         ) : (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">{t("Section not found.")}</p>
+              <div className="bg-card rounded-xl p-12 text-center border border-border">
+                <BookOpen className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-lg">{t("Section not found.")}</p>
           </div>
         )}
 
@@ -1472,7 +1496,7 @@ export default function SubmodulePage() {
           {prevUrl ? (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${prevUrl}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium shadow-sm hover:shadow-md"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-border bg-card text-foreground hover:bg-muted hover:border-primary hover:text-primary transition-colors font-medium shadow-sm hover:shadow-md"
             >
                   <ChevronLeft className="w-5 h-5 flex-shrink-0" />
                   <span>{t("Previous")}</span>
@@ -1483,7 +1507,7 @@ export default function SubmodulePage() {
           {nextUrl ? (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${nextUrl}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
             >
                   <span>{sectionIndex === sections.length - 1 && hasQuiz ? t("Module Quiz") : t("Next")}</span>
                   <ChevronRight className="w-5 h-5 flex-shrink-0" />
@@ -1491,7 +1515,7 @@ export default function SubmodulePage() {
           ) : (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium ml-auto shadow-sm hover:shadow-md"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-border bg-card text-foreground hover:bg-muted hover:border-primary hover:text-primary transition-colors font-medium ml-auto shadow-sm hover:shadow-md"
             >
                   <ArrowLeft className="w-5 h-5 flex-shrink-0" />
                   <span>{t("Back to Course")}</span>

@@ -80,12 +80,12 @@ export default function UserSelector({
       {/* Selected Users Display */}
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full min-h-[60px] px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white cursor-pointer ${
-          disabled ? "opacity-50 cursor-not-allowed" : "hover:border-[var(--neon-blue)]"
-        } focus-within:border-[var(--neon-blue)] focus-within:outline-none transition-colors`}
+        className={`w-full min-h-[60px] px-3 py-2 bg-background dark:bg-[var(--navy-blue-lighter)] border border-border rounded-lg text-foreground cursor-pointer ${
+          disabled ? "opacity-50 cursor-not-allowed" : "hover:border-primary focus-within:border-primary"
+        } focus-within:outline-none transition-colors`}
       >
         {selectedUsers.length === 0 ? (
-          <div className="flex items-center gap-2 text-[var(--medium-grey)]">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Users className="w-4 h-4" />
             <span>{t("Select users...")}</span>
           </div>
@@ -94,13 +94,13 @@ export default function UserSelector({
             {selectedUsers.map((user) => (
               <div
                 key={user._id}
-                className="flex items-center gap-1 px-2 py-1 bg-[var(--neon-blue)]/20 border border-[var(--neon-blue)]/50 rounded-md text-sm"
+                className="flex items-center gap-1 px-2 py-1 bg-primary/20 border border-primary/50 rounded-md text-sm"
               >
                 <div className="flex flex-col">
-                  <span className="text-white font-medium text-xs">
+                  <span className="text-foreground font-medium text-xs">
                     {user.displayName || user.email}
                   </span>
-                  <span className="text-[var(--light-blue)] text-xs">
+                  <span className="text-muted-foreground text-xs">
                     {user.email}
                   </span>
                 </div>
@@ -110,7 +110,7 @@ export default function UserSelector({
                       e.stopPropagation();
                       removeUser(user._id);
                     }}
-                    className="ml-1 hover:bg-[var(--neon-blue)]/30 rounded p-0.5 transition-colors"
+                    className="ml-1 hover:bg-primary/30 rounded p-0.5 transition-colors text-foreground"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -122,7 +122,7 @@ export default function UserSelector({
         {!disabled && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
             <ChevronDown
-              className={`w-4 h-4 text-[var(--medium-grey)] transition-transform ${
+              className={`w-4 h-4 text-muted-foreground transition-transform ${
                 isOpen ? "rotate-180" : ""
               }`}
             />
@@ -139,17 +139,17 @@ export default function UserSelector({
 
       {/* Dropdown */}
       {isOpen && !disabled && (
-        <div className="absolute z-50 w-full mt-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)] rounded-lg shadow-xl max-h-80 overflow-hidden flex flex-col">
+        <div className="absolute z-50 w-full mt-2 bg-card dark:bg-[var(--navy-blue-light)] border border-border rounded-lg shadow-xl max-h-80 overflow-hidden flex flex-col">
           {/* Search Bar */}
-          <div className="p-3 border-b border-[var(--medium-grey)]/30">
+          <div className="p-3 border-b border-border">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--medium-grey)]" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("Search users...")}
-                className="w-full pl-10 pr-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
+                className="w-full pl-10 pr-3 py-2 bg-background dark:bg-[var(--navy-blue-lighter)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary text-sm"
                 autoFocus
               />
             </div>
@@ -158,11 +158,11 @@ export default function UserSelector({
           {/* User List */}
           <div className="overflow-y-auto max-h-60">
             {isLoading ? (
-              <div className="p-4 text-center text-[var(--medium-grey)] text-sm">
+              <div className="p-4 text-center text-muted-foreground text-sm">
                 {t("Loading users...")}
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="p-4 text-center text-[var(--medium-grey)] text-sm">
+              <div className="p-4 text-center text-muted-foreground text-sm">
                 {searchQuery
                   ? t("No users found matching your search")
                   : t("No users available")}
@@ -177,26 +177,26 @@ export default function UserSelector({
                       onClick={() => toggleUser(user)}
                       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
                         isSelected
-                          ? "bg-[var(--neon-blue)]/20 border border-[var(--neon-blue)]/50"
-                          : "hover:bg-[var(--navy-blue-lighter)]"
+                          ? "bg-primary/20 border border-primary/50"
+                          : "hover:bg-muted dark:hover:bg-[var(--navy-blue-lighter)]"
                       }`}
                     >
                       <div
                         className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                           isSelected
-                            ? "bg-[var(--neon-blue)] border-[var(--neon-blue)]"
-                            : "border-[var(--medium-grey)]"
+                            ? "bg-primary border-primary"
+                            : "border-muted-foreground"
                         }`}
                       >
                         {isSelected && (
-                          <Check className="w-3 h-3 text-white" />
+                          <Check className="w-3 h-3 text-primary-foreground" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-white font-medium text-sm truncate">
+                        <div className="text-foreground font-medium text-sm truncate">
                           {user.displayName || user.email}
                         </div>
-                        <div className="text-[var(--medium-grey)] text-xs truncate">
+                        <div className="text-muted-foreground text-xs truncate">
                           {user.email}
                         </div>
                       </div>
@@ -208,13 +208,13 @@ export default function UserSelector({
           </div>
 
           {/* Done Button */}
-          <div className="p-3 border-t border-[var(--medium-grey)]/30">
+          <div className="p-3 border-t border-border">
             <button
               onClick={() => {
                 setIsOpen(false);
                 setSearchQuery("");
               }}
-              className="w-full px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm font-semibold"
+              className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors text-sm font-semibold"
             >
               {t("Done")}
             </button>
@@ -223,7 +223,7 @@ export default function UserSelector({
       )}
 
       {/* Helper Text */}
-      <p className="text-xs text-[var(--medium-grey)] mt-1">
+      <p className="text-xs text-muted-foreground mt-1">
         💡 {t("Click to select multiple users. Selected emails will be comma-separated.")}
       </p>
     </div>

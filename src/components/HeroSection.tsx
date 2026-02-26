@@ -25,7 +25,7 @@ const ModuleCard = ({
   }
 
   return (
-    <div className="relative group bg-white rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+    <div className="relative group bg-card rounded-2xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
       {featured && (
         <div className="absolute -top-3 -right-3 bg-red-500 text-white px-4 py-1 rounded-full text-sm animate-pulse">
           {t("Featured")}
@@ -39,12 +39,12 @@ const ModuleCard = ({
           loading="lazy"
         />
       </div>
-      <h3 className="text-xl font-semibold text-gray-800 mb-2">
+      <h3 className="text-xl font-semibold text-foreground mb-2">
         {module.title || ""}
       </h3>
-      <p className="text-gray-600 mb-4">{module.description || ""}</p>
+      <p className="text-muted-foreground mb-4">{module.description || ""}</p>
       <div className="flex items-center justify-end">
-        <button className="flex items-center space-x-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-lg hover:bg-[var(--medium-blue)] transition-colors">
+        <button className="flex items-center space-x-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-colors">
           <Shield />
           <span>{t("Start Training")}</span>
         </button>
@@ -183,19 +183,19 @@ export default function HeroSection({ courses = [], translationReady = true }: H
   }, [displayModules.length]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Network Animation Background */}
       <NetworkBackground />
 
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
         <div className="space-y-8 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-white leading-tight">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground leading-tight">
             {t("Master Cybersecurity, Protect Your Digital World.")}
           </h1>
-          <p className="text-xl text-[var(--light-blue)] leading-relaxed">
+          <p className="text-xl text-muted-foreground leading-relaxed">
             {t("Interactive training modules designed to enhance your cybersecurity awareness. Learn through engaging scenarios and real-world examples.")}
           </p>
-          <button className="group inline-flex items-center space-x-3 bg-[var(--neon-blue)] text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-[var(--medium-blue)] transform hover:scale-105 transition-all duration-300">
+          <button className="group inline-flex items-center space-x-3 bg-primary text-primary-foreground px-8 py-4 rounded-full text-lg font-medium hover:opacity-90 transform hover:scale-105 transition-all duration-300">
             <span>{t("Explore All Modules")}</span>
             <ArrowRight className="group-hover:translate-x-2 transition-transform duration-300" />
           </button>
@@ -227,8 +227,8 @@ export default function HeroSection({ courses = [], translationReady = true }: H
                         key={index}
                         className={`w-2 h-2 rounded-full transition-all duration-300 ${
                           currentSlide === index
-                            ? "bg-[var(--neon-blue)] w-4"
-                            : "bg-gray-300"
+                            ? "bg-primary w-4"
+                            : "bg-muted-foreground/30"
                         }`}
                         onClick={() => setCurrentSlide(index)}
                       />
@@ -238,17 +238,17 @@ export default function HeroSection({ courses = [], translationReady = true }: H
                   <div className="absolute top-1/2 -translate-y-1/2 flex justify-between w-full px-4">
                     <button
                       onClick={prevSlide}
-                      className="bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 transform"
+                      className="bg-card/80 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card hover:scale-110 transition-all duration-300 transform"
                       aria-label="Previous module"
                     >
-                      <ChevronLeft className="w-6 h-6 text-gray-800" />
+                      <ChevronLeft className="w-6 h-6 text-foreground" />
                     </button>
                     <button
                       onClick={nextSlide}
-                      className="bg-white/80 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-white hover:scale-110 transition-all duration-300 transform"
+                      className="bg-card/80 backdrop-blur-sm p-3 rounded-full shadow-lg hover:bg-card hover:scale-110 transition-all duration-300 transform"
                       aria-label="Next module"
                     >
-                      <ChevronRight className="w-6 h-6 text-gray-800" />
+                      <ChevronRight className="w-6 h-6 text-foreground" />
                     </button>
                   </div>
 

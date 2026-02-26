@@ -37,25 +37,25 @@ const getRoleBasedData = (role: string, t: any) => {
             icon: Users,
             label: t("Total Users"),
             value: "8,430",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Shield,
             label: t("Active Campaigns"),
             value: "47",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Target,
             label: t("Phishing Tests"),
             value: "1,247",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Award,
             label: "Certificates",
             value: "2,340",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
         ],
       };
@@ -78,25 +78,25 @@ const getRoleBasedData = (role: string, t: any) => {
             icon: Users,
             label: t("Org Users"),
             value: "342",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: UserCheck,
             label: t("Active Users"),
             value: "285",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Shield,
             label: t("Campaigns"),
             value: "5",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Award,
             label: "Certificates",
             value: "156",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
         ],
       };
@@ -119,25 +119,25 @@ const getRoleBasedData = (role: string, t: any) => {
             icon: BookOpen,
             label: t("Courses"),
             value: "8/15",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Award,
             label: t("Badges"),
             value: "8",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Shield,
             label: t("Tests Passed"),
             value: "12/15",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: TrendingUp,
             label: t("Streak"),
             value: "7 days",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
         ],
       };
@@ -160,25 +160,25 @@ const getRoleBasedData = (role: string, t: any) => {
             icon: BookOpen,
             label: "Courses",
             value: "3/10",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Award,
             label: "Badges",
             value: "4",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Shield,
             label: "Tests Passed",
             value: "8/12",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: TrendingUp,
             label: "Streak",
             value: "3 days",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
         ],
       };
@@ -201,25 +201,25 @@ const getRoleBasedData = (role: string, t: any) => {
             icon: BookOpen,
             label: "Courses",
             value: "3/10",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Award,
             label: "Badges",
             value: "4",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: Shield,
             label: "Tests Passed",
             value: "8/12",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
           {
             icon: TrendingUp,
             label: "Streak",
             value: "3 days",
-            color: "var(--neon-blue)",
+            color: "var(--primary)",
           },
         ],
       };
@@ -249,17 +249,17 @@ export default function BarChartCard({
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+              tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
               domain={[0, Math.max(...chartData.map((d) => d.value)) + 50]}
             />
             <Bar
               dataKey="value"
-              fill="var(--neon-blue)"
+              fill="var(--primary)"
               radius={[8, 8, 0, 0]}
               maxBarSize={30}
             />
@@ -269,10 +269,10 @@ export default function BarChartCard({
 
       {/* Title Section */}
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-white mb-1">{title}</h3>
+        <h3 className="text-lg font-bold text-foreground mb-1">{title}</h3>
         <p className="text-sm">
-          <span className="text-[var(--success-green)]">(+15%)</span>
-          <span className="text-[var(--medium-grey)]"> {subtitle}</span>
+          <span className="text-success-green">(+15%)</span>
+          <span className="text-muted-foreground"> {subtitle}</span>
         </p>
       </div>
 
@@ -283,10 +283,10 @@ export default function BarChartCard({
           return (
             <div key={index} className="flex flex-col items-center">
               <div className="w-8 h-8 mb-2 flex items-center justify-center">
-                <IconComponent className="w-6 h-6 text-white" />
+                <IconComponent className="w-6 h-6 text-foreground" />
               </div>
-              <p className="text-sm text-white mb-1">{metric.label}</p>
-              <p className="text-2xl font-bold text-white mb-2">
+              <p className="text-sm text-foreground mb-1">{metric.label}</p>
+              <p className="text-2xl font-bold text-foreground mb-2">
                 {metric.value}
               </p>
               <div
