@@ -2,11 +2,12 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
+/* resored css*/
 :root {
   --navy-blue: #0f1a2a;
   --navy-blue-light: #132235;
   --navy-blue-lighter: #1a2a3f;
+  --neon-blue-lighter: #1a2a3f;
   --neon-blue: #51b0ec;
   --light-blue: #abd2eb;
   --medium-blue: #3a7ca5;
