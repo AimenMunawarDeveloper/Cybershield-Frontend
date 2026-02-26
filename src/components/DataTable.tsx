@@ -204,14 +204,14 @@ export default function DataTable({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
+          <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
           <div className="flex items-center text-sm">
-            <Check className="w-4 h-4 text-success-green mr-1" />
-            <span className="text-muted-foreground">{subtitle}</span>
+            <Check className="w-4 h-4 text-[var(--success-green)] mr-1" />
+            <span className="text-[var(--medium-grey)]">{subtitle}</span>
           </div>
         </div>
-        <button className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center hover:bg-background transition-colors">
-          <MoreVertical className="w-4 h-4 text-foreground" />
+        <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center hover:bg-[var(--navy-blue)] transition-colors">
+          <MoreVertical className="w-4 h-4 text-white" />
         </button>
       </div>
 
@@ -220,27 +220,27 @@ export default function DataTable({
         <table className="w-full">
           {/* Table Header */}
           <thead>
-            <tr className="border-b border-border">
-              <th className="text-left py-3 px-0 text-sm font-medium text-muted-foreground">
+            <tr className="border-b border-[var(--navy-blue-lighter)]">
+              <th className="text-left py-3 px-0 text-sm font-medium text-[var(--medium-grey)]">
                 {userRole === "system_admin"
                   ? "ORGANIZATIONS"
                   : userRole === "client_admin"
                   ? "GROUPS"
                   : "COURSES"}
               </th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--medium-grey)]">
                 {userRole === "system_admin" || userRole === "client_admin"
                   ? "ADMINS"
                   : "MODULES"}
               </th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--medium-grey)]">
                 {userRole === "system_admin"
                   ? "USERS"
                   : userRole === "client_admin"
                   ? "STUDENTS"
                   : "SCORE"}
               </th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">
+              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--medium-grey)]">
                 {userRole === "system_admin" || userRole === "client_admin"
                   ? "ACTIVITY"
                   : "PROGRESS"}
@@ -253,7 +253,7 @@ export default function DataTable({
             {data.map((item) => (
               <tr
                 key={item.id}
-                className="border-b border-border last:border-b-0"
+                className="border-b border-[var(--navy-blue-lighter)] last:border-b-0"
               >
                 {/* Item */}
                 <td className="py-4 px-0">
@@ -261,11 +261,11 @@ export default function DataTable({
                     <div
                       className={`w-8 h-8 ${item.item.iconColor} rounded-lg flex items-center justify-center mr-3`}
                     >
-                      <span className="text-foreground text-xs font-bold">
+                      <span className="text-white text-xs font-bold">
                         {item.item.icon}
                       </span>
                     </div>
-                    <span className="text-foreground text-sm">{item.item.name}</span>
+                    <span className="text-white text-sm">{item.item.name}</span>
                   </div>
                 </td>
 
@@ -275,9 +275,9 @@ export default function DataTable({
                     {item.members.map((member, index) => (
                       <div
                         key={index}
-                        className={`w-8 h-8 ${member.color} rounded-full flex items-center justify-center border-2 border-card`}
+                        className={`w-8 h-8 ${member.color} rounded-full flex items-center justify-center border-2 border-[var(--navy-blue-light)]`}
                       >
-                        <span className="text-foreground text-xs font-medium">
+                        <span className="text-white text-xs font-medium">
                           {member.name}
                         </span>
                       </div>
@@ -287,18 +287,18 @@ export default function DataTable({
 
                 {/* Metric */}
                 <td className="py-4 px-4">
-                  <span className="text-foreground text-sm">{item.metric}</span>
+                  <span className="text-white text-sm">{item.metric}</span>
                 </td>
 
                 {/* Completion/Progress */}
                 <td className="py-4 px-4">
                   <div className="flex items-center">
-                    <span className="text-foreground text-sm mr-2">
+                    <span className="text-white text-sm mr-2">
                       {item.completion}%
                     </span>
-                    <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="w-16 h-2 bg-[var(--navy-blue-lighter)] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary rounded-full transition-all duration-300"
+                        className="h-full bg-[var(--neon-blue)] rounded-full transition-all duration-300"
                         style={{ width: `${item.completion}%` }}
                       />
                     </div>

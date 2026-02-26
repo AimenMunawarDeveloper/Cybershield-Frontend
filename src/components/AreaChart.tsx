@@ -146,53 +146,53 @@ export default function AreaChart({
             <linearGradient id="currentGradient" x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="5%"
-                stopColor="var(--primary)"
+                stopColor="var(--neon-blue)"
                 stopOpacity={0.8}
               />
               <stop
                 offset="95%"
-                stopColor="var(--primary)"
+                stopColor="var(--neon-blue)"
                 stopOpacity={0.1}
               />
             </linearGradient>
             <linearGradient id="previousGradient" x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="5%"
-                stopColor="var(--chart-2)"
+                stopColor="var(--electric-blue)"
                 stopOpacity={0.6}
               />
               <stop
                 offset="95%"
-                stopColor="var(--chart-2)"
+                stopColor="var(--electric-blue)"
                 stopOpacity={0.05}
               />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           <XAxis
             dataKey="month"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+            tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+            tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
             domain={yDomain}
             ticks={yTicks}
           />
           <Area
             type="monotone"
             dataKey="current"
-            stroke="var(--primary)"
+            stroke="var(--neon-blue)"
             strokeWidth={2}
             fill="url(#currentGradient)"
           />
           <Area
             type="monotone"
             dataKey="previous"
-            stroke="var(--chart-2)"
+            stroke="var(--electric-blue)"
             strokeWidth={2}
             fill="url(#previousGradient)"
           />

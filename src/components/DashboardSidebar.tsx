@@ -150,23 +150,23 @@ export function DashboardSidebar({
   return (
     <Sidebar
       variant="inset"
-      className="bg-sidebar border-r border-sidebar-border"
+      className="bg-[var(--navy-blue-light)] border-r border-[var(--sidebar-border)]"
       {...props}
     >
-      <SidebarHeader className="bg-sidebar">
+      <SidebarHeader className="bg-[var(--navy-blue-light)]">
         <div className="flex items-center justify-center px-2 py-2">
           <Image
             src="/images/CyberShield_logo_Final-removebg.png"
             alt="CyberShield Logo"
             width={180}
             height={60}
-            className="h-12 w-auto object-contain brightness-0 dark:invert"
+            className="h-12 w-auto object-contain brightness-0 invert"
           />
         </div>
         {/* Shiny line below logo */}
-        <div className="mx-4 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-60"></div>
+        <div className="mx-4 h-px bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-60"></div>
       </SidebarHeader>
-      <SidebarContent className="bg-sidebar">
+      <SidebarContent className="bg-[var(--navy-blue-light)]">
         <SidebarGroup>
           <SidebarGroupLabel>{t("Platform")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -190,15 +190,15 @@ export function DashboardSidebar({
                         isActive={pathname === item.url}
                         tooltip={t(item.title)}
                       >
-<Link href={item.url}>
-                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sidebar-accent/50">
-                              <item.icon className="w-4 h-4 shrink-0 [color:inherit]" />
-                            </div>
-                            <span>{t(item.title)}</span>
-                            {item.badge && (
-                              <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
-                            )}
-                          </Link>
+                        <Link href={item.url}>
+                          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                            <item.icon className="w-4 h-4 text-white" />
+                          </div>
+                          <span>{t(item.title)}</span>
+                          {item.badge && (
+                            <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                          )}
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
 
@@ -219,8 +219,8 @@ export function DashboardSidebar({
                             tooltip={t("Organizations Management")}
                           >
                             <Link href="/dashboard/organizations-management">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sidebar-accent/50">
-                                <Building2 className="w-4 h-4 shrink-0 [color:inherit]" />
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                                <Building2 className="w-4 h-4 text-white" />
                               </div>
                               <span>{t("Organizations")}</span>
                             </Link>
@@ -242,8 +242,8 @@ export function DashboardSidebar({
                             tooltip={t("Organization Management")}
                           >
                             <Link href="/dashboard/organization-management">
-                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sidebar-accent/50">
-                                <Building className="w-4 h-4 shrink-0 [color:inherit]" />
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                                <Building className="w-4 h-4 text-white" />
                               </div>
                               <span>{t("Organization")}</span>
                             </Link>
@@ -270,8 +270,8 @@ export function DashboardSidebar({
                     tooltip={t(item.title)}
                   >
                     <Link href={item.url}>
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-sidebar-accent/50">
-                        <item.icon className="w-4 h-4 shrink-0 [color:inherit]" />
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
+                        <item.icon className="w-4 h-4 text-white" />
                       </div>
                       <span>{t(item.title)}</span>
                     </Link>
