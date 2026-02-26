@@ -279,19 +279,19 @@ export default function SimulationsPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "draft":
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+        return "bg-muted text-muted-foreground border-border dark:bg-gray-500/20 dark:text-gray-400 dark:border-gray-500/30";
       case "scheduled":
-        return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+        return "bg-primary/20 text-primary border-primary/30 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30";
       case "running":
-        return "bg-green-500/20 text-green-400 border-green-500/30";
+        return "bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30";
       case "completed":
-        return "bg-[var(--electric-blue)]/20 text-[var(--electric-blue)] border-[var(--electric-blue)]/30";
+        return "bg-primary/20 text-primary border-primary/30 dark:bg-[var(--electric-blue)]/20 dark:text-[var(--electric-blue)] dark:border-[var(--electric-blue)]/30";
       case "paused":
-        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+        return "bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/30";
       case "cancelled":
-        return "bg-red-500/20 text-red-400 border-red-500/30";
+        return "bg-destructive/20 text-destructive border-destructive/30 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30";
       default:
-        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+        return "bg-muted text-muted-foreground border-border dark:bg-gray-500/20 dark:text-gray-400 dark:border-gray-500/30";
     }
   };
 
@@ -325,7 +325,7 @@ export default function SimulationsPage() {
 
   if (hasAccess === null) {
     return (
-      <div className="p-8 text-center text-white">
+      <div className="p-8 text-center text-foreground">
         <p>{t("Loading...")}</p>
       </div>
     );
@@ -333,9 +333,9 @@ export default function SimulationsPage() {
 
   if (hasAccess === false) {
     return (
-      <div className="p-8 text-center text-white">
+      <div className="p-8 text-center text-foreground">
         <h1 className="text-2xl font-semibold">{t("Access Restricted")}</h1>
-        <p className="mt-2 text-sm text-gray-300">
+        <p className="mt-2 text-sm text-muted-foreground dark:text-foreground">
           {accessError ||
             t("This page is available to system and client administrators only.")}
         </p>
@@ -346,10 +346,10 @@ export default function SimulationsPage() {
   // Show loading state
   if (!translationReady || loading) {
     return (
-      <div className="flex flex-1 items-center justify-center min-h-screen">
+      <div className="flex flex-1 items-center justify-center min-h-screen bg-background dark:bg-[var(--navy-blue)]">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)] text-lg">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground dark:text-foreground text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
@@ -359,7 +359,7 @@ export default function SimulationsPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+      <div className="min-h-screen bg-background dark:bg-gradient-to-br dark:from-[var(--navy-blue)] dark:via-[var(--navy-blue-light)] dark:to-[var(--navy-blue)] relative">
         <NetworkBackground />
         {/* Hero Section */}
         <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -368,34 +368,34 @@ export default function SimulationsPage() {
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="text-center space-y-4">
               <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
-                  <Zap className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+                  <Zap className="w-8 h-8 text-primary-foreground" />
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
                 {t("Campaign Simulations")}
-                <span className="block text-[var(--neon-blue)] mt-1">
+                <span className="block text-primary mt-1">
                   {t("Unified Multi-Channel Security Training")}
                 </span>
               </h1>
               
-              <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg text-muted-foreground dark:text-foreground max-w-3xl mx-auto leading-relaxed">
                 {t("Create and manage comprehensive phishing campaigns across WhatsApp and Email channels simultaneously.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
-                  <MessageSquare className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Multi-Channel")}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-card dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-border dark:border-[var(--neon-blue)]/30 backdrop-blur-sm">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <span className="text-foreground text-xs">{t("Multi-Channel")}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
-                  <BarChart3 className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Unified Analytics")}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-card dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-border dark:border-[var(--neon-blue)]/30 backdrop-blur-sm">
+                  <BarChart3 className="w-4 h-4 text-primary" />
+                  <span className="text-foreground text-xs">{t("Unified Analytics")}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
-                  <Calendar className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Smart Scheduling")}</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-card dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-border dark:border-[var(--neon-blue)]/30 backdrop-blur-sm">
+                  <Calendar className="w-4 h-4 text-primary" />
+                  <span className="text-foreground text-xs">{t("Smart Scheduling")}</span>
                 </div>
               </div>
             </div>
@@ -403,19 +403,19 @@ export default function SimulationsPage() {
         </div>
 
         {/* Main Content Section */}
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
+        <div className="bg-card/95 dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4 border border-border dark:border-transparent border-b-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             {/* Header with Create Button */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-white">{t("All Campaigns")}</h2>
-                <p className="text-[var(--medium-grey)] mt-1">
+                <h2 className="text-2xl font-bold text-foreground">{t("All Campaigns")}</h2>
+                <p className="text-muted-foreground dark:text-foreground mt-1">
                   {t("Manage your multi-channel phishing simulations")}
                 </p>
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-xl hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
+                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-[var(--neon-blue)] dark:to-black dark:text-white rounded-xl hover:opacity-90 dark:hover:from-black dark:hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-primary/50 transform hover:scale-[1.02]"
               >
                 <Plus className="w-5 h-5" />
                 {t("Create Campaign")}
@@ -424,7 +424,7 @@ export default function SimulationsPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-900/20 border border-red-500 rounded-lg text-red-300 flex items-center gap-2">
+              <div className="mb-6 p-4 bg-destructive/20 border border-destructive rounded-lg text-destructive flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -433,18 +433,18 @@ export default function SimulationsPage() {
             {/* Campaigns Grid */}
             {campaigns.length === 0 ? (
               <div className="text-center py-16">
-                <div className="w-20 h-20 bg-[var(--neon-blue)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-10 h-10 text-[var(--neon-blue)]" />
+                <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Zap className="w-10 h-10 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
                   {t("No campaigns yet")}
                 </h3>
-                <p className="text-[var(--medium-grey)] mb-6">
+                <p className="text-muted-foreground dark:text-foreground mb-6">
                   {t("Create your first unified campaign to get started")}
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-xl hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-[var(--neon-blue)] dark:to-black dark:text-white rounded-xl hover:opacity-90 dark:hover:from-black dark:hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-primary/50 transform hover:scale-[1.02]"
                 >
                   <Plus className="w-5 h-5" />
                   {t("Create Campaign")}
@@ -455,16 +455,16 @@ export default function SimulationsPage() {
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign._id}
-                    className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
+                    className="group relative bg-card dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-border dark:border-[var(--neon-blue)]/20 dark:hover:border-[var(--neon-blue)]/60 hover:border-primary/50 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-primary/20 flex flex-col"
                   >
                     {/* Campaign Header */}
                     <div className="p-6 flex flex-col flex-1">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                          <h3 className="text-xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
                             {campaign.name}
                           </h3>
-                          <p className="text-sm text-[var(--medium-grey)] line-clamp-2">
+                          <p className="text-sm text-muted-foreground dark:text-foreground line-clamp-2">
                             {campaign.description}
                           </p>
                         </div>
@@ -477,19 +477,19 @@ export default function SimulationsPage() {
                       {/* Channel Badges */}
                       <div className="flex gap-2 mb-4">
                         {campaign.emailConfig.enabled && (
-                          <div className="flex items-center gap-1 px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg text-xs border border-blue-500/30">
+                          <div className="flex items-center gap-1 px-3 py-1 bg-primary/20 text-primary rounded-lg text-xs border border-primary/30">
                             <Mail className="w-3 h-3" />
                             {t("Email")}
                           </div>
                         )}
                         {campaign.whatsappConfig.enabled && (
-                          <div className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-lg text-xs border border-green-500/30">
+                          <div className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-600 dark:text-green-400 rounded-lg text-xs border border-green-500/30">
                             <MessageSquare className="w-3 h-3" />
                             {t("WhatsApp")}
                           </div>
                         )}
                         {campaign.emailConfig.enabled && campaign.whatsappConfig.enabled && (
-                          <div className="flex items-center gap-1 px-3 py-1 bg-[var(--electric-blue)]/20 text-[var(--electric-blue)] rounded-lg text-xs border border-[var(--electric-blue)]/30">
+                          <div className="flex items-center gap-1 px-3 py-1 bg-primary/20 text-primary rounded-lg text-xs border border-primary/30">
                             <Zap className="w-3 h-3" />
                             {t("Both Channels")}
                           </div>
@@ -498,21 +498,21 @@ export default function SimulationsPage() {
 
                       {/* Stats */}
                       <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-[var(--navy-blue)] rounded-lg p-3">
+                        <div className="bg-muted dark:bg-[var(--navy-blue)] rounded-lg p-3 border border-border dark:border-transparent">
                           <div className="flex items-center gap-2 mb-1">
-                            <Users className="w-4 h-4 text-[var(--neon-blue)]" />
-                            <span className="text-xs text-[var(--medium-grey)]">{t("Targets")}</span>
+                            <Users className="w-4 h-4 text-primary" />
+                            <span className="text-xs text-muted-foreground dark:text-foreground">{t("Targets")}</span>
                           </div>
-                          <p className="text-xl font-bold text-white">
+                          <p className="text-xl font-bold text-foreground">
                             {campaign.targetUsers.length}
                           </p>
                         </div>
-                        <div className="bg-[var(--navy-blue)] rounded-lg p-3">
+                        <div className="bg-muted dark:bg-[var(--navy-blue)] rounded-lg p-3 border border-border dark:border-transparent">
                           <div className="flex items-center gap-2 mb-1">
-                            <CheckCircle2 className="w-4 h-4 text-green-400" />
-                            <span className="text-xs text-[var(--medium-grey)]">{t("Sent")}</span>
+                            <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <span className="text-xs text-muted-foreground dark:text-foreground">{t("Sent")}</span>
                           </div>
-                          <p className="text-xl font-bold text-white">
+                          <p className="text-xl font-bold text-foreground">
                             {(campaign.stats.totalEmailSent || 0) + (campaign.stats.totalWhatsappSent || 0)}
                           </p>
                         </div>
@@ -520,7 +520,7 @@ export default function SimulationsPage() {
 
                       {/* Dates */}
                       {campaign.scheduleDate && (
-                        <div className="flex items-center gap-2 text-xs text-[var(--medium-grey)] mb-4">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground dark:text-foreground mb-4">
                           <Clock className="w-3 h-3" />
                           <span>{t("Scheduled")}: {formatDate(campaign.scheduleDate)}</span>
                         </div>
@@ -533,7 +533,7 @@ export default function SimulationsPage() {
                             setSelectedCampaign(campaign);
                             setShowDetailModal(true);
                           }}
-                          className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                          className="flex-1 px-4 py-3 bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-[var(--neon-blue)] dark:to-[var(--medium-blue)] dark:text-white rounded-xl dark:hover:from-[var(--medium-blue)] dark:hover:to-[var(--neon-blue)] hover:opacity-90 transition-all duration-300 text-sm font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
                         >
                           <Eye className="w-4 h-4" />
                           {t("View Details")}
@@ -601,7 +601,7 @@ export default function SimulationsPage() {
                     </div>
 
                     {/* Animated glow effect on hover */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[var(--neon-blue)]/0 via-[var(--neon-blue)]/10 to-[var(--neon-blue)]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary/0 via-primary/10 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
                   </div>
                 ))}
               </div>

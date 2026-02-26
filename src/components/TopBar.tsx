@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { Bell, Search } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -64,10 +65,10 @@ function UserGreeting() {
 
   return (
     <div className="flex flex-col">
-      <span className="text-lg font-semibold text-white">
+      <span className="text-lg font-semibold text-foreground">
         {t("Hello")} {firstName}
       </span>
-      <span className="text-sm text-[var(--medium-grey)]">
+      <span className="text-sm text-muted-foreground">
         {formatTime(currentTime)} • {formatDate(currentTime)}
       </span>
     </div>
@@ -81,13 +82,13 @@ function SearchBar() {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--medium-grey)]" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       <Input
         type="text"
         placeholder={t("Search...")}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)]"
+        className="pl-10 w-80 h-8 text-sm bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
       />
     </div>
   );
@@ -130,17 +131,17 @@ export default function TopBar({
 
   return (
     <header
-      className={`flex justify-between items-center gap-4 h-12 ${
+      className={`flex justify-between items-center gap-4 h-12 text-foreground ${
         variant === "dashboard"
           ? "bg-transparent my-2 px-4"
           : isAuthPage
-          ? "bg-white w-full px-4 py-4"
-          : "bg-[var(--navy-blue)] my-2 px-4"
+          ? "bg-background w-full px-4 py-4"
+          : "bg-background my-2 px-4"
       }`}
     >
       <div className="flex items-center gap-4">
         {showSidebarTrigger && (
-          <SidebarTrigger className="-ml-1 text-white hover:bg-[var(--navy-blue-lighter)]" />
+          <SidebarTrigger className="-ml-1 text-foreground hover:bg-muted" />
         )}
         {variant === "main" ? (
           <Image
@@ -173,8 +174,8 @@ export default function TopBar({
                     href="/sign-in"
                     className={`font-medium ${
                       isAuthPage
-                        ? "text-[var(--navy-blue)] hover:text-[var(--neon-blue)]"
-                        : "text-white hover:text-[var(--neon-blue)]"
+                        ? "text-foreground hover:text-primary"
+                        : "text-foreground hover:text-primary"
                     }`}
                   >
                     {t("Sign In")}
@@ -185,7 +186,7 @@ export default function TopBar({
                 <NavigationMenuLink asChild>
                   <Button
                     asChild
-                    className="bg-[var(--neon-blue)] text-[var(--navy-blue)] rounded-md font-medium text-sm h-8 px-4 cursor-pointer flex items-center hover:bg-[var(--electric-blue)] transition-colors"
+                    className="bg-primary text-primary-foreground rounded-md font-medium text-sm h-8 px-4 cursor-pointer flex items-center hover:opacity-90 transition-opacity"
                   >
                     <Link href="/sign-up">{t("Sign Up")}</Link>
                   </Button>
@@ -194,15 +195,18 @@ export default function TopBar({
             </SignedOut>
             <SignedIn>
               <NavigationMenuItem>
+                <ThemeToggle />
+              </NavigationMenuItem>
+              <NavigationMenuItem>
                 <LanguageToggle />
               </NavigationMenuItem>
               <NavigationMenuItem>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8"
+                  className="p-1.5 hover:bg-muted rounded-full transition-colors h-8 w-8"
                 >
-                  <Bell className="h-4 w-4 text-white" />
+                  <Bell className="h-4 w-4 text-foreground" />
                 </Button>
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -213,10 +217,10 @@ export default function TopBar({
                     elements: {
                       avatarBox: "w-7 h-7",
                       userButtonPopoverCard:
-                        "shadow-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-light)]",
+                        "shadow-lg border border-border bg-card",
                       userButtonPopoverActionButton:
-                        "hover:bg-[var(--navy-blue-lighter)]",
-                      userButtonPopoverActionButtonText: "text-white",
+                        "hover:bg-muted",
+                      userButtonPopoverActionButtonText: "text-foreground",
                       userButtonPopoverFooter: "hidden",
                     },
                   }}

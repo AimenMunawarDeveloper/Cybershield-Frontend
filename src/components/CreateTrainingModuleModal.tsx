@@ -840,21 +840,21 @@ export default function CreateTrainingModuleModal({
   if (!isOpen) return null;
 
   const inputClass =
-    "w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none";
-  const labelClass = "block text-sm font-medium text-white mb-2";
+    "w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+  const labelClass = "block text-sm font-medium text-foreground mb-2";
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--navy-blue-light)] rounded-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl border border-[var(--medium-grey)]">
+      <div className="bg-card rounded-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl border border-border">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">{isEditMode ? t("Edit Course") : t("Add Course")}</h2>
+          <h2 className="text-xl font-bold text-foreground">{isEditMode ? t("Edit Course") : t("Add Course")}</h2>
           <button
             type="button"
             onClick={() => {
               resetForm();
               onClose();
             }}
-            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors text-white"
+            className="p-2 hover:bg-muted rounded-lg transition-colors text-foreground"
           >
             <X className="w-5 h-5" />
           </button>
@@ -894,8 +894,8 @@ export default function CreateTrainingModuleModal({
                   onClick={() => setLevel("basic")}
                   className={`flex-1 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
                     level === "basic"
-                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-white"
-                      : "border-[var(--medium-grey)] text-[var(--medium-grey)] hover:border-white/50 hover:text-white"
+                      ? "border-primary bg-primary/20 text-foreground"
+                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                   }`}
                 >
                   {t("Basic")}
@@ -905,8 +905,8 @@ export default function CreateTrainingModuleModal({
                   onClick={() => setLevel("advanced")}
                   className={`flex-1 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
                     level === "advanced"
-                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-white"
-                      : "border-[var(--medium-grey)] text-[var(--medium-grey)] hover:border-white/50 hover:text-white"
+                      ? "border-primary bg-primary/20 text-foreground"
+                      : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
                   }`}
                 >
                   {t("Advanced")}
@@ -918,10 +918,10 @@ export default function CreateTrainingModuleModal({
           {/* Badges */}
           <div>
             <label className={labelClass + " flex items-center gap-2 mb-3"}>
-              <Award className="w-4 h-4 text-[var(--neon-blue)]" />
+              <Award className="w-4 h-4 text-primary" />
               {t("Badges (optional)")}
             </label>
-            <p className="text-sm text-[var(--medium-grey)] mb-3">
+            <p className="text-sm text-muted-foreground mb-3">
               {t("Click a badge to select or deselect. Selected badges will appear in the course sidebar.")}
             </p>
             <div className="flex flex-wrap gap-3">
@@ -938,27 +938,27 @@ export default function CreateTrainingModuleModal({
                     onClick={() => toggleBadge(badge.id)}
                     className={`flex flex-col items-center justify-center rounded-xl border-2 p-3 w-24 min-h-[4.5rem] transition-all hover:shadow-md ${
                       isSelected
-                        ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 ring-2 ring-[var(--neon-blue)]/50"
-                        : "border-[var(--medium-grey)] bg-[var(--navy-blue-lighter)]/50 hover:border-[var(--neon-blue)]/60"
+                        ? "border-primary bg-primary/20 ring-2 ring-primary/50"
+                        : "border-border bg-input/50 hover:border-primary/60"
                     }`}
                     title={isSelected ? t("Click to deselect") : t("Click to select")}
                   >
                     <div
                       className={`flex items-center justify-center w-9 h-9 rounded-full mb-1.5 ${
-                        isSelected ? "bg-[var(--neon-blue)]/30" : "bg-[var(--neon-blue)]/10"
+                        isSelected ? "bg-primary/30" : "bg-primary/10"
                       }`}
                     >
                       {Icon ? (
                         <Icon
                           className={`w-5 h-5 flex-shrink-0 ${
-                            isSelected ? "text-[var(--neon-blue)]" : "text-[var(--medium-grey)]"
+                            isSelected ? "text-primary" : "text-muted-foreground"
                           }`}
                         />
                       ) : null}
                     </div>
                     <span
                       className={`text-[10px] font-medium text-center leading-tight line-clamp-2 px-0.5 ${
-                        isSelected ? "text-white" : "text-[var(--medium-grey)]"
+                        isSelected ? "text-primary-foreground" : "text-muted-foreground"
                       }`}
                     >
                       {badgeLabel}
@@ -976,7 +976,7 @@ export default function CreateTrainingModuleModal({
               <button
                 type="button"
                 onClick={addModule}
-                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
                 {t("Add module")}
@@ -990,11 +990,11 @@ export default function CreateTrainingModuleModal({
                 return (
                   <div
                     key={moduleIndex}
-                    className="rounded-lg border border-[var(--medium-grey)] bg-[var(--navy-blue-lighter)]/30 overflow-hidden"
+                    className="rounded-lg border border-border bg-input/30 overflow-hidden"
                   >
                     {/* Module header - accordion */}
                     <div
-                      className="flex items-center gap-3 px-4 py-3 bg-[var(--navy-blue-lighter)]/50 border-b border-[var(--medium-grey)]/50 cursor-pointer"
+                      className="flex items-center gap-3 px-4 py-3 bg-muted/50 border-b border-border/50 cursor-pointer"
                       onClick={() => {
                         setExpandedModules((prev) => {
                           const newSet = new Set(prev);
@@ -1013,8 +1013,8 @@ export default function CreateTrainingModuleModal({
                         });
                       }}
                     >
-                      <div className="w-6 h-6 rounded-full bg-[var(--neon-blue)]/30 flex items-center justify-center flex-shrink-0">
-                        <div className="w-2 h-2 rounded-full bg-[var(--neon-blue)]" />
+                      <div className="w-6 h-6 rounded-full bg-primary/30 flex items-center justify-center flex-shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-primary" />
                       </div>
                       <input
                         type="text"
@@ -1023,8 +1023,8 @@ export default function CreateTrainingModuleModal({
                           updateModule(moduleIndex, { title: e.target.value })
                         }
                         onClick={(e) => e.stopPropagation()}
-                        className={`flex-1 bg-transparent border-none text-white font-medium focus:outline-none focus:ring-0 ${
-                          !mod.title ? "placeholder-[var(--medium-grey)]" : ""
+                        className={`flex-1 bg-transparent border-none text-foreground font-medium focus:outline-none focus:ring-0 ${
+                          !mod.title ? "placeholder:text-muted-foreground" : ""
                         }`}
                         placeholder={t("Module title (e.g. Types of Cyber Threats)")}
                       />
@@ -1034,15 +1034,15 @@ export default function CreateTrainingModuleModal({
                           e.stopPropagation();
                           removeModule(moduleIndex);
                         }}
-                        className="p-1.5 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded transition-colors"
+                        className="p-1.5 text-crimson-red hover:bg-crimson-red/20 rounded transition-colors"
                         title={t("Remove module")}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
                       {isExpanded ? (
-                        <ChevronDown className="w-5 h-5 text-[var(--medium-grey)] flex-shrink-0" />
+                        <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-[var(--medium-grey)] flex-shrink-0" />
+                        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
                       )}
                     </div>
 
@@ -1051,16 +1051,16 @@ export default function CreateTrainingModuleModal({
                       <div className="p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
                         {/* Sections (indented like image) */}
                         <div className="space-y-1">
-                          <span className="text-xs font-medium text-[var(--medium-grey)] uppercase tracking-wide">
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                             {t("Sections")}
                           </span>
                           {mod.sections.map((section, sectionIndex) => (
                             <div
                               key={sectionIndex}
-                              className="ml-4 pl-3 border-l-2 border-[var(--neon-blue)]/40 space-y-3 py-2"
+                              className="ml-4 pl-3 border-l-2 border-primary/40 space-y-3 py-2"
                             >
                               <div className="flex items-center gap-2">
-                                <ChevronRight className="w-4 h-4 text-[var(--medium-grey)] flex-shrink-0" />
+                                <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                                 <input
                                   type="text"
                                   value={section.title}
@@ -1078,7 +1078,7 @@ export default function CreateTrainingModuleModal({
                                     onClick={() =>
                                       removeSection(moduleIndex, sectionIndex)
                                     }
-                                    className="p-1.5 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded"
+                                    className="p-1.5 text-crimson-red hover:bg-crimson-red/20 rounded"
                                   >
                                     <Trash2 className="w-4 h-4" />
                                   </button>
@@ -1099,8 +1099,8 @@ export default function CreateTrainingModuleModal({
                                 />
                                 <div className="mt-2">
                                   <div className="flex items-center gap-2 mb-1">
-                                    <LinkIcon className="w-4 h-4 text-[var(--medium-grey)]" />
-                                    <span className="text-sm text-white">{t("URLs (optional)")}</span>
+                                    <LinkIcon className="w-4 h-4 text-muted-foreground" />
+                                    <span className="text-sm text-foreground">{t("URLs (optional)")}</span>
                                   </div>
                                   {section.urls.map((url, urlIndex) => (
                                     <div key={urlIndex} className="flex gap-2 mb-2">
@@ -1127,7 +1127,7 @@ export default function CreateTrainingModuleModal({
                                             urlIndex
                                           )
                                         }
-                                        className="p-2 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded"
+                                        className="p-2 text-crimson-red hover:bg-crimson-red/20 rounded"
                                       >
                                         <Trash2 className="w-4 h-4" />
                                       </button>
@@ -1138,7 +1138,7 @@ export default function CreateTrainingModuleModal({
                                     onClick={() =>
                                       addSectionUrl(moduleIndex, sectionIndex)
                                     }
-                                    className="flex items-center gap-2 px-2 py-1 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded"
+                                    className="flex items-center gap-2 px-2 py-1 text-xs text-primary hover:bg-primary/20 rounded"
                                   >
                                     <Plus className="w-3 h-3" />
                                     {t("Add URL")}
@@ -1148,15 +1148,15 @@ export default function CreateTrainingModuleModal({
                                 {/* Media Upload Section */}
                                 <div className="mt-4">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <ImageIcon className="w-4 h-4 text-[var(--medium-grey)]" />
-                                    <span className="text-sm text-white">{t("Images & Videos")}</span>
+                                    <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                                    <span className="text-sm text-foreground">{t("Images & Videos")}</span>
                                   </div>
                                   
                                   {/* Existing Media */}
                                   {section.media && section.media.length > 0 && (
                                     <div className="space-y-2 mb-3">
                                       {section.media.map((mediaItem, mediaIndex) => (
-                                        <div key={`${moduleIndex}-${sectionIndex}-${mediaIndex}-${mediaItem.url}`} className="flex items-start gap-2 p-2 bg-[var(--navy-blue-lighter)]/30 rounded border border-[var(--medium-grey)]/30">
+                                        <div key={`${moduleIndex}-${sectionIndex}-${mediaIndex}-${mediaItem.url}`} className="flex items-start gap-2 p-2 bg-muted/30 rounded border border-border/30">
                                           {mediaItem.type === 'image' ? (
                                             <img
                                               src={mediaItem.url}
@@ -1192,7 +1192,7 @@ export default function CreateTrainingModuleModal({
                                             onClick={() =>
                                               removeMedia(moduleIndex, sectionIndex, mediaIndex)
                                             }
-                                            className="p-1.5 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded flex-shrink-0"
+                                            className="p-1.5 text-crimson-red hover:bg-crimson-red/20 rounded flex-shrink-0"
                                           >
                                             <Trash2 className="w-3 h-3" />
                                           </button>
@@ -1216,7 +1216,7 @@ export default function CreateTrainingModuleModal({
                                     return (
                                       <>
                                   <div className="flex gap-2">
-                                    <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded cursor-pointer border border-[var(--neon-blue)]/30">
+                                    <label className="flex items-center gap-2 px-3 py-2 text-xs text-primary hover:bg-primary/20 rounded cursor-pointer border border-primary/30">
                                       <ImageIcon className="w-3 h-3" />
                                       <span>{t("Upload Image")}</span>
                                       <input
@@ -1232,7 +1232,7 @@ export default function CreateTrainingModuleModal({
                                               disabled={isThisSectionUploading}
                                       />
                                     </label>
-                                    <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded cursor-pointer border border-[var(--neon-blue)]/30">
+                                    <label className="flex items-center gap-2 px-3 py-2 text-xs text-primary hover:bg-primary/20 rounded cursor-pointer border border-primary/30">
                                       <Video className="w-3 h-3" />
                                       <span>{t("Upload Video")}</span>
                                       <input
@@ -1265,7 +1265,7 @@ export default function CreateTrainingModuleModal({
                           <button
                             type="button"
                             onClick={() => addSection(moduleIndex)}
-                            className="ml-4 flex items-center gap-2 px-3 py-2 text-sm text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded-lg"
+                            className="ml-4 flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-primary/20 rounded-lg"
                           >
                             <Plus className="w-4 h-4" />
                             {t("Add section")}
@@ -1280,30 +1280,30 @@ export default function CreateTrainingModuleModal({
                               if (mod.quiz.length === 0) addQuizToModule(moduleIndex);
                               else setExpandedQuiz(isQuizExpanded ? null : moduleIndex);
                             }}
-                            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-[var(--navy-blue-lighter)]/50 text-left"
+                            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-muted/50 text-left"
                           >
-                            <HelpCircle className="w-5 h-5 text-[var(--neon-blue)]" />
-                            <span className="font-medium text-white">
+                            <HelpCircle className="w-5 h-5 text-primary" />
+                            <span className="font-medium text-foreground">
                               {t("Module Quiz")}
                             </span>
                             {mod.quiz.length > 0 && (
-                              <span className="text-xs text-[var(--medium-grey)]">
+                              <span className="text-xs text-muted-foreground">
                                 {mod.quiz.length} {t("question(s)")}
                               </span>
                             )}
                             {mod.quiz.length === 0 ? (
-                              <span className="text-sm text-[var(--medium-grey)] ml-auto">
+                              <span className="text-sm text-muted-foreground ml-auto">
                                 {t("Add quiz")}
                               </span>
                             ) : isQuizExpanded ? (
-                              <ChevronDown className="w-4 h-4 ml-auto text-[var(--medium-grey)]" />
+                              <ChevronDown className="w-4 h-4 ml-auto text-muted-foreground" />
                             ) : (
-                              <ChevronRight className="w-4 h-4 ml-auto text-[var(--medium-grey)]" />
+                              <ChevronRight className="w-4 h-4 ml-auto text-muted-foreground" />
                             )}
                           </button>
 
                           {mod.quiz.length === 0 && (
-                            <p className="text-xs text-[var(--medium-grey)] ml-8 mt-1">
+                            <p className="text-xs text-muted-foreground ml-8 mt-1">
                               {t("Add questions with options and mark the correct answer.")}
                             </p>
                           )}
@@ -1316,7 +1316,7 @@ export default function CreateTrainingModuleModal({
                                   className="p-3 rounded-lg bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)]/50 space-y-3"
                                 >
                                   <div className="flex items-start justify-between gap-2">
-                                    <span className="text-xs text-[var(--medium-grey)]">
+                                    <span className="text-xs text-muted-foreground">
                                       {t("Question")} {questionIndex + 1}
                                     </span>
                                     <button
@@ -1324,7 +1324,7 @@ export default function CreateTrainingModuleModal({
                                       onClick={() =>
                                         removeQuizQuestion(moduleIndex, questionIndex)
                                       }
-                                      className="p-1 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded"
+                                      className="p-1 text-crimson-red hover:bg-crimson-red/20 rounded"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -1358,7 +1358,7 @@ export default function CreateTrainingModuleModal({
                                               correctIndex: choiceIndex,
                                             })
                                           }
-                                          className="w-4 h-4 text-[var(--neon-blue)]"
+                                          className="w-4 h-4 text-primary"
                                         />
                                         <input
                                           type="text"
@@ -1384,7 +1384,7 @@ export default function CreateTrainingModuleModal({
                                                 choiceIndex
                                               )
                                             }
-                                            className="p-1.5 text-[var(--crimson-red)] hover:bg-[var(--crimson-red)]/20 rounded"
+                                            className="p-1.5 text-crimson-red hover:bg-crimson-red/20 rounded"
                                           >
                                             <Trash2 className="w-4 h-4" />
                                           </button>
@@ -1396,7 +1396,7 @@ export default function CreateTrainingModuleModal({
                                       onClick={() =>
                                         addQuizChoice(moduleIndex, questionIndex)
                                       }
-                                      className="flex items-center gap-2 px-2 py-1 text-xs text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded"
+                                      className="flex items-center gap-2 px-2 py-1 text-xs text-primary hover:bg-primary/20 rounded"
                                     >
                                       <Plus className="w-3 h-3" />
                                       {t("Add choice")}
@@ -1407,7 +1407,7 @@ export default function CreateTrainingModuleModal({
                               <button
                                 type="button"
                                 onClick={() => addQuizToModule(moduleIndex)}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded-lg"
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:bg-primary/20 rounded-lg"
                               >
                                 <Plus className="w-4 h-4" />
                                 {t("Add question")}
@@ -1430,13 +1430,13 @@ export default function CreateTrainingModuleModal({
                 resetForm();
                 onClose();
               }}
-              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors"
+              className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               {t("Cancel")}
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
+              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
             >
               {isEditMode ? t("Save changes") : t("Add Course")}
             </button>

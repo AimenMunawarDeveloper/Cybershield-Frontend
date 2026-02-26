@@ -386,19 +386,19 @@ export default function CreateUnifiedCampaignModal({
   if (!isOpen) return null;
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--navy-blue-light)] rounded-2xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-card dark:bg-[var(--navy-blue-light)] rounded-2xl border border-border p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-black rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-lg dark:bg-gradient-to-br dark:from-[var(--neon-blue)] dark:to-[var(--navy-blue)]">
+              <Zap className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-foreground">
                 {t("Create Unified Campaign")}
               </h2>
-              <p className="text-sm text-[var(--medium-grey)]">
+              <p className="text-sm text-muted-foreground">
                 {t("Step")} {step} {t("of")} 3
               </p>
             </div>
@@ -408,7 +408,7 @@ export default function CreateUnifiedCampaignModal({
               resetForm();
               onClose();
             }}
-            className="text-[var(--medium-grey)] hover:text-white transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors"
             disabled={loading}
           >
             <X className="w-6 h-6" />
@@ -422,8 +422,8 @@ export default function CreateUnifiedCampaignModal({
               key={s}
               className={`flex-1 h-2 rounded-full transition-all ${
                 s <= step
-                  ? "bg-gradient-to-r from-[var(--neon-blue)] to-black"
-                  : "bg-[var(--navy-blue)]"
+                  ? "bg-primary dark:bg-gradient-to-r dark:from-[var(--neon-blue)] dark:to-[var(--navy-blue)]"
+                  : "bg-muted dark:bg-[var(--navy-blue)]"
               }`}
             />
           ))}
@@ -431,7 +431,7 @@ export default function CreateUnifiedCampaignModal({
         
         {/* Error Message */}
         {error && (
-          <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded-lg text-red-300 text-sm">
+          <div className="mb-4 p-4 bg-destructive/20 border border-destructive rounded-lg text-destructive text-sm">
             {error}
           </div>
         )}
@@ -441,27 +441,27 @@ export default function CreateUnifiedCampaignModal({
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <label className="block text-white mb-2 font-medium">
+                <label className="block text-foreground mb-2 font-medium">
                   {t("Campaign Name")} *
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--navy-blue)] border border-[var(--medium-grey)] border-opacity-30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)] transition-colors"
+                  className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                   placeholder={t("Enter campaign name")}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-white mb-2 font-medium">
+                <label className="block text-foreground mb-2 font-medium">
                   {t("Description")} *
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--navy-blue)] border border-[var(--medium-grey)] border-opacity-30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)] transition-colors resize-none"
+                  className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
                   placeholder={t("Describe the purpose of this campaign")}
                   rows={3}
                   required
@@ -469,19 +469,19 @@ export default function CreateUnifiedCampaignModal({
               </div>
               
               <div>
-                <label className="block text-white mb-2 font-medium">
+                <label className="block text-foreground mb-2 font-medium">
                   {t("Schedule Date")} ({t("Optional")})
                 </label>
                 <input
                   type="datetime-local"
                   value={scheduleDate}
                   onChange={(e) => setScheduleDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--navy-blue)] border border-[var(--medium-grey)] border-opacity-30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)] transition-colors"
+                  className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue)] border border-border rounded-lg text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                 />
               </div>
               
               <div>
-                <label className="block text-white mb-3 font-medium">
+                <label className="block text-foreground mb-3 font-medium">
                   {t("Select Channels")} *
                 </label>
                 <div className="grid grid-cols-2 gap-4">
@@ -490,12 +490,12 @@ export default function CreateUnifiedCampaignModal({
                     onClick={() => setEmailEnabled(!emailEnabled)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       emailEnabled
-                        ? "border-blue-500 bg-blue-500/20"
-                        : "border-[var(--medium-grey)]/30 bg-[var(--navy-blue)]"
+                        ? "border-primary bg-primary/20 text-foreground"
+                        : "border-border bg-muted dark:bg-[var(--navy-blue)] text-muted-foreground"
                     }`}
                   >
-                    <Mail className={`w-8 h-8 mx-auto mb-2 ${emailEnabled ? "text-blue-400" : "text-[var(--medium-grey)]"}`} />
-                    <p className={`text-sm font-medium ${emailEnabled ? "text-white" : "text-[var(--medium-grey)]"}`}>
+                    <Mail className={`w-8 h-8 mx-auto mb-2 ${emailEnabled ? "text-primary" : "text-muted-foreground"}`} />
+                    <p className="text-sm font-medium">
                       {t("Email")}
                     </p>
                   </button>
@@ -505,12 +505,12 @@ export default function CreateUnifiedCampaignModal({
                     onClick={() => setWhatsappEnabled(!whatsappEnabled)}
                     className={`p-4 rounded-lg border-2 transition-all ${
                       whatsappEnabled
-                        ? "border-green-500 bg-green-500/20"
-                        : "border-[var(--medium-grey)]/30 bg-[var(--navy-blue)]"
+                        ? "border-green-500 bg-green-500/20 text-foreground dark:text-green-400"
+                        : "border-border bg-muted dark:bg-[var(--navy-blue)] text-muted-foreground"
                     }`}
                   >
-                    <MessageSquare className={`w-8 h-8 mx-auto mb-2 ${whatsappEnabled ? "text-green-400" : "text-[var(--medium-grey)]"}`} />
-                    <p className={`text-sm font-medium ${whatsappEnabled ? "text-white" : "text-[var(--medium-grey)]"}`}>
+                    <MessageSquare className={`w-8 h-8 mx-auto mb-2 ${whatsappEnabled ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`} />
+                    <p className="text-sm font-medium">
                       {t("WhatsApp")}
                     </p>
                   </button>
@@ -526,14 +526,14 @@ export default function CreateUnifiedCampaignModal({
               {emailEnabled && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Mail className="w-5 h-5 text-blue-400" />
-                    <h3 className="text-lg font-semibold text-white">
+                    <Mail className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">
                       {t("Email Users")} ({selectedUsers.length} {t("selected")})
                     </h3>
                   </div>
                   
                   <div>
-                    <label className="block text-white mb-2 font-medium">
+                    <label className="block text-foreground mb-2 font-medium">
                       {t("Select Users for Email")} *
                     </label>
                     <UserSelector
@@ -547,20 +547,20 @@ export default function CreateUnifiedCampaignModal({
                   
                   {selectedUsers.length > 0 && (
                     <div className="mt-4">
-                      <p className="text-sm text-[var(--medium-grey)] mb-2">
+                      <p className="text-sm text-muted-foreground mb-2">
                         {t("Selected users for email campaign")}:
                       </p>
                       <div className="space-y-2 max-h-48 overflow-y-auto">
                         {selectedUsers.map((user) => (
                           <div
                             key={user._id}
-                            className="flex items-center justify-between p-3 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/20"
+                            className="flex items-center justify-between p-3 bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-border"
                           >
                             <div>
-                              <p className="text-white font-medium">
+                              <p className="text-foreground font-medium">
                                 {user.displayName || user.email}
                               </p>
-                              <p className="text-sm text-[var(--medium-grey)] mt-1">
+                              <p className="text-sm text-muted-foreground mt-1">
                                 {user.email}
                               </p>
                             </div>
@@ -577,15 +577,15 @@ export default function CreateUnifiedCampaignModal({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-green-400" />
-                      <h3 className="text-lg font-semibold text-white">
+                      <MessageSquare className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      <h3 className="text-lg font-semibold text-foreground">
                         {t("WhatsApp Users")} ({manualUsers.length})
                       </h3>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowAddUserForm(!showAddUserForm)}
-                      className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       {t("Add User")}
@@ -593,20 +593,20 @@ export default function CreateUnifiedCampaignModal({
                   </div>
                   
                   {showAddUserForm && (
-                    <div className="p-4 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 space-y-4">
+                    <div className="p-4 bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-border space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <input
                           type="text"
                           value={newUserFirstName}
                           onChange={(e) => setNewUserFirstName(e.target.value)}
-                          className="px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          className="px-3 py-2 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                           placeholder={t("First Name")}
                         />
                         <input
                           type="text"
                           value={newUserLastName}
                           onChange={(e) => setNewUserLastName(e.target.value)}
-                          className="px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          className="px-3 py-2 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                           placeholder={t("Last Name")}
                         />
                       </div>
@@ -616,7 +616,7 @@ export default function CreateUnifiedCampaignModal({
                           type="email"
                           value={newUserEmail}
                           onChange={(e) => setNewUserEmail(e.target.value)}
-                          className="w-full px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          className="w-full px-3 py-2 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                           placeholder={t("Email Address")}
                         />
                       )}
@@ -626,7 +626,7 @@ export default function CreateUnifiedCampaignModal({
                           type="tel"
                           value={newUserPhone}
                           onChange={(e) => setNewUserPhone(e.target.value)}
-                          className="w-full px-3 py-2 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                          className="w-full px-3 py-2 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                           placeholder={t("Phone Number")}
                         />
                       )}
@@ -648,7 +648,7 @@ export default function CreateUnifiedCampaignModal({
                             setNewUserEmail("");
                             setNewUserPhone("");
                           }}
-                          className="px-4 py-2 bg-[var(--navy-blue-light)] text-white rounded hover:bg-[var(--navy-blue)] transition-colors"
+                          className="px-4 py-2 bg-muted dark:bg-[var(--navy-blue-light)] text-foreground rounded border border-border hover:bg-background dark:hover:bg-[var(--navy-blue)] transition-colors"
                         >
                           {t("Cancel")}
                         </button>
@@ -660,13 +660,13 @@ export default function CreateUnifiedCampaignModal({
                     {manualUsers.map((user) => (
                       <div
                         key={user.id}
-                        className="flex items-center justify-between p-3 bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/20"
+                        className="flex items-center justify-between p-3 bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-border"
                       >
                         <div>
-                          <p className="text-white font-medium">
+                          <p className="text-foreground font-medium">
                             {user.firstName} {user.lastName}
                           </p>
-                          <div className="flex gap-3 text-sm text-[var(--medium-grey)] mt-1">
+                          <div className="flex gap-3 text-sm text-muted-foreground mt-1">
                             {user.email && (
                               <span className="flex items-center gap-1">
                                 <Mail className="w-3 h-3" />
@@ -684,7 +684,7 @@ export default function CreateUnifiedCampaignModal({
                         <button
                           type="button"
                           onClick={() => handleRemoveUser(user.id)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
+                          className="text-destructive hover:opacity-80 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -700,36 +700,36 @@ export default function CreateUnifiedCampaignModal({
           {step === 3 && (
             <div className="space-y-6">
               {emailEnabled && (
-                <div className="p-4 bg-[var(--navy-blue)] rounded-lg border border-blue-500/30 space-y-4">
+                <div className="p-4 bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-primary/30 dark:border-[var(--neon-blue)]/30 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Mail className="w-5 h-5 text-blue-400" />
-                    <h3 className="text-lg font-semibold text-white">
+                    <Mail className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">
                       {t("Email Configuration")}
                     </h3>
                   </div>
                   
                   <div>
-                    <label className="block text-sm text-[var(--medium-grey)] mb-2">
+                    <label className="block text-sm text-muted-foreground mb-2">
                       {t("Sender Email")}
                     </label>
                     <input
                       type="email"
                       value={HARDCODED_SENDER_EMAIL}
                       readOnly
-                      className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white opacity-75 cursor-not-allowed"
+                      className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded-lg text-foreground opacity-75 cursor-not-allowed"
                     />
                   </div>
 
                   {/* Email Template Selection */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm text-white font-medium">
+                      <label className="block text-sm text-foreground font-medium">
                         {t("Email Template")}
                       </label>
                       <button
                         type="button"
                         onClick={() => setShowEmailTemplateSelector(!showEmailTemplateSelector)}
-                        className="flex items-center gap-2 px-3 py-1.5 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-colors text-sm"
                       >
                         <FileText className="w-4 h-4" />
                         {showEmailTemplateSelector ? t("Hide Templates") : t("Choose Template")}
@@ -737,13 +737,13 @@ export default function CreateUnifiedCampaignModal({
                     </div>
                     
                     {showEmailTemplateSelector && (
-                      <div className="mb-4 p-4 bg-[var(--navy-blue-light)] rounded-lg border border-[var(--medium-grey)]/30 max-h-64 overflow-y-auto">
+                      <div className="mb-4 p-4 bg-background dark:bg-[var(--navy-blue-light)] rounded-lg border border-border max-h-64 overflow-y-auto">
                         {emailTemplatesLoading ? (
-                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                          <div className="text-center py-4 text-muted-foreground">
                             {t("Loading templates...")}
                           </div>
                         ) : emailTemplates.length === 0 ? (
-                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                          <div className="text-center py-4 text-muted-foreground">
                             {t("No templates available")}
                           </div>
                         ) : (
@@ -753,12 +753,12 @@ export default function CreateUnifiedCampaignModal({
                                 key={template._id || template.id}
                                 type="button"
                                 onClick={() => handleSelectEmailTemplate(template)}
-                                className="p-3 text-left bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 hover:border-[var(--neon-blue)] transition-colors"
+                                className="p-3 text-left bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-border hover:border-primary transition-colors"
                               >
-                                <div className="text-white font-medium text-sm mb-1">
+                                <div className="text-foreground font-medium text-sm mb-1">
                                   {t(template.title)}
                                 </div>
-                                <div className="text-[var(--medium-grey)] text-xs line-clamp-2">
+                                <div className="text-muted-foreground text-xs line-clamp-2">
                                   {t(template.description)}
                                 </div>
                               </button>
@@ -773,7 +773,7 @@ export default function CreateUnifiedCampaignModal({
                     type="text"
                     value={emailSubject}
                     onChange={(e) => setEmailSubject(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                    className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder={t("Email Subject")}
                     required={emailEnabled}
                   />
@@ -781,7 +781,7 @@ export default function CreateUnifiedCampaignModal({
                   <textarea
                     value={emailBody}
                     onChange={(e) => setEmailBody(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)] resize-none"
+                    className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                     placeholder={t("Email Body")}
                     rows={4}
                     required={emailEnabled}
@@ -791,17 +791,17 @@ export default function CreateUnifiedCampaignModal({
                     type="url"
                     value={emailLandingPage}
                     onChange={(e) => setEmailLandingPage(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                    className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder={(process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://cybershieldlearningportal.vercel.app") + "/ke"}
                   />
                 </div>
               )}
               
               {whatsappEnabled && (
-                <div className="p-4 bg-[var(--navy-blue)] rounded-lg border border-green-500/30 space-y-4">
+                <div className="p-4 bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-green-500/30 space-y-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <MessageSquare className="w-5 h-5 text-green-400" />
-                    <h3 className="text-lg font-semibold text-white">
+                    <MessageSquare className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <h3 className="text-lg font-semibold text-foreground">
                       {t("WhatsApp Configuration")}
                     </h3>
                   </div>
@@ -809,7 +809,7 @@ export default function CreateUnifiedCampaignModal({
                   {/* WhatsApp Template Selection */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm text-white font-medium">
+                      <label className="block text-sm text-foreground font-medium">
                         {t("WhatsApp Template")}
                       </label>
                       <button
@@ -823,13 +823,13 @@ export default function CreateUnifiedCampaignModal({
                     </div>
                     
                     {showWhatsappTemplateSelector && (
-                      <div className="mb-4 p-4 bg-[var(--navy-blue-light)] rounded-lg border border-[var(--medium-grey)]/30 max-h-64 overflow-y-auto">
+                      <div className="mb-4 p-4 bg-background dark:bg-[var(--navy-blue-light)] rounded-lg border border-border max-h-64 overflow-y-auto">
                         {whatsappTemplatesLoading ? (
-                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                          <div className="text-center py-4 text-muted-foreground">
                             {t("Loading templates...")}
                           </div>
                         ) : whatsappTemplates.length === 0 ? (
-                          <div className="text-center py-4 text-[var(--medium-grey)]">
+                          <div className="text-center py-4 text-muted-foreground">
                             {t("No templates available")}
                           </div>
                         ) : (
@@ -839,12 +839,12 @@ export default function CreateUnifiedCampaignModal({
                                 key={template._id || template.id}
                                 type="button"
                                 onClick={() => handleSelectWhatsappTemplate(template)}
-                                className="p-3 text-left bg-[var(--navy-blue)] rounded-lg border border-[var(--medium-grey)]/30 hover:border-green-500 transition-colors"
+                                className="p-3 text-left bg-muted dark:bg-[var(--navy-blue)] rounded-lg border border-border hover:border-green-500 transition-colors"
                               >
-                                <div className="text-white font-medium text-sm mb-1">
+                                <div className="text-foreground font-medium text-sm mb-1">
                                   {t(template.title)}
                                 </div>
-                                <div className="text-[var(--medium-grey)] text-xs line-clamp-2">
+                                <div className="text-muted-foreground text-xs line-clamp-2">
                                   {t(template.description)}
                                 </div>
                               </button>
@@ -858,7 +858,7 @@ export default function CreateUnifiedCampaignModal({
                   <textarea
                     value={whatsappMessage}
                     onChange={(e) => setWhatsappMessage(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)] resize-none"
+                    className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary resize-none"
                     placeholder={t("WhatsApp Message Template")}
                     rows={4}
                     required={whatsappEnabled}
@@ -868,7 +868,7 @@ export default function CreateUnifiedCampaignModal({
                     type="url"
                     value={whatsappLandingPage}
                     onChange={(e) => setWhatsappLandingPage(e.target.value)}
-                    className="w-full px-4 py-3 bg-[var(--navy-blue-light)] border border-[var(--medium-grey)]/30 rounded-lg text-white focus:outline-none focus:border-[var(--neon-blue)]"
+                    className="w-full px-4 py-3 bg-background dark:bg-[var(--navy-blue-light)] border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                     placeholder={(process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://cybershieldlearningportal.vercel.app") + "/ke"}
                     required={whatsappEnabled}
                   />
@@ -884,7 +884,7 @@ export default function CreateUnifiedCampaignModal({
                 type="button"
                 onClick={prevStep}
                 disabled={loading}
-                className="px-6 py-3 bg-[var(--navy-blue)] text-white rounded-lg hover:bg-[var(--navy-blue-light)] transition-colors disabled:opacity-50"
+                className="px-6 py-3 bg-muted dark:bg-[var(--navy-blue)] text-foreground rounded-lg border border-border hover:bg-background dark:hover:bg-[var(--navy-blue-light)] transition-colors disabled:opacity-50"
               >
                 {t("Previous")}
               </button>
@@ -895,7 +895,7 @@ export default function CreateUnifiedCampaignModal({
                 type="button"
                 onClick={nextStep}
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-lg hover:from-black hover:to-[var(--neon-blue)] transition-all disabled:opacity-50"
+                className="flex-1 px-6 py-3 bg-primary text-primary-foreground dark:bg-gradient-to-r dark:from-[var(--neon-blue)] dark:to-[var(--navy-blue)] rounded-lg hover:opacity-90 dark:hover:from-[var(--navy-blue)] dark:hover:to-[var(--neon-blue)] transition-all disabled:opacity-50"
               >
                 {t("Next")}
               </button>
@@ -903,7 +903,7 @@ export default function CreateUnifiedCampaignModal({
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
