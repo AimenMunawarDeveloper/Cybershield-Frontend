@@ -20,7 +20,7 @@ export default async function DashboardLayout({
       <DashboardSidebar />
       <SidebarInset className="m-0">
         <TopBar variant="dashboard" showSidebarTrigger={true} />
-        <div className="bg-background min-h-screen relative overflow-hidden rounded-none">
+        <div className="bg-[var(--navy-blue)] min-h-screen relative overflow-hidden rounded-none">
           {children}
         </div>
       </SidebarInset>

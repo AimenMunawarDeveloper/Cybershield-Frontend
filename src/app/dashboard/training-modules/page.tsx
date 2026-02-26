@@ -313,7 +313,7 @@ export default function TrainingModulesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
       <HeroSection 
         courses={(() => {
           const coursesToPass = language === "en" ? courses : (translatedCourses.length > 0 ? translatedCourses : courses);
@@ -332,49 +332,49 @@ export default function TrainingModulesPage() {
 
       {/* About Us Section */}
       {translationReady && (
-        <div className="bg-card py-16 px-4 sm:px-6 lg:px-8">
+        <div className="bg-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Text Content */}
             <div className="space-y-6">
               <div>
-<p className="text-sm font-semibold text-primary mb-2">
-                {t("About Us")}
+                <p className="text-sm font-semibold text-[var(--neon-blue)] mb-2">
+                  {t("About Us")}
                 </p>
-                <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
                   {t("Empowering Lifelong Learners, One Course at a Time")}
                 </h2>
-                <p className="text-lg text-muted-foreground mb-6">
+                <p className="text-lg text-gray-700 mb-6">
                   {t("Founded with a vision to bridge the gap between traditional learning and modern technology, our platform offers flexible, on-demand learning that fits into your lifestyle. Join thousands of learners who are achieving their goals and shaping their future one lesson at a time.")}
                 </p>
-                <button className="px-6 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:opacity-90 transition-colors">
+                <button className="px-6 py-3 bg-[var(--neon-blue)] text-white rounded-lg font-medium hover:bg-[var(--medium-blue)] transition-colors">
                   {t("See More")}
                 </button>
               </div>
 
               {/* Statistics */}
-              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-border">
+              <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">
+                  <div className="text-4xl font-bold text-[var(--neon-blue)] mb-2">
                     50+
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-gray-600">
                     {t("Total Register Students")}
                   </div>
                 </div>
-                <div className="text-center border-l border-r border-border">
-                  <div className="text-4xl font-bold text-primary mb-2">
+                <div className="text-center border-l border-r border-gray-200">
+                  <div className="text-4xl font-bold text-[var(--neon-blue)] mb-2">
                     30+
                   </div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-gray-600">
                     {t("Excellent Employees")}
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-4xl font-bold text-primary mb-2">
+                  <div className="text-4xl font-bold text-[var(--neon-blue)] mb-2">
                     25+
                   </div>
-                  <div className="text-sm text-muted-foreground">{t("Excellent Courses")}</div>
+                  <div className="text-sm text-gray-600">{t("Excellent Courses")}</div>
                 </div>
               </div>
             </div>
@@ -415,19 +415,19 @@ export default function TrainingModulesPage() {
 
       {/* Course Catalog Section */}
       {translationReady && (
-        <div className="bg-muted py-16 px-4 sm:px-6 lg:px-8">
+        <div className="bg-gradient-to-br from-[var(--navy-blue-light)] to-[var(--navy-blue-lighter)] py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header with Controls */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <h2 className="text-4xl font-bold text-foreground mb-4 md:mb-0">
+              <h2 className="text-4xl font-bold text-white mb-4 md:mb-0">
                 {t("Explore Our Course Catalog")}
               </h2>
               <div className="flex items-center gap-4">
                 {canPerformCRUD && (
                   <button
                     onClick={() => setIsModalOpen(true)}
-                    className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-medium hover:opacity-90 transition-colors shadow"
+                    className="inline-flex items-center gap-2 bg-[var(--neon-blue)] text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors shadow"
                   >
                     <Plus className="w-4 h-4" />
                     {t("New Training Module")}
@@ -442,28 +442,28 @@ export default function TrainingModulesPage() {
                 {/* Search Bar */}
                 <div className="flex-1 max-w-md">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white z-10" />
                     <input
                       type="text"
                       placeholder={t("Search Courses")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg text-sm bg-input backdrop-blur-sm text-foreground placeholder:text-muted-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full pl-10 pr-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:bg-white/20"
                     />
                   </div>
                 </div>
 
                 {/* Filter Dropdown */}
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <Filter className="w-4 h-4 text-white/70" />
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="px-4 py-2 rounded-lg text-sm bg-input backdrop-blur-sm text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]"
                   >
                     <option
                       value="all"
-                      className="bg-card text-foreground"
+                      className="bg-[var(--navy-blue)] text-white"
                     >
                       {t("Show all trainings")}
                     </option>
@@ -472,27 +472,27 @@ export default function TrainingModulesPage() {
 
                 {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{t("Sort:")}</span>
+                  <span className="text-sm text-white/70">{t("Sort:")}</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 rounded-lg text-sm bg-input backdrop-blur-sm text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]"
                   >
                     <option
                       value="newest"
-                      className="bg-card text-foreground"
+                      className="bg-[var(--navy-blue)] text-white"
                     >
                       {t("Newest First")}
                     </option>
                     <option
                       value="oldest"
-                      className="bg-card text-foreground"
+                      className="bg-[var(--navy-blue)] text-white"
                     >
                       {t("Oldest First")}
                     </option>
                     <option
                       value="alphabetical"
-                      className="bg-card text-foreground"
+                      className="bg-[var(--navy-blue)] text-white"
                     >
                       {t("Alphabetical (A to Z)")}
                     </option>
@@ -502,13 +502,13 @@ export default function TrainingModulesPage() {
 
               <div className="flex items-center gap-4">
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-input backdrop-blur-sm rounded-lg p-1 border border-border">
+                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       viewMode === "grid"
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? "bg-[var(--neon-blue)] text-white shadow-sm"
+                        : "text-white/70 hover:text-white"
                     }`}
                   >
                     <Grid className="w-4 h-4" />
@@ -518,8 +518,8 @@ export default function TrainingModulesPage() {
                     onClick={() => setViewMode("table")}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       viewMode === "table"
-                        ? "bg-primary text-primary-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
+                        ? "bg-[var(--neon-blue)] text-white shadow-sm"
+                        : "text-white/70 hover:text-white"
                     }`}
                   >
                     <List className="w-4 h-4" />
@@ -528,28 +528,28 @@ export default function TrainingModulesPage() {
                 </div>
 
                 {/* Training Language Dropdown */}
-                <select className="px-4 py-2 rounded-lg text-sm bg-input backdrop-blur-sm text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary">
+                <select className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]">
                   <option
                     value="en"
-                    className="bg-card text-foreground"
+                    className="bg-[var(--navy-blue)] text-white"
                   >
                     English
                   </option>
                   <option
                     value="es"
-                    className="bg-card text-foreground"
+                    className="bg-[var(--navy-blue)] text-white"
                   >
                     Spanish
                   </option>
                   <option
                     value="fr"
-                    className="bg-card text-foreground"
+                    className="bg-[var(--navy-blue)] text-white"
                   >
                     French
                   </option>
                   <option
                     value="de"
-                    className="bg-card text-foreground"
+                    className="bg-[var(--navy-blue)] text-white"
                   >
                     German
                   </option>
@@ -562,10 +562,10 @@ export default function TrainingModulesPage() {
           {viewMode === "grid" ? (
             <>
               {loading && (
-                <div className="text-center py-12 text-foreground">{translationReady ? t("Loading courses...") : "Loading courses..."}</div>
+                <div className="text-center py-12 text-white">{translationReady ? t("Loading courses...") : "Loading courses..."}</div>
               )}
               {error && (
-                <div className="text-center py-12 text-destructive">{error}</div>
+                <div className="text-center py-12 text-red-300">{error}</div>
               )}
               {!loading && !error && translationReady && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -589,7 +589,7 @@ export default function TrainingModulesPage() {
                     .map((course) => (
                       <div
                         key={course._id}
-                        className="bg-card rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative group"
+                        className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer relative group"
                       >
                         <div
                           onClick={() =>
@@ -597,7 +597,7 @@ export default function TrainingModulesPage() {
                           }
                           className="block"
                         >
-                          <div className="relative h-48 bg-muted">
+                          <div className="relative h-48 bg-[var(--navy-blue-lighter)]">
                             <Image
                               src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                               alt={course.courseTitle}
@@ -606,23 +606,23 @@ export default function TrainingModulesPage() {
                             />
                           </div>
                           <div className="p-4">
-                            <h3 className="text-lg font-bold text-foreground mb-2">
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">
                               {course.courseTitle}
                             </h3>
-                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                               {course.description || t("No description")}
                             </p>
                             <div className="flex items-center justify-between">
                               {course.createdBy && (
                                 <div className="flex items-center gap-2">
-                                  <Users className="w-4 h-4 text-primary" />
-                                  <span className="text-sm text-muted-foreground">
+                                  <Users className="w-4 h-4 text-[var(--neon-blue)]" />
+                                  <span className="text-sm text-gray-600">
                                     {course.createdBy.displayName || t("Unknown")}
                                   </span>
                                 </div>
                               )}
                               {course.createdAt && (
-                                <span className="text-xs text-muted-foreground">
+                                <span className="text-xs text-gray-500">
                                   {new Date(course.createdAt).toLocaleDateString()}
                                 </span>
                               )}
@@ -642,7 +642,7 @@ export default function TrainingModulesPage() {
                                 const originalCourse = courses.find(c => c._id === course._id);
                                 if (originalCourse) openEditModal(originalCourse);
                               }}
-                              className="p-2 rounded-lg bg-card shadow hover:bg-muted text-foreground hover:text-primary"
+                              className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-[var(--neon-blue)]"
                               title={t("Edit")}
                             >
                               <Pencil className="w-4 h-4" />
@@ -655,7 +655,7 @@ export default function TrainingModulesPage() {
                                 const originalCourse = courses.find(c => c._id === course._id);
                                 if (originalCourse) setCourseToDelete(originalCourse);
                               }}
-                              className="p-2 rounded-lg bg-card shadow hover:bg-muted text-foreground hover:text-destructive"
+                              className="p-2 rounded-lg bg-white/90 shadow hover:bg-white text-gray-700 hover:text-red-500"
                               title={t("Delete")}
                             >
                               <Trash2 className="w-4 h-4" />
@@ -669,7 +669,7 @@ export default function TrainingModulesPage() {
             </>
           ) : (
             translationReady && (
-              <div className="bg-card/80 backdrop-blur-sm rounded-lg p-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
                 <ModuleTable
                   courses={translatedCourses}
                   loading={loading}
@@ -705,25 +705,25 @@ export default function TrainingModulesPage() {
       {/* Delete confirmation */}
       {courseToDelete && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-card rounded-xl p-6 max-w-md w-full shadow-xl">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-foreground">{t("Delete course?")}</h3>
+              <h3 className="text-lg font-bold text-gray-900">{t("Delete course?")}</h3>
               <button
                 type="button"
                 onClick={() => setCourseToDelete(null)}
-                className="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-gray-600 mb-6">
               {t("This will permanently delete")} &quot;{language === "ur" ? (translatedCourses.find(c => c._id === courseToDelete._id)?.courseTitle || courseToDelete.courseTitle) : courseToDelete.courseTitle}&quot; {t("and all progress for this course. This cannot be undone.")}
             </p>
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setCourseToDelete(null)}
-                className="px-4 py-2 border border-border text-foreground rounded-lg hover:bg-muted"
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
               >
                 {t("Cancel")}
               </button>
@@ -731,7 +731,7 @@ export default function TrainingModulesPage() {
                 type="button"
                 onClick={handleDeleteCourse}
                 disabled={deleting}
-                className="px-4 py-2 bg-destructive text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
               >
                 {deleting ? t("Deleting…") : t("Delete")}
               </button>

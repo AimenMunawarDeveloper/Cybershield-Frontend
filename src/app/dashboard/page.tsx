@@ -285,8 +285,8 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
-          <p className="text-light-blue text-lg">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+          <p className="text-[var(--light-blue)] text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
@@ -316,26 +316,26 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric1.label}
                 </p>
-                <p className="text-lg font-bold text-foreground">
+                <p className="text-lg font-bold text-white">
                   {metrics?.metric1.value}
                 </p>
                 <p
                   className={`text-xs ${
                     metrics?.metric1.change.startsWith("+") ||
                     metrics?.metric1.change.startsWith("-0")
-                      ? "text-success-green"
-                      : "text-crimson-red"
+                      ? "text-[var(--success-green)]"
+                      : "text-[var(--crimson-red)]"
                   }`}
                 >
                   {metrics?.metric1.change}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-icon-bg rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-icon-fg"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -355,25 +355,25 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric2.label}
                 </p>
-                <p className="text-lg font-bold text-foreground">
+                <p className="text-lg font-bold text-white">
                   {metrics?.metric2.value}
                 </p>
                 <p
                   className={`text-xs ${
                     metrics?.metric2.change.startsWith("+")
-                      ? "text-success-green"
-                      : "text-crimson-red"
+                      ? "text-[var(--success-green)]"
+                      : "text-[var(--crimson-red)]"
                   }`}
                 >
                   {metrics?.metric2.change}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-icon-bg rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-icon-fg"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -393,26 +393,26 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric3.label}
                 </p>
-                <p className="text-lg font-bold text-foreground">
+                <p className="text-lg font-bold text-white">
                   {metrics?.metric3.value}
                 </p>
                 <p
                   className={`text-xs ${
                     metrics?.metric3.change.startsWith("+") ||
                     metrics?.metric3.change.startsWith("-")
-                      ? "text-success-green"
-                      : "text-crimson-red"
+                      ? "text-[var(--success-green)]"
+                      : "text-[var(--crimson-red)]"
                   }`}
                 >
                   {metrics?.metric3.change}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-icon-bg rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-icon-fg"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -432,28 +432,28 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric4.label}
                 </p>
-                <p className="text-lg font-bold text-foreground">
+                <p className="text-lg font-bold text-white">
                   {metrics?.metric4.value}
                 </p>
                 <p
                   className={`text-xs ${
                     metrics?.metric4.change.startsWith("-") &&
                     !metrics?.metric4.change.includes("/")
-                      ? "text-success-green"
+                      ? "text-[var(--success-green)]"
                       : metrics?.metric4.change.startsWith("+")
-                      ? "text-success-green"
-                      : "text-crimson-red"
+                      ? "text-[var(--success-green)]"
+                      : "text-[var(--crimson-red)]"
                   }`}
                 >
                   {metrics?.metric4.change}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-icon-bg rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-icon-fg"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -476,19 +476,19 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-8 relative overflow-hidden">
               <div className="relative z-10">
-                <p className="text-sm text-muted-foreground mb-1">
+                <p className="text-sm text-[var(--medium-grey)] mb-1">
                   {welcomeMsg?.greeting}
                 </p>
-                <h2 className="text-2xl font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   {welcomeMsg?.name}
                 </h2>
-                <p className="text-sm text-muted-foreground mb-1">
+                <p className="text-sm text-[var(--medium-grey)] mb-1">
                   {t("Glad to see you again!")}
                 </p>
-                <p className="text-sm text-muted-foreground mb-6">
+                <p className="text-sm text-[var(--medium-grey)] mb-6">
                   {welcomeMsg?.subtitle}
                 </p>
-                <div className="flex items-center text-primary cursor-pointer hover:text-foreground transition-colors">
+                <div className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:text-white transition-colors">
                   <span className="text-sm">{welcomeMsg?.action}</span>
                   <svg
                     className="w-4 h-4 ml-1"
@@ -512,13 +512,13 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-white">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
                     ? t("Training Completion")
                     : t("Your Progress")}
                 </h3>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-[var(--medium-grey)]">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
                     ? t("Average across users")
@@ -540,16 +540,16 @@ export default function DashboardPage() {
                 />
               </div>
               {/* Darker background box for percentage */}
-              <div className="bg-background rounded-lg p-4">
+              <div className="bg-[var(--navy-blue)] rounded-lg p-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-foreground">
+                  <p className="text-3xl font-bold text-white">
                     {profile?.role === "affiliated"
                       ? "73%"
                       : profile?.role === "non_affiliated"
                       ? "45%"
                       : "85%"}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-[var(--medium-grey)]">
                     {t("Courses completed")}
                   </p>
                 </div>
@@ -561,12 +561,12 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-white">
                   {t("Security Awareness")}
                 </h3>
-                <button className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+                <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-4 h-4 text-foreground"
+                    className="w-4 h-4 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -585,14 +585,14 @@ export default function DashboardPage() {
                 {/* Left Side - Stats Cards */}
                 <div className="space-y-3">
                   {/* Phishing Tests Card */}
-                  <div className="bg-muted rounded-lg p-4">
-                    <p className="text-xs text-muted-foreground mb-1">
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--medium-grey)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
                         ? t("Total Tests")
                         : t("Tests Passed")}
                     </p>
-                    <p className="text-lg font-bold text-foreground">
+                    <p className="text-lg font-bold text-white">
                       {profile?.role === "system_admin"
                         ? "1,247"
                         : profile?.role === "client_admin"
@@ -602,14 +602,14 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Badges Card */}
-                  <div className="bg-muted rounded-lg p-4">
-                    <p className="text-xs text-muted-foreground mb-1">
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
+                    <p className="text-xs text-[var(--medium-grey)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
                         ? t("Avg Badges")
                         : t("Your Badges")}
                     </p>
-                    <p className="text-lg font-bold text-foreground">
+                    <p className="text-lg font-bold text-white">
                       {profile?.role === "affiliated"
                         ? "8"
                         : profile?.role === "non_affiliated"
@@ -650,13 +650,13 @@ export default function DashboardPage() {
         <div className="mt-8 relative z-10">
           <div className="dashboard-card rounded-lg p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-lg font-semibold text-white">
                 {profile?.role === "system_admin" ||
                 profile?.role === "client_admin"
                   ? t("User Activity Overview")
                   : t("Your Learning Progress")}
               </h3>
-              <p className="text-xs text-success-green">
+              <p className="text-xs text-[var(--success-green)]">
                 {profile?.role === "system_admin" ||
                 profile?.role === "client_admin"
                   ? t("(+15%) increase this month")

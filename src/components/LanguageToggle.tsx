@@ -25,12 +25,12 @@ export default function LanguageToggle() {
         variant="ghost"
         size="icon"
         onClick={() => setShowMenu(!showMenu)}
-        className="p-1.5 hover:bg-muted rounded-full transition-colors h-8 w-8 relative"
+        className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8 relative"
         title={`Current language: ${language === "en" ? "English" : "Urdu"}`}
       >
-        <Globe className="h-4 w-4 text-foreground" />
+        <Globe className="h-4 w-4 text-white" />
         {language === "ur" && (
-          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-primary rounded-full"></span>
+          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-[var(--neon-blue)] rounded-full"></span>
         )}
       </Button>
 
@@ -43,30 +43,30 @@ export default function LanguageToggle() {
           />
 
           {/* Dropdown Menu */}
-          <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-48 bg-[var(--navy-blue-light)] border border-[var(--sidebar-border)] rounded-lg shadow-xl z-50 overflow-hidden">
             <div className="py-1">
               {languages.map((lang) => (
                 <button
                   key={lang.code}
                   onClick={() => handleLanguageChange(lang.code as "en" | "ur")}
-                  className={`w-full px-4 py-2.5 text-left flex items-center justify-between hover:bg-muted transition-colors ${
-                    language === lang.code ? "bg-muted" : ""
+                  className={`w-full px-4 py-2.5 text-left flex items-center justify-between hover:bg-[var(--navy-blue-lighter)] transition-colors ${
+                    language === lang.code ? "bg-[var(--navy-blue-lighter)]" : ""
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{lang.flag}</span>
-                    <span className="text-foreground text-sm font-medium">
+                    <span className="text-white text-sm font-medium">
                       {lang.label}
                     </span>
                   </div>
                   {language === lang.code && (
-                    <Check className="h-4 w-4 text-primary" />
+                    <Check className="h-4 w-4 text-[var(--neon-blue)]" />
                   )}
                 </button>
               ))}
             </div>
-            <div className="border-t border-border px-4 py-2 bg-muted/50">
-              <p className="text-xs text-muted-foreground">
+            <div className="border-t border-[var(--sidebar-border)] px-4 py-2 bg-[var(--navy-blue)]">
+              <p className="text-xs text-[var(--medium-grey)]">
                 {language === "en" ? "Language" : "زبان"}
               </p>
             </div>
