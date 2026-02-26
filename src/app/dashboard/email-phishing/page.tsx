@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus, FilePlus, Eye } from "lucide-react";
+import { Mail, Send, Shield, AlertTriangle, Lock, CheckCircle2, XCircle, Clock, Plus, FilePlus, Eye, MousePointerClick } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import CreateEmailCampaignModal from "@/components/CreateEmailCampaignModal";
@@ -35,6 +35,7 @@ interface EmailRecord {
   status: "sent" | "failed";
   createdAt: string;
   openedAt?: string;
+  clickedAt?: string;
   error?: string;
 }
 
@@ -751,6 +752,12 @@ export default function EmailPhishingPage() {
                                   {t("Opened")}
                                 </span>
                               )}
+                              {email.clickedAt && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-purple-900/30 text-purple-400 border border-purple-500/30 flex items-center gap-1">
+                                  <MousePointerClick className="w-3 h-3" />
+                                  {t("Clicked")}
+                                </span>
+                              )}
                               <span
                                 className={`text-xs px-2 py-1 rounded-full ${
                                   email.status === "sent"
@@ -777,6 +784,12 @@ export default function EmailPhishingPage() {
                               <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
                                 <Eye className="w-3 h-3" />
                                 <span>{t("First opened at")} {formatDate(email.openedAt)}</span>
+                              </div>
+                            )}
+                            {email.clickedAt && (
+                              <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
+                                <MousePointerClick className="w-3 h-3" />
+                                <span>{t("First clicked at")} {formatDate(email.clickedAt)}</span>
                               </div>
                             )}
                           </div>

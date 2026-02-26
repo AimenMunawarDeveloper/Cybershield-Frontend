@@ -29,6 +29,7 @@ interface CampaignTarget {
   whatsappStatus: string;
   emailSentAt?: string;
   emailOpenedAt?: string;
+  emailClickedAt?: string;
   whatsappSentAt?: string;
 }
 
@@ -381,6 +382,11 @@ export default function CampaignDetailModal({
                             {target.emailOpenedAt && (
                               <p className="text-xs text-blue-400 mt-1">
                                 {t("First opened at")}: {formatDate(target.emailOpenedAt)}
+                              </p>
+                            )}
+                            {target.emailClickedAt && (
+                              <p className="text-xs text-purple-400 mt-1">
+                                {t("First clicked at")}: {formatDate(target.emailClickedAt)}
                               </p>
                             )}
                           </div>
