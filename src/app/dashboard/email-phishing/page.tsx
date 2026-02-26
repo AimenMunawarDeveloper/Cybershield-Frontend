@@ -36,6 +36,7 @@ interface EmailRecord {
   createdAt: string;
   openedAt?: string;
   clickedAt?: string;
+  credentialsEnteredAt?: string;
   error?: string;
 }
 
@@ -758,6 +759,11 @@ export default function EmailPhishingPage() {
                                   {t("Clicked")}
                                 </span>
                               )}
+                              {email.credentialsEnteredAt && (
+                                <span className="text-xs px-2 py-1 rounded-full bg-amber-900/30 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                                  {t("Credentials entered")}
+                                </span>
+                              )}
                               <span
                                 className={`text-xs px-2 py-1 rounded-full ${
                                   email.status === "sent"
@@ -790,6 +796,11 @@ export default function EmailPhishingPage() {
                               <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
                                 <MousePointerClick className="w-3 h-3" />
                                 <span>{t("First clicked at")} {formatDate(email.clickedAt)}</span>
+                              </div>
+                            )}
+                            {email.credentialsEnteredAt && (
+                              <div className="flex items-center gap-1 text-xs text-amber-400 mt-1">
+                                <span>{t("Credentials entered at")} {formatDate(email.credentialsEnteredAt)}</span>
                               </div>
                             )}
                           </div>

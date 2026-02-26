@@ -30,6 +30,7 @@ interface CampaignTarget {
   emailSentAt?: string;
   emailOpenedAt?: string;
   emailClickedAt?: string;
+  emailReportedAt?: string;
   whatsappSentAt?: string;
 }
 
@@ -389,6 +390,11 @@ export default function CampaignDetailModal({
                                 {t("First clicked at")}: {formatDate(target.emailClickedAt)}
                               </p>
                             )}
+                            {target.emailReportedAt && (
+                              <p className="text-xs text-amber-400 mt-1">
+                                {t("Credentials entered at")}: {formatDate(target.emailReportedAt)}
+                              </p>
+                            )}
                           </div>
                         </div>
                       )}
@@ -468,6 +474,13 @@ export default function CampaignDetailModal({
                           <span className="text-xs text-[var(--medium-grey)]">{t("Clicked")}</span>
                         </div>
                         <p className="text-2xl font-bold text-white">{analytics.email.totalClicked}</p>
+                      </div>
+                      
+                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs text-[var(--medium-grey)]">{t("Credentials entered")}</span>
+                        </div>
+                        <p className="text-2xl font-bold text-white">{analytics.email.totalReported}</p>
                       </div>
                     </div>
                     
