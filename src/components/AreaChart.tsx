@@ -168,7 +168,7 @@ export default function AreaChart({
               />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
           <XAxis
             dataKey="month"
             axisLine={false}

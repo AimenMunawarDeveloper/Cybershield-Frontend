@@ -23,7 +23,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface TopBarProps {
   variant?: "main" | "dashboard";
@@ -65,7 +64,7 @@ function UserGreeting() {
 
   return (
     <div className="flex flex-col">
-      <span className="text-lg font-semibold text-foreground">
+      <span className="text-lg font-semibold text-white">
         {t("Hello")} {firstName}
       </span>
       <span className="text-sm text-[var(--medium-grey)]">
@@ -88,7 +87,7 @@ function SearchBar() {
         placeholder={t("Search...")}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 w-80 h-8 text-sm bg-[var(--input)] border-[var(--sidebar-border)] text-foreground placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)]"
+        className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)]"
       />
     </div>
   );
@@ -135,13 +134,13 @@ export default function TopBar({
         variant === "dashboard"
           ? "bg-transparent my-2 px-4"
           : isAuthPage
-          ? "bg-[var(--white)] w-full px-4 py-4"
-          : "bg-background my-2 px-4"
+          ? "bg-white w-full px-4 py-4"
+          : "bg-[var(--navy-blue)] my-2 px-4"
       }`}
     >
       <div className="flex items-center gap-4">
         {showSidebarTrigger && (
-          <SidebarTrigger className="-ml-1 text-foreground hover:bg-[var(--navy-blue-lighter)]" />
+          <SidebarTrigger className="-ml-1 text-white hover:bg-[var(--navy-blue-lighter)]" />
         )}
         {variant === "main" ? (
           <Image
@@ -149,7 +148,7 @@ export default function TopBar({
             alt="CyberShield Logo"
             width={200}
             height={60}
-            className={`app-logo h-12 w-full object-contain ${
+            className={`h-12 w-full object-contain ${
               isAuthPage ? "brightness-0" : "brightness-0 invert"
             }`}
           />
@@ -175,7 +174,7 @@ export default function TopBar({
                     className={`font-medium ${
                       isAuthPage
                         ? "text-[var(--navy-blue)] hover:text-[var(--neon-blue)]"
-                        : "text-foreground hover:text-[var(--neon-blue)]"
+                        : "text-white hover:text-[var(--neon-blue)]"
                     }`}
                   >
                     {t("Sign In")}
@@ -195,9 +194,6 @@ export default function TopBar({
             </SignedOut>
             <SignedIn>
               <NavigationMenuItem>
-                <ThemeToggle />
-              </NavigationMenuItem>
-              <NavigationMenuItem>
                 <LanguageToggle />
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -206,7 +202,7 @@ export default function TopBar({
                   size="icon"
                   className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8"
                 >
-                  <Bell className="h-4 w-4 text-foreground" />
+                  <Bell className="h-4 w-4 text-white" />
                 </Button>
               </NavigationMenuItem>
               <NavigationMenuItem>
@@ -217,10 +213,10 @@ export default function TopBar({
                     elements: {
                       avatarBox: "w-7 h-7",
                       userButtonPopoverCard:
-                        "shadow-lg border border-[var(--sidebar-border)] bg-[var(--card)]",
+                        "shadow-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-light)]",
                       userButtonPopoverActionButton:
-                        "hover:bg-[var(--accent)]",
-                      userButtonPopoverActionButtonText: "text-[var(--card-foreground)]",
+                        "hover:bg-[var(--navy-blue-lighter)]",
+                      userButtonPopoverActionButtonText: "text-white",
                       userButtonPopoverFooter: "hidden",
                     },
                   }}

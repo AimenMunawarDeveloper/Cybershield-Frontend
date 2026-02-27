@@ -269,7 +269,7 @@ export default function BarChartCard({
 
       {/* Title Section */}
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-foreground mb-1">{title}</h3>
+        <h3 className="text-lg font-bold text-white mb-1">{title}</h3>
         <p className="text-sm">
           <span className="text-[var(--success-green)]">(+15%)</span>
           <span className="text-[var(--medium-grey)]"> {subtitle}</span>
@@ -283,10 +283,10 @@ export default function BarChartCard({
           return (
             <div key={index} className="flex flex-col items-center">
               <div className="w-8 h-8 mb-2 flex items-center justify-center">
-                <IconComponent className="w-6 h-6 text-foreground" />
+                <IconComponent className="w-6 h-6 text-white" />
               </div>
-              <p className="text-sm text-foreground mb-1">{metric.label}</p>
-              <p className="text-2xl font-bold text-foreground mb-2">
+              <p className="text-sm text-white mb-1">{metric.label}</p>
+              <p className="text-2xl font-bold text-white mb-2">
                 {metric.value}
               </p>
               <div

@@ -4,7 +4,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LayoutChrome from "@/components/LayoutChrome";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,22 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider afterSignOutUrl="/sign-in">
-      <html lang="en" suppressHydrationWarning>
-        <head>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){var t=localStorage.getItem("cybershield-theme")||"dark";document.documentElement.setAttribute("data-theme",t);})();`,
-            }}
-          />
-        </head>
+      <html lang="en">
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <ThemeProvider>
-            <LanguageProvider>
-              <LayoutChrome>{children}</LayoutChrome>
-            </LanguageProvider>
-          </ThemeProvider>
+          <LanguageProvider>
+          <LayoutChrome>{children}</LayoutChrome>
+          </LanguageProvider>
         </body>
       </html>
     </ClerkProvider>

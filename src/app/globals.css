@@ -156,62 +156,6 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Light theme: bluish white background, bluish cards, navy text */
-[data-theme="light"] {
-  --background: #f8fbfd;
-  --foreground: #0f1a2a;
-  --card: #eef6fc;
-  --card-foreground: #0f1a2a;
-  --popover: #ffffff;
-  --popover-foreground: #0f1a2a;
-  --secondary: #e8f2f9;
-  --secondary-foreground: #0f1a2a;
-  --muted: #e8f2f9;
-  --muted-foreground: #3d4f5e;
-  --accent: #e8f2f9;
-  --accent-foreground: #0f1a2a;
-  --border: rgba(15, 26, 42, 0.1);
-  --input: #eef6fc;
-  --sidebar: #e8f2f9;
-  --sidebar-foreground: #0f1a2a;
-  --sidebar-primary: var(--navy-blue);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e0eef8;
-  --sidebar-accent-foreground: #0f1a2a;
-  --sidebar-border: rgba(15, 26, 42, 0.1);
-  /* Inner boxes in light theme: tint of #51b0ec (neon blue) */
-  --content-box: rgba(81,176,236, 0.3);
-  --medium-grey: #3d4f5e;
-}
-
-/* Theme-aware boxes: navy in dark, neon-blue tint in light (same as graphs) */
-.dashboard-inner-box {
-  background: var(--navy-blue);
-}
-.dashboard-sub-box,
-.theme-sub-box {
-  background: var(--navy-blue-lighter);
-}
-html[data-theme="light"] .dashboard-inner-box,
-html[data-theme="light"] .dashboard-sub-box,
-html[data-theme="light"] .theme-sub-box {
-  background: var(--content-box);
-}
-
-/* Light theme: logo in navy #0f1a2a */
-[data-theme="light"] .app-logo {
-  filter: brightness(0) !important;
-}
-
-/* Light theme: no gradient background – fully remove blurred blob */
-html[data-theme="light"] .blurred-background {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  background: none !important;
-  pointer-events: none !important;
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -252,8 +196,8 @@ html[data-theme="light"] .blurred-background {
 }
 
 .dashboard-card {
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--navy-blue-light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;

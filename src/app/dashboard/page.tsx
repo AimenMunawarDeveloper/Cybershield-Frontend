@@ -11,7 +11,6 @@ import DataTable from "@/components/DataTable";
 import ActivityFeed from "@/components/ActivityFeed";
 import FloatingChat from "@/components/FloatingChat";
 import { useTranslation } from "@/hooks/useTranslation";
-import { useTheme } from "@/contexts/ThemeContext";
 
 interface UserProfile {
   _id: string;
@@ -31,7 +30,6 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const { t, preTranslate, language } = useTranslation();
-  const { theme } = useTheme();
   const [translationReady, setTranslationReady] = useState(false);
 
   const fetchUserProfile = useCallback(async () => {
@@ -309,8 +307,8 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
-        {/* Blurred background element – dark theme only */}
-        {theme === "dark" && <div className="blurred-background" />}
+        {/* Blurred background element */}
+        <div className="blurred-background"></div>
 
         {/* Top Row Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
@@ -321,8 +319,8 @@ export default function DashboardPage() {
                 <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric1.label}
                 </p>
-<p className="text-lg font-bold text-foreground">
-                {metrics?.metric1.value}
+                <p className="text-lg font-bold text-white">
+                  {metrics?.metric1.value}
                 </p>
                 <p
                   className={`text-xs ${
@@ -337,7 +335,7 @@ export default function DashboardPage() {
               </div>
               <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[var(--white)]"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -360,8 +358,8 @@ export default function DashboardPage() {
                 <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric2.label}
                 </p>
-<p className="text-lg font-bold text-foreground">
-                {metrics?.metric2.value}
+                <p className="text-lg font-bold text-white">
+                  {metrics?.metric2.value}
                 </p>
                 <p
                   className={`text-xs ${
@@ -375,7 +373,7 @@ export default function DashboardPage() {
               </div>
               <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[var(--white)]"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -398,8 +396,8 @@ export default function DashboardPage() {
                 <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric3.label}
                 </p>
-<p className="text-lg font-bold text-foreground">
-                {metrics?.metric3.value}
+                <p className="text-lg font-bold text-white">
+                  {metrics?.metric3.value}
                 </p>
                 <p
                   className={`text-xs ${
@@ -414,7 +412,7 @@ export default function DashboardPage() {
               </div>
               <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[var(--white)]"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -437,8 +435,8 @@ export default function DashboardPage() {
                 <p className="text-xs text-[var(--medium-grey)]">
                   {metrics?.metric4.label}
                 </p>
-<p className="text-lg font-bold text-foreground">
-                {metrics?.metric4.value}
+                <p className="text-lg font-bold text-white">
+                  {metrics?.metric4.value}
                 </p>
                 <p
                   className={`text-xs ${
@@ -455,7 +453,7 @@ export default function DashboardPage() {
               </div>
               <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-5 h-5 text-[var(--white)]"
+                  className="w-5 h-5 text-white"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -481,7 +479,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-[var(--medium-grey)] mb-1">
                   {welcomeMsg?.greeting}
                 </p>
-                <h2 className="text-2xl font-bold text-foreground mb-2">
+                <h2 className="text-2xl font-bold text-white mb-2">
                   {welcomeMsg?.name}
                 </h2>
                 <p className="text-sm text-[var(--medium-grey)] mb-1">
@@ -490,7 +488,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-[var(--medium-grey)] mb-6">
                   {welcomeMsg?.subtitle}
                 </p>
-                <div className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:text-foreground transition-colors">
+                <div className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:text-white transition-colors">
                   <span className="text-sm">{welcomeMsg?.action}</span>
                   <svg
                     className="w-4 h-4 ml-1"
@@ -514,7 +512,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-white">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
                     ? t("Training Completion")
@@ -542,9 +540,9 @@ export default function DashboardPage() {
                 />
               </div>
               {/* Darker background box for percentage */}
-              <div className="dashboard-inner-box rounded-lg p-4">
+              <div className="bg-[var(--navy-blue)] rounded-lg p-4">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-foreground">
+                  <p className="text-3xl font-bold text-white">
                     {profile?.role === "affiliated"
                       ? "73%"
                       : profile?.role === "non_affiliated"
@@ -563,12 +561,12 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-foreground">
+                <h3 className="text-lg font-semibold text-white">
                   {t("Security Awareness")}
                 </h3>
-                <button className="w-8 h-8 dashboard-sub-box rounded-lg flex items-center justify-center">
+                <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center">
                   <svg
-                    className="w-4 h-4 text-[var(--white)]"
+                    className="w-4 h-4 text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -587,14 +585,14 @@ export default function DashboardPage() {
                 {/* Left Side - Stats Cards */}
                 <div className="space-y-3">
                   {/* Phishing Tests Card */}
-                  <div className="dashboard-sub-box rounded-lg p-4">
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
                     <p className="text-xs text-[var(--medium-grey)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
                         ? t("Total Tests")
                         : t("Tests Passed")}
                     </p>
-                    <p className="text-lg font-bold text-foreground">
+                    <p className="text-lg font-bold text-white">
                       {profile?.role === "system_admin"
                         ? "1,247"
                         : profile?.role === "client_admin"
@@ -604,14 +602,14 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Badges Card */}
-                  <div className="dashboard-sub-box rounded-lg p-4">
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
                     <p className="text-xs text-[var(--medium-grey)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
                         ? t("Avg Badges")
                         : t("Your Badges")}
                     </p>
-                    <p className="text-lg font-bold text-foreground">
+                    <p className="text-lg font-bold text-white">
                       {profile?.role === "affiliated"
                         ? "8"
                         : profile?.role === "non_affiliated"
@@ -652,7 +650,7 @@ export default function DashboardPage() {
         <div className="mt-8 relative z-10">
           <div className="dashboard-card rounded-lg p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-lg font-semibold text-white">
                 {profile?.role === "system_admin" ||
                 profile?.role === "client_admin"
                   ? t("User Activity Overview")
