@@ -150,25 +150,25 @@ export function DashboardSidebar({
   return (
     <Sidebar
       variant="inset"
-      className="bg-[var(--navy-blue-light)] border-r border-[var(--sidebar-border)]"
+      className="bg-[var(--sidebar)] border-r border-[var(--sidebar-border)]"
       {...props}
     >
-      <SidebarHeader className="bg-[var(--navy-blue-light)]">
+      <SidebarHeader className="bg-[var(--sidebar)]">
         <div className="flex items-center justify-center px-2 py-2">
           <Image
             src="/images/CyberShield_logo_Final-removebg.png"
             alt="CyberShield Logo"
             width={180}
             height={60}
-            className="h-12 w-auto object-contain brightness-0 invert"
+            className="app-logo h-12 w-auto object-contain brightness-0 invert"
           />
         </div>
         {/* Shiny line below logo */}
         <div className="mx-4 h-px bg-gradient-to-r from-transparent via-[var(--neon-blue)] to-transparent opacity-60"></div>
       </SidebarHeader>
-      <SidebarContent className="bg-[var(--navy-blue-light)]">
+      <SidebarContent className="bg-[var(--sidebar)]">
         <SidebarGroup>
-          <SidebarGroupLabel>{t("Platform")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground">{t("Platform")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.navMain.map((item, index) => {
@@ -192,9 +192,9 @@ export function DashboardSidebar({
                       >
                         <Link href={item.url}>
                           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                            <item.icon className="w-4 h-4 text-white" />
+                            <item.icon className="w-4 h-4 text-[var(--white)]" />
                           </div>
-                          <span>{t(item.title)}</span>
+                          <span className="text-foreground">{t(item.title)}</span>
                           {item.badge && (
                             <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
                           )}
@@ -220,9 +220,9 @@ export function DashboardSidebar({
                           >
                             <Link href="/dashboard/organizations-management">
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                                <Building2 className="w-4 h-4 text-white" />
+                                <Building2 className="w-4 h-4 text-[var(--white)]" />
                               </div>
-                              <span>{t("Organizations")}</span>
+                              <span className="text-foreground">{t("Organizations")}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -243,9 +243,9 @@ export function DashboardSidebar({
                           >
                             <Link href="/dashboard/organization-management">
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                                <Building className="w-4 h-4 text-white" />
+                                <Building className="w-4 h-4 text-[var(--white)]" />
                               </div>
-                              <span>{t("Organization")}</span>
+                              <span className="text-foreground">{t("Organization")}</span>
                             </Link>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -259,7 +259,7 @@ export function DashboardSidebar({
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>{t("Support")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-muted-foreground">{t("Support")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {data.support.map((item) => (
@@ -271,9 +271,9 @@ export function DashboardSidebar({
                   >
                     <Link href={item.url}>
                       <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                        <item.icon className="w-4 h-4 text-white" />
+                        <item.icon className="w-4 h-4 text-[var(--white)]" />
                       </div>
-                      <span>{t(item.title)}</span>
+                      <span className="text-foreground">{t(item.title)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

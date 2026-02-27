@@ -28,7 +28,7 @@ export default function LanguageToggle() {
         className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8 relative"
         title={`Current language: ${language === "en" ? "English" : "Urdu"}`}
       >
-        <Globe className="h-4 w-4 text-white" />
+        <Globe className="h-4 w-4 text-foreground" />
         {language === "ur" && (
           <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-[var(--neon-blue)] rounded-full"></span>
         )}
