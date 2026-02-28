@@ -244,7 +244,7 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
       <div className={`flex items-center justify-center p-12 ${className}`}>
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)]">{t("Loading incidents...")}</p>
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)]">{t("Loading incidents...")}</p>
         </div>
       </div>
     );
@@ -264,12 +264,12 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
       {/* Header with Time Range */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-1">{t("Incident Reports")}</h2>
-          <p className="text-[var(--medium-grey)] text-sm">{t("Visual analytics of your reported incidents")}</p>
+          <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1">{t("Incident Reports")}</h2>
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">{t("Visual analytics of your reported incidents")}</p>
         </div>
 
         {/* Time Range Selector */}
-        <div className="flex gap-2 bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-[var(--medium-grey)]/20">
+        <div className="flex gap-2 bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-gray-300 dark:border-[var(--medium-grey)]/20">
           {(["7d", "30d", "90d", "all"] as const).map((range) => (
             <button
               key={range}
@@ -277,7 +277,7 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
                 timeRange === range
                   ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
-                  : "text-[var(--medium-grey)] hover:text-white hover:bg-[var(--navy-blue)]/50"
+                  : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50"
               }`}
             >
               {range === "all" ? t("All Time") : range === "7d" ? t("7 Days") : range === "30d" ? t("30 Days") : t("90 Days")}
@@ -288,45 +288,45 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
 
       {/* Statistics Cards - Compact */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-[var(--medium-grey)]/20">
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[var(--medium-grey)] text-xs">{t("Total Incidents")}</span>
+            <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-xs">{t("Total Incidents")}</span>
             <Activity className="w-4 h-4 text-[var(--neon-blue)]" />
           </div>
-          <div className="text-2xl font-bold text-white">{stats.total}</div>
+          <div className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{stats.total}</div>
         </div>
 
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-[var(--medium-grey)]/20">
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[var(--medium-grey)] text-xs">{t("Phishing Detected")}</span>
+            <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-xs">{t("Phishing Detected")}</span>
             <AlertTriangle className="w-4 h-4 text-red-400" />
           </div>
           <div className="text-2xl font-bold text-red-400">{stats.phishing}</div>
-          <div className="text-xs text-[var(--medium-grey)] mt-0.5">
+          <div className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-0.5">
             {stats.phishingRate.toFixed(1)}%
           </div>
         </div>
 
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-[var(--medium-grey)]/20">
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[var(--medium-grey)] text-xs">{t("Safe Messages")}</span>
+            <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-xs">{t("Safe Messages")}</span>
             <CheckCircle2 className="w-4 h-4 text-green-400" />
           </div>
           <div className="text-2xl font-bold text-green-400">{stats.safe}</div>
         </div>
 
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-[var(--medium-grey)]/20">
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20">
           <div className="flex items-center justify-between mb-1">
-            <span className="text-[var(--medium-grey)] text-xs">{t("Avg Probability")}</span>
+            <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-xs">{t("Avg Probability")}</span>
             <TrendingUp className="w-4 h-4 text-[var(--neon-blue)]" />
           </div>
-          <div className="text-2xl font-bold text-white">{(stats.avgProbability * 100).toFixed(1)}%</div>
+          <div className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{(stats.avgProbability * 100).toFixed(1)}%</div>
         </div>
       </div>
 
       {/* Main Chart - Full Width */}
-      <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-6 border border-[var(--medium-grey)]/20">
-        <h3 className="text-lg font-semibold text-white mb-4">{t("Incidents Over Time")}</h3>
+      <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-6 border border-gray-300 dark:border-[var(--medium-grey)]/20">
+        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4">{t("Incidents Over Time")}</h3>
         <div className="w-full h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
@@ -364,17 +364,17 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-stroke)" />
               <XAxis
                 dataKey="date"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+                tick={{ fill: "var(--dashboard-text-secondary)", fontSize: 12 }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+                tick={{ fill: "var(--dashboard-text-secondary)", fontSize: 12 }}
               />
               <Area
                 type="monotone"
@@ -398,19 +398,19 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
       {/* Secondary Charts - 50/50 split: Type Breakdown Cards and Donut Chart */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Type Breakdown Cards - Email and WhatsApp */}
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-4 border border-[var(--medium-grey)]/20">
-          <h3 className="text-sm font-semibold text-white mb-4">{t("Incidents by Type")}</h3>
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20">
+          <h3 className="text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4">{t("Incidents by Type")}</h3>
           <div className="space-y-3">
             {/* Email Card */}
-            <div className="bg-[var(--navy-blue)]/30 rounded-lg p-4 border border-[var(--medium-grey)]/20 hover:bg-[var(--navy-blue)]/40 transition-colors">
+            <div className="bg-gray-50 dark:bg-[var(--navy-blue)]/30 rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue)]/40 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#51b0ec] to-[#4fc3f7] rounded-lg flex items-center justify-center">
                     <Mail className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--medium-grey)]">{t("Email")}</p>
-                    <p className="text-xl font-bold text-white">
+                    <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Email")}</p>
+                    <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                       {phishingByType.find((d) => d.type === t("Email"))?.total || 0}
                     </p>
                   </div>
@@ -420,13 +420,13 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-[#ef4444]"></div>
-                    <span className="text-xs text-[var(--medium-grey)]">{t("Phishing")}</span>
+                    <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Phishing")}</span>
                   </div>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
                     {phishingByType.find((d) => d.type === t("Email"))?.phishing || 0}
                   </span>
                 </div>
-                <div className="w-full bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#ef4444] to-[#dc2626] rounded-full transition-all duration-500"
                     style={{
@@ -444,13 +444,13 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-[#10b981]"></div>
-                    <span className="text-xs text-[var(--medium-grey)]">{t("Safe")}</span>
+                    <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Safe")}</span>
                   </div>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
                     {phishingByType.find((d) => d.type === t("Email"))?.safe || 0}
                   </span>
                 </div>
-                <div className="w-full bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#10b981] to-[#059669] rounded-full transition-all duration-500"
                     style={{
@@ -469,15 +469,15 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
             </div>
 
             {/* WhatsApp Card */}
-            <div className="bg-[var(--navy-blue)]/30 rounded-lg p-4 border border-[var(--medium-grey)]/20 hover:bg-[var(--navy-blue)]/40 transition-colors">
+            <div className="bg-gray-50 dark:bg-[var(--navy-blue)]/30 rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue)]/40 transition-colors">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 bg-gradient-to-br from-[#25d366] to-[#128c7e] rounded-lg flex items-center justify-center">
                     <MessageSquare className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs text-[var(--medium-grey)]">{t("WhatsApp")}</p>
-                    <p className="text-xl font-bold text-white">
+                    <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("WhatsApp")}</p>
+                    <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                       {phishingByType.find((d) => d.type === t("WhatsApp"))?.total || 0}
                     </p>
                   </div>
@@ -487,13 +487,13 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-[#ef4444]"></div>
-                    <span className="text-xs text-[var(--medium-grey)]">{t("Phishing")}</span>
+                    <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Phishing")}</span>
                   </div>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
                     {phishingByType.find((d) => d.type === t("WhatsApp"))?.phishing || 0}
                   </span>
                 </div>
-                <div className="w-full bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#ef4444] to-[#dc2626] rounded-full transition-all duration-500"
                     style={{
@@ -511,13 +511,13 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-[#10b981]"></div>
-                    <span className="text-xs text-[var(--medium-grey)]">{t("Safe")}</span>
+                    <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Safe")}</span>
                   </div>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
                     {phishingByType.find((d) => d.type === t("WhatsApp"))?.safe || 0}
                   </span>
                 </div>
-                <div className="w-full bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 rounded-full h-2 overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-[#10b981] to-[#059669] rounded-full transition-all duration-500"
                     style={{
@@ -538,8 +538,8 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
         </div>
 
         {/* Donut Chart - Email Safe, Email Phishing, WhatsApp Safe, WhatsApp Phishing */}
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-6 border border-[var(--medium-grey)]/20">
-          <h3 className="text-lg font-semibold text-white mb-4">{t("Incidents Breakdown")}</h3>
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-6 border border-gray-300 dark:border-[var(--medium-grey)]/20">
+          <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4">{t("Incidents Breakdown")}</h3>
           <div className="flex items-center justify-center h-[260px] relative w-full">
             <div className="relative mx-auto" style={{ width: 220, height: 220 }}>
               <ResponsiveContainer width="100%" height="100%">
@@ -596,8 +596,8 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
               </ResponsiveContainer>
               {/* Center content */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                <p className="text-xs text-[var(--medium-grey)] mb-1">{t("Total")}</p>
-                <p className="text-xl font-bold text-white">
+                <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-1">{t("Total")}</p>
+                <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {filteredIncidents.length}
                 </p>
               </div>
@@ -605,7 +605,7 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
           </div>
           
           {/* Legend at the bottom */}
-          <div className="mt-6 pt-4 border-t border-[var(--medium-grey)]/20">
+          <div className="mt-6 pt-4 border-t border-gray-300 dark:border-[var(--medium-grey)]/20">
             <div className="flex flex-wrap justify-center gap-6">
               {donutChartData.map((entry, index) => {
                 const total = donutChartData.reduce((sum, item) => sum + item.value, 0);
@@ -618,11 +618,11 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
                         className="w-3 h-3 rounded-full flex-shrink-0"
                         style={{ backgroundColor: entry.gradient[0] }}
                       ></div>
-                      <p className="text-xs text-[var(--medium-grey)] whitespace-nowrap">
+                      <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] whitespace-nowrap">
                         {entry.name}
                       </p>
                     </div>
-                    <p className="text-sm font-bold text-white">{percentage}%</p>
+                    <p className="text-sm font-bold text-[var(--dashboard-text-primary)] dark:text-white">{percentage}%</p>
                   </div>
                 );
               })}
@@ -632,8 +632,8 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
       </div>
 
       {filteredIncidents.length === 0 && (
-        <div className="bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-12 border border-[var(--medium-grey)]/20 text-center">
-          <p className="text-[var(--medium-grey)]">{t("No incidents found for the selected time range")}</p>
+        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-12 border border-gray-300 dark:border-[var(--medium-grey)]/20 text-center">
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("No incidents found for the selected time range")}</p>
         </div>
       )}
     </div>
