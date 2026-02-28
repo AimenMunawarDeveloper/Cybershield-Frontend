@@ -352,11 +352,11 @@ export default function VoicePhishingPage() {
         
         // Status messages
         "Connecting...",
-        "Calculating score...",
+        "Calculating learning score...",
         "Call in progress...",
         "Ready to start",
         "Setting up your voice phishing simulation",
-        "Analyzing your conversation and generating your security score",
+        "Analyzing your conversation and generating your learning score",
         "Listen carefully and respond to the caller",
         "Click the microphone to start a call",
         
@@ -1189,7 +1189,7 @@ export default function VoicePhishingPage() {
                       {loading 
                         ? t("Connecting...") 
                         : calculatingScore 
-                          ? t("Calculating score...") 
+                          ? t("Calculating learning score...") 
                           : isConnected 
                             ? t("Call in progress...") 
                             : t("Ready to start")}
@@ -1198,7 +1198,7 @@ export default function VoicePhishingPage() {
                       {loading 
                         ? t("Setting up your voice phishing simulation") 
                         : calculatingScore
-                          ? t("Analyzing your conversation and generating your security score")
+                          ? t("Analyzing your conversation and generating your learning score")
                         : isConnected 
                           ? t("Listen carefully and respond to the caller") 
                           : t("Click the microphone to start a call")

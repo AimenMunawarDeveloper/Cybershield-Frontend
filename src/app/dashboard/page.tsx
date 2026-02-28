@@ -10,7 +10,7 @@ import BarChartCard from "@/components/BarChartCard";
 import DataTable from "@/components/DataTable";
 import ActivityFeed from "@/components/ActivityFeed";
 import FloatingChat from "@/components/FloatingChat";
-import UserEmailRiskSection from "@/components/UserEmailRiskSection";
+import UserLearningScoresSection from "@/components/UserLearningScoresSection";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface UserProfile {
@@ -21,11 +21,14 @@ interface UserProfile {
   orgId?: string;
   orgName?: string;
   phoneNumber?: string | null;
-  points?: number;
   learningScore?: number;
-  emailRiskScore?: number;
-  whatsappRiskScore?: number;
-  lmsRiskScore?: number;
+  learningScores?: { email: number; whatsapp: number; lms: number; voice?: number };
+}
+
+interface OrgSummary {
+  userCount: number;
+  activeCount: number;
+  avgLearningScore: number; // cumulative 0–100
 }
 
 export default function DashboardPage() {
@@ -38,6 +41,7 @@ export default function DashboardPage() {
   const [savingPhone, setSavingPhone] = useState(false);
   const { t, preTranslate, language } = useTranslation();
   const [translationReady, setTranslationReady] = useState(false);
+  const [orgSummary, setOrgSummary] = useState<OrgSummary | null>(null);
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -64,6 +68,31 @@ export default function DashboardPage() {
     }
   }, [getToken, language, preTranslate]);
 
+  // Fetch org summary for client_admin (user count, active count, avg cumulative learning score)
+  useEffect(() => {
+    if (!profile || profile.role !== "client_admin" || !profile.orgId) {
+      setOrgSummary(null);
+      return;
+    }
+    const apiClient = new ApiClient(getToken);
+    apiClient
+      .getOrgUsers(profile.orgId, 1, 500)
+      .then((data: { users?: { status?: string; learningScore?: number }[]; pagination?: { total: number } }) => {
+        const users = data.users || [];
+        const total = data.pagination?.total ?? users.length;
+        const activeCount = users.filter((u) => u.status === "active").length;
+        const withScore = users.filter((u) => typeof u.learningScore === "number");
+        const sumScore = withScore.reduce((a, u) => a + (u.learningScore ?? 0), 0);
+        const avgLearningScore = withScore.length > 0 ? sumScore / withScore.length : 0;
+        setOrgSummary({
+          userCount: total,
+          activeCount,
+          avgLearningScore: Math.round(avgLearningScore * 10) / 10,
+        });
+      })
+      .catch(() => setOrgSummary(null));
+  }, [profile?.role, profile?.orgId, getToken]);
+
   // Pre-translate static strings
   useEffect(() => {
     const preTranslatePageContent = async () => {
@@ -79,7 +108,7 @@ export default function DashboardPage() {
         "Total Organizations",
         "Total Users",
         "Active Campaigns",
-        "Avg Risk Score",
+        "Avg Learning Score",
         "Training Completion",
         "Your Progress",
         "Average across users",
@@ -159,7 +188,7 @@ export default function DashboardPage() {
             icon: "shield",
           },
           metric4: {
-            label: t("Avg Risk Score"),
+            label: t("Avg Learning Score"),
             value: "6.8/10",
             change: "-0.5",
             icon: "chart",
@@ -169,13 +198,13 @@ export default function DashboardPage() {
         return {
           metric1: {
             label: t("Organization Users"),
-            value: "342",
+            value: orgSummary != null ? String(orgSummary.userCount) : "—",
             change: "+8%",
             icon: "users",
           },
           metric2: {
             label: t("Active Users"),
-            value: "285",
+            value: orgSummary != null ? String(orgSummary.activeCount) : "—",
             change: "+3%",
             icon: "user-check",
           },
@@ -186,9 +215,9 @@ export default function DashboardPage() {
             icon: "shield",
           },
           metric4: {
-            label: t("Avg Risk Score"),
-            value: "7.2/10",
-            change: "-0.3",
+            label: t("Avg Learning Score"),
+            value: orgSummary != null ? `${orgSummary.avgLearningScore.toFixed(1)}/100` : "—",
+            change: "0–100",
             icon: "chart",
           },
         };
@@ -201,16 +230,16 @@ export default function DashboardPage() {
             icon: "book",
           },
           metric2: {
-            label: t("Your Points"),
-            value: profile.points?.toString() || "450",
-            change: "+35",
-            icon: "star",
+            label: t("Learning scores (Email / WhatsApp / Voice)"),
+            value: (profile.learningScores ? [profile.learningScores.email, profile.learningScores.whatsapp, profile.learningScores.voice ?? 0] : [0, 0, 0]).map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
+            change: "E / W / V",
+            icon: "shield-check",
           },
           metric3: {
-            label: t("Scores (Email / WhatsApp / LMS score)"),
-            value: [profile.emailRiskScore, profile.whatsappRiskScore, profile.lmsRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
-            change: "E / W / L",
-            icon: "shield-check",
+            label: t("Learning score (LMS)"),
+            value: typeof profile.learningScores?.lms === "number" ? profile.learningScores.lms.toFixed(2) : "0.00",
+            change: "0–1",
+            icon: "book",
           },
           metric4: {
             label: t("Certificates"),
@@ -228,16 +257,16 @@ export default function DashboardPage() {
             icon: "book",
           },
           metric2: {
-            label: t("Your Points"),
-            value: profile.points?.toString() || "180",
-            change: "+20",
-            icon: "star",
+            label: t("Learning scores (Email / WhatsApp / Voice)"),
+            value: (profile.learningScores ? [profile.learningScores.email, profile.learningScores.whatsapp, profile.learningScores.voice ?? 0] : [0, 0, 0]).map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
+            change: "E / W / V",
+            icon: "shield-check",
           },
           metric3: {
-            label: t("Scores (Email / WhatsApp / LMS score)"),
-            value: [profile.emailRiskScore, profile.whatsappRiskScore, profile.lmsRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
-            change: "E / W / L",
-            icon: "shield-check",
+            label: t("Learning score (LMS)"),
+            value: typeof profile.learningScores?.lms === "number" ? profile.learningScores.lms.toFixed(2) : "0.00",
+            change: "0–1",
+            icon: "book",
           },
           metric4: {
             label: t("Certificates"),
@@ -336,7 +365,7 @@ export default function DashboardPage() {
         {showPhonePrompt && (
           <div className="dashboard-card rounded-lg p-4 relative z-10 border border-amber-500/30 bg-amber-500/5">
             <p className="text-sm text-[var(--dashboard-text-primary)] mb-2">
-              {t("Add your phone number to receive WhatsApp phishing simulations and track your WhatsApp risk score.")}
+              {t("Add your phone number to receive WhatsApp phishing simulations and track your learning scores.")}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               <input
@@ -694,8 +723,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* User email risk scores (admins only) */}
-        <UserEmailRiskSection getToken={getToken} profile={profile} />
+        {/* Learning scores (admins only) */}
+        <UserLearningScoresSection getToken={getToken} profile={profile} />
 
         {/* Area Chart Section */}
         <div className="mt-8 relative z-10">

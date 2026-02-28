@@ -204,7 +204,7 @@ export default function CallDetailsPage() {
         "Recording is being processed or is not available yet. Please check back later.",
         
         // Score Card
-        "Security Score",
+        "Learning score",
         "Excellent",
         "Good",
         "Fair",
@@ -702,7 +702,7 @@ export default function CallDetailsPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <Trophy className="w-8 h-8 text-yellow-400" />
-                    <h2 className="text-2xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Security Score")}</h2>
+                    <h2 className="text-2xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Learning score")}</h2>
                   </div>
                   <span
                     className={`text-5xl font-bold ${getScoreColor(displayConversation.score)}`}

@@ -20,7 +20,7 @@ interface CreateCampaignModalProps {
   onClose: () => void;
   onSubmit: (campaignData: CampaignData) => void;
   initialTemplate?: TemplateData | null;
-  /** When set, only platform users from this org can be selected (required for WhatsApp risk scoring). */
+  /** When set, only platform users from this org can be selected (required for WhatsApp learning score). */
   orgId?: string | null;
   /** Required when orgId is set, to fetch org users. */
   getToken?: () => Promise<string | null>;

@@ -55,7 +55,7 @@ const getRoleBasedActivities = (role: string, t: any) => {
             id: 5,
             icon: AlertTriangle,
             iconColor: "text-[var(--crimson-red)]",
-            title: t("Risk score alert: 3 organizations need attention"),
+            title: t("Learning score alert: 3 organizations need attention"),
             date: t("18 DEC 4:30 PM"),
           },
         ],

@@ -1072,7 +1072,7 @@ export default function WhatsAppPhishingPage() {
         </div>
       )}
 
-      {/* Create Campaign Modal - only platform users with phone number (for WhatsApp risk scoring) */}
+      {/* Create Campaign Modal - only platform users with phone number (for WhatsApp learning score) */}
       <CreateCampaignModal
         isOpen={showCreateModal}
         onClose={() => {

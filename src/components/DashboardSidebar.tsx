@@ -76,7 +76,7 @@ const data = {
       icon: Phone,
     },
     {
-      title: "Risk Analysis",
+      title: "Learning Analysis",
       url: "/dashboard/analysis",
       icon: BarChart3,
     },
