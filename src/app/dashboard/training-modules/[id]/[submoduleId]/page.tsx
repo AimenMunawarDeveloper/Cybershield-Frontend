@@ -83,19 +83,19 @@ function formatInlineMarkdown(text: string): React.ReactElement[] {
     // Add the formatted segment
     if (segment.type === 'bold') {
       parts.push(
-        <strong key={`bold-${key++}`} className="font-semibold text-gray-900">
+        <strong key={`bold-${key++}`} className="font-semibold text-gray-900 dark:text-white">
           {segment.content}
         </strong>
       );
     } else if (segment.type === 'italic') {
       parts.push(
-        <em key={`italic-${key++}`} className="text-gray-700">
+        <em key={`italic-${key++}`} className="text-gray-700 dark:text-[var(--dashboard-text-secondary)]">
           {segment.content}
         </em>
       );
     } else if (segment.type === 'code') {
       parts.push(
-        <code key={`code-${key++}`} className="px-1.5 py-0.5 bg-gray-100 text-[var(--neon-blue)] rounded text-sm font-mono">
+        <code key={`code-${key++}`} className="px-1.5 py-0.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] text-[var(--neon-blue)] rounded text-sm font-mono">
           {segment.content}
         </code>
       );
@@ -129,7 +129,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
         parts.push(
           <ol key={`list-${key++}`} className="list-decimal list-inside space-y-2 my-4 ml-4">
             {listItems.map((item, idx) => (
-              <li key={idx} className="pl-2 text-gray-800 leading-relaxed">
+              <li key={idx} className="pl-2 text-gray-800 dark:text-[var(--dashboard-text-secondary)] leading-relaxed">
                 {formatInlineMarkdown(item)}
               </li>
             ))}
@@ -139,7 +139,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
         parts.push(
           <ul key={`list-${key++}`} className="list-disc list-inside space-y-2 my-4 ml-4">
             {listItems.map((item, idx) => (
-              <li key={idx} className="pl-2 text-gray-800 leading-relaxed">
+              <li key={idx} className="pl-2 text-gray-800 dark:text-[var(--dashboard-text-secondary)] leading-relaxed">
                 {formatInlineMarkdown(item)}
               </li>
             ))}
@@ -172,15 +172,15 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       const isWarning = calloutType === 'WARNING' || calloutType === 'IMPORTANT';
       
       const bgColor = isInfo 
-        ? 'bg-blue-50 border-blue-200' 
+        ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-500/30' 
         : isTip 
-        ? 'bg-yellow-50 border-yellow-200'
-        : 'bg-orange-50 border-orange-200';
+        ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-500/30'
+        : 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-500/30';
       const iconColor = isInfo
-        ? 'text-blue-600'
+        ? 'text-blue-600 dark:text-blue-400'
         : isTip
-        ? 'text-yellow-600'
-        : 'text-orange-600';
+        ? 'text-yellow-600 dark:text-yellow-400'
+        : 'text-orange-600 dark:text-orange-400';
       const Icon = isInfo ? Info : isTip ? Lightbulb : AlertCircle;
       
       parts.push(
@@ -188,8 +188,8 @@ function formatContent(material: string, translateFn?: (text: string) => string)
           <div className="flex items-start gap-3">
             <Icon className={`w-5 h-5 ${iconColor} flex-shrink-0 mt-0.5`} />
             <div className="flex-1">
-              <p className="font-semibold text-gray-900 mb-1">{translateFn ? translateFn(type) : type}</p>
-              <div className="text-gray-800 leading-relaxed">{formatInlineMarkdown(content)}</div>
+              <p className="font-semibold text-gray-900 dark:text-white mb-1">{translateFn ? translateFn(type) : type}</p>
+              <div className="text-gray-800 dark:text-[var(--dashboard-text-secondary)] leading-relaxed">{formatInlineMarkdown(content)}</div>
             </div>
           </div>
         </div>
@@ -202,7 +202,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       flushList();
       const headingText = trimmed.substring(3).trim();
       parts.push(
-        <h3 key={`h3-${key++}`} className="text-xl font-bold text-gray-900 mt-6 mb-3">
+        <h3 key={`h3-${key++}`} className="text-xl font-bold text-gray-900 dark:text-white mt-6 mb-3">
           {formatInlineMarkdown(headingText)}
         </h3>
       );
@@ -212,7 +212,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       flushList();
       const headingText = trimmed.substring(2).trim();
       parts.push(
-        <h2 key={`h2-${key++}`} className="text-2xl font-bold text-gray-900 mt-8 mb-4 border-b border-gray-200 pb-2">
+        <h2 key={`h2-${key++}`} className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 border-b border-gray-200 dark:border-[var(--neon-blue)]/30 pb-2">
           {formatInlineMarkdown(headingText)}
         </h2>
       );
@@ -222,7 +222,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
       flushList();
       const headingText = trimmed.substring(1).trim();
       parts.push(
-        <h1 key={`h1-${key++}`} className="text-3xl font-bold text-gray-900 mt-8 mb-4">
+        <h1 key={`h1-${key++}`} className="text-3xl font-bold text-gray-900 dark:text-white mt-8 mb-4">
           {formatInlineMarkdown(headingText)}
         </h1>
       );
@@ -255,7 +255,7 @@ function formatContent(material: string, translateFn?: (text: string) => string)
     // Regular paragraph
     flushList();
     parts.push(
-      <p key={`p-${key++}`} className="text-gray-800 leading-relaxed mb-6 text-lg">
+      <p key={`p-${key++}`} className="text-gray-800 dark:text-[var(--dashboard-text-secondary)] leading-relaxed mb-6 text-lg">
         {formatInlineMarkdown(trimmed)}
       </p>
     );
@@ -1097,40 +1097,40 @@ export default function SubmodulePage() {
 
   if (loading || !displayCourse) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <p className="text-gray-500">{t("Loading...")}</p>
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[var(--navy-blue)] flex items-center justify-center">
+        <p className="text-gray-500 dark:text-[var(--dashboard-text-secondary)]">{t("Loading...")}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
-        <p className="text-red-600">{error}</p>
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[var(--navy-blue)] flex items-center justify-center">
+        <p className="text-red-600 dark:text-red-400">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-[var(--navy-blue)] flex">
       {/* Sidebar Navigation */}
       <aside
         className={`${
           sidebarCollapsed ? "w-0" : "w-80"
-        } bg-white border-r border-gray-200 transition-all duration-300 overflow-hidden flex-shrink-0 sticky top-0 h-screen overflow-y-auto`}
+        } bg-white dark:bg-[var(--navy-blue-light)] border-r border-gray-200 dark:border-[var(--neon-blue)]/30 transition-all duration-300 overflow-hidden flex-shrink-0 sticky top-0 h-screen overflow-y-auto`}
       >
         <div className="p-6">
           {/* Course Header */}
           <div className="mb-6">
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-[var(--neon-blue)] transition-colors mb-3"
+              className="flex items-center gap-2 text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] hover:text-[var(--neon-blue)] dark:hover:text-[var(--neon-blue)] transition-colors mb-3"
             >
               <ArrowLeft className="w-4 h-4" />
               {t("Back to course")}
             </button>
-            <h2 className="text-lg font-bold text-gray-900 line-clamp-2 mb-2">{displayCourse.courseTitle}</h2>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-2 mb-2">{displayCourse.courseTitle}</h2>
+            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-[var(--dashboard-text-secondary)]">
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3" />
                 <span>{getTotalItems()} {t("items")}</span>
@@ -1144,13 +1144,13 @@ export default function SubmodulePage() {
 
           {/* Progress Bar */}
           <div className="mb-6">
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-2 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[var(--neon-blue)] transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-[var(--dashboard-text-secondary)] mt-1">
               {getCompletedCount()} {t("of")} {getTotalItems()} {t("completed")}
             </p>
           </div>
@@ -1164,13 +1164,13 @@ export default function SubmodulePage() {
               const isCurrentModule = modIdx === moduleIndex;
 
               return (
-                <div key={mod._id || modIdx} className="border border-gray-200 rounded-lg overflow-hidden">
+                <div key={mod._id || modIdx} className="border border-gray-200 dark:border-[var(--neon-blue)]/30 rounded-lg overflow-hidden">
                   <button
                     onClick={() => toggleSidebarModule(modIdx)}
                     className={`w-full px-4 py-3 flex items-center justify-between text-left transition-colors ${
                       isCurrentModule
-                        ? "bg-[var(--neon-blue)]/10 border-l-4 border-l-[var(--neon-blue)]"
-                        : "hover:bg-gray-50"
+                        ? "bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 border-l-4 border-l-[var(--neon-blue)]"
+                        : "hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)]"
                     }`}
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -1178,28 +1178,28 @@ export default function SubmodulePage() {
                         className={`w-6 h-6 rounded flex items-center justify-center flex-shrink-0 ${
                           isCurrentModule
                             ? "bg-[var(--neon-blue)] text-white"
-                            : "bg-gray-200 text-gray-600"
+                            : "bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-gray-600 dark:text-[var(--dashboard-text-secondary)]"
                         }`}
                       >
                         <span className="text-xs font-semibold">{modIdx + 1}</span>
                       </div>
                       <span
                         className={`text-sm font-medium truncate ${
-                          isCurrentModule ? "text-[var(--neon-blue)]" : "text-gray-900"
+                          isCurrentModule ? "text-[var(--neon-blue)]" : "text-gray-900 dark:text-white"
                         }`}
                       >
                         {mod.title || `Module ${modIdx + 1}`}
                       </span>
                     </div>
                     {isExpanded ? (
-                      <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                     )}
                   </button>
 
                   {isExpanded && (
-                    <div className="bg-gray-50 border-t border-gray-200">
+                    <div className="bg-gray-50 dark:bg-[var(--navy-blue)] border-t border-gray-200 dark:border-[var(--neon-blue)]/30">
                       {sections.map((section, secIdx) => {
                         const sectionId = `${modIdx}-${secIdx}`;
                         const isCurrent = modIdx === moduleIndex && secIdx === sectionIndex;
@@ -1209,16 +1209,16 @@ export default function SubmodulePage() {
                           <button
                             key={section._id || secIdx}
                             onClick={() => router.push(`/dashboard/training-modules/${courseId}/${sectionId}`)}
-                            className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 last:border-0 ${
+                            className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 dark:border-[var(--neon-blue)]/20 last:border-0 ${
                               isCurrent
-                                ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
-                                : "text-gray-700 hover:bg-gray-100"
+                                ? "bg-[var(--neon-blue)]/5 dark:bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium"
+                                : "text-gray-700 dark:text-[var(--dashboard-text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)]"
                             }`}
                           >
                             {isCompleted ? (
                               <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
                             ) : (
-                              <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                              <Circle className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                             )}
                             <span className="truncate">{section.title || `Section ${secIdx + 1}`}</span>
                           </button>
@@ -1227,10 +1227,10 @@ export default function SubmodulePage() {
                       {hasQuiz && (
                         <button
                           onClick={() => router.push(`/dashboard/training-modules/${courseId}/${modIdx}-quiz`)}
-                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 ${
+                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 dark:border-[var(--neon-blue)]/20 ${
                             modIdx === moduleIndex && isQuiz
-                              ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
-                              : "text-gray-700 hover:bg-gray-100"
+                              ? "bg-[var(--neon-blue)]/5 dark:bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium"
+                              : "text-gray-700 dark:text-[var(--dashboard-text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)]"
                           }`}
                         >
                           {isRead(`${modIdx}-quiz`) ? (
@@ -1244,10 +1244,10 @@ export default function SubmodulePage() {
                       {mod.activityType && (
                         <button
                           onClick={() => router.push(`/dashboard/training-modules/${courseId}/${modIdx}-activity`)}
-                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 last:border-b-0 ${
+                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 dark:border-[var(--neon-blue)]/20 last:border-b-0 ${
                             modIdx === moduleIndex && isActivity
-                              ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
-                              : "text-gray-700 hover:bg-gray-100"
+                              ? "bg-[var(--neon-blue)]/5 dark:bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium"
+                              : "text-gray-700 dark:text-[var(--dashboard-text-secondary)] hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)]"
                           }`}
                         >
                           {isRead(`${modIdx}-activity`) ? (
@@ -1270,20 +1270,20 @@ export default function SubmodulePage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+        <header className="bg-white dark:bg-[var(--navy-blue-light)] border-b border-gray-200 dark:border-[var(--neon-blue)]/30 sticky top-0 z-20">
           <div className="px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors"
                 aria-label="Toggle sidebar"
               >
-                <BookOpen className="w-5 h-5 text-gray-600" />
+                <BookOpen className="w-5 h-5 text-gray-600 dark:text-[var(--dashboard-text-secondary)]" />
               </button>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">{displayCourse.courseTitle}</h1>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{displayCourse.courseTitle}</h1>
                 {currentModule && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-[var(--dashboard-text-secondary)]">
                     {currentModule.title}{" "}
                     {isQuiz
                       ? `• ${t("Module Quiz")}`
@@ -1297,7 +1297,7 @@ export default function SubmodulePage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
                 {moduleIndex + 1} {t("of")} {displayCourse.modules.length} {t("modules")}
             </span>
           </div>
@@ -1309,27 +1309,27 @@ export default function SubmodulePage() {
           <div className="max-w-4xl mx-auto px-6 py-8">
             {/* Certificate Generated Notification - Cisco Style with Cybershield Colors */}
             {certificateGenerated && (
-              <div className="mb-6 bg-white border border-[var(--neon-blue)]/30 rounded-lg p-5 shadow-sm">
+              <div className="mb-6 bg-white dark:bg-[var(--navy-blue-light)] border border-[var(--neon-blue)]/30 dark:border-[var(--neon-blue)]/50 rounded-lg p-5 shadow-sm">
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--neon-blue)] flex items-center justify-center">
                     <Award className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-semibold text-gray-900 mb-1.5">{t("Certificate Earned! 🎉")}</h3>
-                    <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5">{t("Certificate Earned! 🎉")}</h3>
+                    <p className="text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-4 text-sm leading-relaxed">
                       {t("Congratulations! You've successfully completed this course and earned a certificate of completion.")}
                     </p>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => router.push("/dashboard/certificates")}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium"
                       >
                         <Award className="w-4 h-4" />
                         {t("View Certificate")}
                       </button>
                       <button
                         onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--neon-blue)] text-[var(--neon-blue)] rounded-md hover:bg-[var(--neon-blue)]/5 transition-colors text-sm font-medium"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 border border-[var(--neon-blue)] text-[var(--neon-blue)] rounded-md hover:bg-[var(--neon-blue)]/5 dark:hover:bg-[var(--neon-blue)]/10 transition-colors text-sm font-medium"
                       >
                         <ArrowLeft className="w-4 h-4" />
                         {t("Back to Course")}
@@ -1338,7 +1338,7 @@ export default function SubmodulePage() {
                   </div>
                   <button
                     onClick={() => setCertificateGenerated(false)}
-                    className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                    className="flex-shrink-0 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors p-1"
                     aria-label="Close notification"
                   >
                     <X className="w-5 h-5" />
@@ -1347,28 +1347,28 @@ export default function SubmodulePage() {
               </div>
             )}
         {isQuiz ? (
-              <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <article className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl shadow-sm border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden">
                 {/* Start Quiz screen */}
                 {!quizStarted ? (
                   <div className="px-8 py-12 text-center">
                     <div className="max-w-md mx-auto">
-                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 flex items-center justify-center mx-auto mb-6">
+                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center mx-auto mb-6">
                         <FileQuestion className="w-10 h-10 text-[var(--neon-blue)]" />
                       </div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-2">{t("Module Quiz")}</h1>
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t("Module Quiz")}</h1>
                       {currentModule?.title && (
-                        <p className="text-gray-600 mb-6">{currentModule.title}</p>
+                        <p className="text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-6">{currentModule.title}</p>
                       )}
-                      <p className="text-gray-700 mb-2">
-                        {t("You have")} <strong>{quizDurationMinutes}</strong> {t("minutes to complete this quiz.")}
+                      <p className="text-gray-700 dark:text-[var(--dashboard-text-secondary)] mb-2">
+                        {t("You have")} <strong className="dark:text-white">{quizDurationMinutes}</strong> {t("minutes to complete this quiz.")}
                       </p>
-                      <p className="text-sm text-gray-500 mb-8">
+                      <p className="text-sm text-gray-500 dark:text-[var(--dashboard-text-secondary)] mb-8">
                         {quizQuestions.length} {quizQuestions.length === 1 ? t("question") : t("questions")}
                       </p>
                       <button
                         type="button"
                         onClick={startQuiz}
-                        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
+                        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
                       >
                         <PlayCircle className="w-6 h-6" />
                         {t("Start Quiz")}
@@ -1377,22 +1377,22 @@ export default function SubmodulePage() {
                   </div>
                 ) : (
                 <>
-                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 px-8 py-6 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 px-8 py-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
                         <FileQuestion className="w-7 h-7 text-white" />
                       </div>
                       <div>
-                        <h1 className="text-2xl font-bold text-gray-900 mb-1">{t("Module Quiz")}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{t("Module Quiz")}</h1>
                         {currentModule?.title && (
-                          <p className="text-sm text-gray-600">{currentModule.title}</p>
+                          <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">{currentModule.title}</p>
                         )}
                       </div>
                     </div>
                     {/* Timer */}
                     <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg font-semibold ${
-                      quizTimeExpired ? "bg-red-100 text-red-800" : quizTimeRemainingSec <= 60 ? "bg-amber-100 text-amber-800" : "bg-white/80 text-gray-800"
+                      quizTimeExpired ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400" : quizTimeRemainingSec <= 60 ? "bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400" : "bg-white/80 dark:bg-[var(--navy-blue-lighter)]/80 text-gray-800 dark:text-white"
                     }`}>
                       <Clock className="w-5 h-5" />
                       {quizTimeExpired ? (
@@ -1406,15 +1406,15 @@ export default function SubmodulePage() {
                   </div>
                 </div>
                 {quizTimeExpired && (
-                  <div className="px-8 py-3 bg-amber-50 border-b border-amber-200 text-amber-800 text-sm font-medium">
+                  <div className="px-8 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-400 text-sm font-medium">
                     {t("The quiz has ended. Submit your answers to see your score.")}
                   </div>
                 )}
                 <div className="px-8 py-8">
               {quizQuestions.length === 0 ? (
                     <div className="text-center py-12">
-                      <FileQuestion className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">{t("No questions in this quiz.")}</p>
+                      <FileQuestion className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-[var(--dashboard-text-secondary)] text-lg">{t("No questions in this quiz.")}</p>
                     </div>
               ) : (
                     <div className="space-y-10">
@@ -1428,7 +1428,7 @@ export default function SubmodulePage() {
                               <span className="text-[var(--neon-blue)] font-bold text-lg">{qi + 1}</span>
                             </div>
                             <div className="flex-1">
-                              <h3 className="text-xl font-semibold text-gray-900 leading-relaxed mb-6">
+                              <h3 className="text-xl font-semibold text-gray-900 dark:text-white leading-relaxed mb-6">
                                 {q.question}
                               </h3>
                       <ul className="space-y-3">
@@ -1457,7 +1457,7 @@ export default function SubmodulePage() {
                                               : "bg-[var(--neon-blue)]/10 text-[var(--neon-blue)] font-medium border-2 border-[var(--neon-blue)] shadow-sm disabled:text-[var(--neon-blue)]"
                                             : showCorrect
                                             ? "bg-green-50 text-green-800 border-2 border-green-500 disabled:text-green-800"
-                                            : "bg-white text-gray-700 border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:text-gray-700"
+                                            : "bg-white dark:bg-[var(--navy-blue-lighter)] text-gray-700 dark:text-[var(--dashboard-text-secondary)] border-2 border-gray-200 dark:border-[var(--neon-blue)]/30 hover:bg-gray-50 dark:hover:bg-[var(--navy-blue)] hover:border-gray-300 dark:hover:border-[var(--neon-blue)]/50 disabled:text-gray-700 dark:disabled:text-[var(--dashboard-text-secondary)]"
                                         } ${showQuizResults ? "cursor-default" : "cursor-pointer"}`}
                               >
                                 <span
@@ -1470,7 +1470,7 @@ export default function SubmodulePage() {
                                                 : "bg-[var(--neon-blue)] text-white"
                                               : showCorrect
                                               ? "bg-green-500 text-white border-2 border-green-600"
-                                              : "bg-gray-100 text-gray-700 border-2 border-gray-300"
+                                              : "bg-gray-100 dark:bg-[var(--navy-blue-lighter)] text-gray-700 dark:text-[var(--dashboard-text-secondary)] border-2 border-gray-300 dark:border-[var(--neon-blue)]/30"
                                   }`}
                                 >
                                   {String.fromCharCode(65 + ci)}
@@ -1508,7 +1508,7 @@ export default function SubmodulePage() {
               )}
 
               {/* Quiz submit / results: show when quiz in progress (Submit) or after quiz (score + retake) */}
-                  <div className="mt-10 pt-8 border-t border-gray-200">
+                  <div className="mt-10 pt-8 border-t border-gray-200 dark:border-[var(--neon-blue)]/30">
                     <div className="space-y-4">
                 {(showQuizResults || isRead(submoduleId)) ? (
                         <div className="space-y-4">
@@ -1523,14 +1523,14 @@ export default function SubmodulePage() {
                               : lastQuizScore;
                             return score ? (
                               <>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-gray-50 border border-gray-200">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 rounded-xl bg-gray-50 dark:bg-[var(--navy-blue-lighter)] border border-gray-200 dark:border-[var(--neon-blue)]/30">
                                   <div>
-                                    <p className="text-sm font-medium text-gray-600 mb-0.5">{t("Score")}</p>
-                                    <p className="text-2xl font-bold text-gray-900">
+                                    <p className="text-sm font-medium text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-0.5">{t("Score")}</p>
+                                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                       {t("You scored")} {score.correctCount} {t("out of")} {score.total} ({score.scorePercent}%)
                                     </p>
                                   </div>
-                                  <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold ${score.passed ? "bg-green-100 text-green-800 border border-green-200" : "bg-red-100 text-red-800 border border-red-200"}`}>
+                                  <div className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-semibold ${score.passed ? "bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-500/30" : "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 border border-red-200 dark:border-red-500/30"}`}>
                                     {score.passed ? (
                                       <>
                                         <CheckCircle2 className="w-5 h-5 shrink-0" />
@@ -1545,9 +1545,9 @@ export default function SubmodulePage() {
                                   </div>
                                 </div>
                                 {showQuizResults && Object.values(quizResults).every(r => r) && (
-                                  <div className="flex items-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-lg">
-                                    <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
-                                    <span className="!text-green-800 font-medium">{t("All answers are correct! Great job!")}</span>
+                                  <div className="flex items-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-500/30 rounded-lg">
+                                    <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" />
+                                    <span className="!text-green-800 dark:!text-green-400 font-medium">{t("All answers are correct! Great job!")}</span>
                                   </div>
                                 )}
                               </>
@@ -1559,7 +1559,7 @@ export default function SubmodulePage() {
                                 type="button"
                                 onClick={toggleComplete}
                                 disabled={markingRead}
-                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
                                 <RotateCcw className="w-5 h-5 shrink-0" />
                                 <span>{markingRead ? t("Updating…") : t("Retake Quiz")}</span>
@@ -1568,7 +1568,7 @@ export default function SubmodulePage() {
                               <button
                                 type="button"
                                 onClick={retakeQuiz}
-                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                                className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                               >
                                 <RotateCcw className="w-5 h-5 shrink-0" />
                                 <span>{t("Retake Quiz")}</span>
@@ -1582,25 +1582,25 @@ export default function SubmodulePage() {
                       type="button"
                             onClick={toggleComplete}
                       disabled={(!allQuizAttempted && !quizTimeExpired) || markingRead}
-                            className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--neon-blue)] shadow-md hover:shadow-lg"
+                            className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--neon-blue)] shadow-md hover:shadow-lg"
                     >
                       <Check className="w-5 h-5 shrink-0" />
                             <span>{markingRead ? t("Submitting…") : t("Submit Quiz")}</span>
                     </button>
                     {!allQuizAttempted && !quizTimeExpired && quizQuestions.length > 0 && (
-                            <p className="text-sm text-gray-600">
+                            <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
                               {t("Please answer all")} {quizQuestions.length} {quizQuestions.length !== 1 ? t("questions") : t("question")} {t("to submit.")}
                       </p>
                     )}
                     {quizTimeExpired && (
-                      <p className="text-sm text-amber-700 font-medium">
+                      <p className="text-sm text-amber-700 dark:text-amber-400 font-medium">
                         {t("The quiz has ended. Submit your answers to see your score.")}
                       </p>
                     )}
                   </>
                 )}
                       {markReadError && !showQuizResults && (
-                        <p className="text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+                        <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg border border-red-200 dark:border-red-500/30">
                           {markReadError}
                         </p>
                       )}
@@ -1611,22 +1611,22 @@ export default function SubmodulePage() {
                 )}
           </article>
         ) : isActivity ? (
-              <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <article className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl shadow-sm border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden">
                 {!activityStarted ? (
                   <div className="px-8 py-12">
                     <div className="max-w-md mx-auto">
-                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 flex items-center justify-center mx-auto mb-6">
+                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center mx-auto mb-6">
                         {activityType === "whatsapp" ? (
                           <MessageCircle className="w-10 h-10 text-[var(--neon-blue)]" />
                         ) : (
                           <Mail className="w-10 h-10 text-[var(--neon-blue)]" />
                         )}
                       </div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">{t("Activity")}</h1>
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 text-center">{t("Activity")}</h1>
                       {currentModule?.title && (
-                        <p className="text-gray-600 mb-6 text-center">{currentModule.title}</p>
+                        <p className="text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-6 text-center">{currentModule.title}</p>
                       )}
-                      <p className="text-gray-700 mb-6 text-center">
+                      <p className="text-gray-700 dark:text-[var(--dashboard-text-secondary)] mb-6 text-center">
                         {activityType === "email"
                           ? t("This activity will be completed via Email.")
                           : activityType === "whatsapp"
@@ -1635,7 +1635,7 @@ export default function SubmodulePage() {
                       </p>
                       {(activityType === "email" || activityType === "whatsapp") && (
                         <div className="mb-6 text-left">
-                          <label htmlFor="activity-contact" className="block text-sm font-medium text-gray-700 mb-2">
+                          <label htmlFor="activity-contact" className="block text-sm font-medium text-gray-700 dark:text-white mb-2">
                             {activityType === "email" ? t("Email address") : t("Phone number")}
                           </label>
                           {activityType === "email" ? (
@@ -1648,7 +1648,7 @@ export default function SubmodulePage() {
                                 setActivityContactError(null);
                               }}
                               placeholder={t("e.g. you@example.com")}
-                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] outline-none text-gray-900"
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-[var(--neon-blue)]/30 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] outline-none text-gray-900 dark:text-white dark:bg-[var(--navy-blue-lighter)]"
                             />
                           ) : (
                             <input
@@ -1660,11 +1660,11 @@ export default function SubmodulePage() {
                                 setActivityContactError(null);
                               }}
                               placeholder={t("e.g. +1 234 567 8900")}
-                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] outline-none text-gray-900"
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-[var(--neon-blue)]/30 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] outline-none text-gray-900 dark:text-white dark:bg-[var(--navy-blue-lighter)]"
                             />
                           )}
                           {activityContactError && (
-                            <p className="mt-2 text-sm text-red-600">{activityContactError}</p>
+                            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{activityContactError}</p>
                           )}
                         </div>
                       )}
@@ -1673,7 +1673,7 @@ export default function SubmodulePage() {
                           type="button"
                           onClick={() => startActivity()}
                           disabled={activitySendLoading}
-                          className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-lg font-semibold shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                          className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-lg font-semibold shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                           {activitySendLoading ? (
                             <>
@@ -1692,7 +1692,7 @@ export default function SubmodulePage() {
                   </div>
                 ) : (
                   <div className="px-8 py-8">
-                    <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 rounded-xl p-6 mb-8">
+                    <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 rounded-xl p-6 mb-8">
                       <div className="flex items-center gap-4 mb-4">
                         {activityType === "whatsapp" ? (
                           <MessageCircle className="w-10 h-10 text-[var(--neon-blue)]" />
@@ -1700,13 +1700,13 @@ export default function SubmodulePage() {
                           <Mail className="w-10 h-10 text-[var(--neon-blue)]" />
                         )}
                         <div>
-                          <h2 className="text-xl font-bold text-gray-900">{t("Activity")}</h2>
-                          <p className="text-sm text-gray-600">
+                          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("Activity")}</h2>
+                          <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
                             {activityType === "email" ? t("Email") : activityType === "whatsapp" ? t("WhatsApp") : t("Activity")}
                           </p>
                         </div>
                       </div>
-                      <p className="text-gray-700 mb-2">
+                      <p className="text-gray-700 dark:text-[var(--dashboard-text-secondary)] mb-2">
                         {activityType === "email"
                           ? t("Complete this activity by following the instructions sent to your email.")
                           : activityType === "whatsapp"
@@ -1714,7 +1714,7 @@ export default function SubmodulePage() {
                             : t("Complete this activity as instructed.")}
                       </p>
                       {(activityType === "email" && activityEmail.trim()) || (activityType === "whatsapp" && activityPhone.trim()) ? (
-                        <p className="text-sm text-gray-600 mt-2">
+                        <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] mt-2">
                           {activityType === "email"
                             ? t("Email") + ": " + activityEmail.trim()
                             : t("Phone") + ": " + activityPhone.trim()}
@@ -1732,19 +1732,19 @@ export default function SubmodulePage() {
                       <div
                         className={`mb-6 rounded-xl border-2 p-4 ${
                           passed
-                            ? "bg-green-50 border-green-500 text-green-800"
+                            ? "bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-500/30 text-green-800 dark:text-green-400"
                             : showFailed
-                              ? "bg-red-50 border-red-500 text-red-800"
-                              : "bg-amber-50 border-amber-500 text-amber-800"
+                              ? "bg-red-50 dark:bg-red-900/20 border-red-500 dark:border-red-500/30 text-red-800 dark:text-red-400"
+                              : "bg-amber-50 dark:bg-amber-900/20 border-amber-500 dark:border-amber-500/30 text-amber-800 dark:text-amber-400"
                         }`}
                       >
                         <div className="flex items-start gap-3">
                           {passed ? (
-                            <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                            <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
                           ) : showFailed ? (
-                            <X className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                            <X className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
                           ) : (
-                            <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                            <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                           )}
                           <div>
                             {passed && (
@@ -1770,7 +1770,7 @@ export default function SubmodulePage() {
                                   {t("Open the email after 2 minutes.")}
                                 </p>
                                 {activityTimeRemainingSec > 0 ? (
-                                  <p className="text-sm mt-2 font-medium text-amber-700">
+                                  <p className="text-sm mt-2 font-medium text-amber-700 dark:text-amber-400">
                                     {t("Time remaining")}: {Math.floor(activityTimeRemainingSec / 60)}:{String(activityTimeRemainingSec % 60).padStart(2, "0")}
                                   </p>
                                 ) : null}
@@ -1789,15 +1789,15 @@ export default function SubmodulePage() {
                       return (
                       <div
                         className={`mb-6 rounded-xl border-2 p-4 ${
-                          passed ? "bg-green-50 border-green-500 text-green-800"
-                            : showFailed ? "bg-red-50 border-red-500 text-red-800"
-                            : "bg-amber-50 border-amber-500 text-amber-800"
+                          passed ? "bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-500/30 text-green-800 dark:text-green-400"
+                            : showFailed ? "bg-red-50 dark:bg-red-900/20 border-red-500 dark:border-red-500/30 text-red-800 dark:text-red-400"
+                            : "bg-amber-50 dark:bg-amber-900/20 border-amber-500 dark:border-amber-500/30 text-amber-800 dark:text-amber-400"
                         }`}
                       >
                         <div className="flex items-start gap-3">
-                          {passed ? <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-                            : showFailed ? <X className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                            : <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />}
+                          {passed ? <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                            : showFailed ? <X className="w-6 h-6 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                            : <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />}
                           <div>
                             {passed && (
                               <>
@@ -1815,7 +1815,7 @@ export default function SubmodulePage() {
                               <>
                                 <p className="font-semibold">{t("Pending")}</p>
                                 {activityTimeRemainingSec > 0 && (
-                                  <p className="text-sm mt-2 font-medium text-amber-700">
+                                  <p className="text-sm mt-2 font-medium text-amber-700 dark:text-amber-400">
                                     {t("Time remaining")}: {Math.floor(activityTimeRemainingSec / 60)}:{String(activityTimeRemainingSec % 60).padStart(2, "0")}
                                   </p>
                                 )}
@@ -1826,13 +1826,13 @@ export default function SubmodulePage() {
                       </div>
                     ); })()}
 
-                    <div className="pt-6 border-t border-gray-200">
+                    <div className="pt-6 border-t border-gray-200 dark:border-[var(--neon-blue)]/30">
                       {isRead(submoduleId) ? (
                         <button
                           type="button"
                           onClick={toggleComplete}
                           disabled={markingRead}
-                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                         >
                           <CheckCircle2 className="w-5 h-5 shrink-0" />
                           <span>{markingRead ? t("Updating…") : t("Mark as Incomplete")}</span>
@@ -1842,27 +1842,27 @@ export default function SubmodulePage() {
                           type="button"
                           onClick={toggleComplete}
                           disabled={markingRead || (activityType === "email" && !activityTimeExpired) || (activityType === "email" && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false) || (activityType === "whatsapp" && !activityTimeExpired) || (activityType === "whatsapp" && activityWhatsAppStatus?.hasCampaign && activityWhatsAppStatus.passed === false)}
-                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white dark:bg-[var(--navy-blue-light)] hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                         >
-                          <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white transition-colors" />
-                          <span className="text-[var(--neon-blue)] group-hover:text-white transition-colors">
+                          <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white dark:group-hover:text-[var(--neon-blue)] transition-colors" />
+                          <span className="text-[var(--neon-blue)] group-hover:text-white dark:group-hover:text-[var(--neon-blue)] transition-colors">
                             {markingRead ? t("Saving…") : t("Mark as Complete")}
                           </span>
                         </button>
                       )}
                       {activityType === "email" && activityTimeExpired && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false && (
                         <>
-                          <p className="mt-2 text-sm text-red-600">
+                          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                             {t("You cannot complete this activity because you clicked a link or entered credentials in the email.")}
                           </p>
-                          <p className="mt-2 text-sm text-gray-700">
+                          <p className="mt-2 text-sm text-gray-700 dark:text-[var(--dashboard-text-secondary)]">
                             {t("Do not click the link or enter credentials. Try the activity again.")}
                           </p>
                           <button
                             type="button"
                             onClick={handleActivityRetry}
                             disabled={activityRetryLoading}
-                            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[var(--neon-blue)] bg-white text-[var(--neon-blue)] hover:bg-[var(--neon-blue)] hover:text-white transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[var(--neon-blue)] bg-white dark:bg-[var(--navy-blue-light)] text-[var(--neon-blue)] hover:bg-[var(--neon-blue)] hover:text-white transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             {activityRetryLoading ? (
                               <>
@@ -1877,17 +1877,17 @@ export default function SubmodulePage() {
                       )}
                       {activityType === "whatsapp" && activityTimeExpired && activityWhatsAppStatus?.hasCampaign && activityWhatsAppStatus.passed === false && (
                         <>
-                          <p className="mt-2 text-sm text-red-600">
+                          <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                             {t("You cannot complete this activity because you clicked a link or entered credentials in the message.")}
                           </p>
-                          <p className="mt-2 text-sm text-gray-700">
+                          <p className="mt-2 text-sm text-gray-700 dark:text-[var(--dashboard-text-secondary)]">
                             {t("Do not click the link or enter credentials. Try the activity again.")}
                           </p>
                           <button
                             type="button"
                             onClick={handleActivityRetry}
                             disabled={activityRetryLoading}
-                            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[var(--neon-blue)] bg-white text-[var(--neon-blue)] hover:bg-[var(--neon-blue)] hover:text-white transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[var(--neon-blue)] bg-white dark:bg-[var(--navy-blue-light)] text-[var(--neon-blue)] hover:bg-[var(--neon-blue)] hover:text-white transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
                           >
                             {activityRetryLoading ? (
                               <>
@@ -1901,7 +1901,7 @@ export default function SubmodulePage() {
                         </>
                       )}
                       {markReadError && (
-                        <p className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+                        <p className="mt-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg border border-red-200 dark:border-red-500/30">
                           {markReadError}
                         </p>
                       )}
@@ -1910,19 +1910,19 @@ export default function SubmodulePage() {
                 )}
               </article>
         ) : currentSection ? (
-              <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <article className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl shadow-sm border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden">
                 {/* Section Header */}
-                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 px-8 py-6 border-b border-gray-200">
+                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 px-8 py-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
                       <BookOpen className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                      <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                     {currentSection.title || t("Section")}
                   </h1>
                   {currentModule?.title && (
-                        <p className="text-sm text-gray-600">{currentModule.title}</p>
+                        <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">{currentModule.title}</p>
                   )}
                 </div>
                   </div>
@@ -1932,7 +1932,7 @@ export default function SubmodulePage() {
                 <div className="px-8 py-8">
                   {(currentSection.material || translatedSectionMaterial) && (
                     <article className="max-w-none mb-8 prose prose-lg prose-gray max-w-none">
-                      <div className="text-gray-800 leading-relaxed space-y-6">
+                      <div className="text-gray-800 dark:text-[var(--dashboard-text-secondary)] leading-relaxed space-y-6">
                         {formatContent(
                           translatedSectionMaterial || currentSection.material || "",
                           t
@@ -1964,7 +1964,7 @@ export default function SubmodulePage() {
                                 }}
                               />
                               {mediaItem.caption && (
-                                <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
+                                <figcaption className="text-sm text-gray-500 dark:text-[var(--dashboard-text-secondary)] text-center mt-3 italic">
                                   {translatedMediaCaptions.get(idx) || mediaItem.caption}
                                 </figcaption>
                               )}
@@ -1973,7 +1973,7 @@ export default function SubmodulePage() {
                             <figure className="w-full">
                               <VideoPlayer mediaItem={mediaItem} />
                               {mediaItem.caption && (
-                                <figcaption className="text-sm text-gray-500 text-center mt-3 italic">
+                                <figcaption className="text-sm text-gray-500 dark:text-[var(--dashboard-text-secondary)] text-center mt-3 italic">
                                   {translatedMediaCaptions.get(idx) || mediaItem.caption}
                                 </figcaption>
                               )}
@@ -1985,8 +1985,8 @@ export default function SubmodulePage() {
               )}
 
               {(currentSection.urls?.length ?? 0) > 0 && (
-                    <div className="mt-8 pt-8 border-t border-gray-200">
-                      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-[var(--neon-blue)]/30">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <LinkIcon className="w-5 h-5 text-[var(--neon-blue)]" />
                         {t("Additional Resources")}
                   </h2>
@@ -1997,7 +1997,7 @@ export default function SubmodulePage() {
                           href={url}
                           target="_blank"
                           rel="noopener noreferrer"
-                              className="flex items-center gap-3 px-4 py-3 bg-gray-50 hover:bg-[var(--neon-blue)]/5 border border-gray-200 hover:border-[var(--neon-blue)]/30 rounded-lg transition-colors group"
+                              className="flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[var(--navy-blue-lighter)] hover:bg-[var(--neon-blue)]/5 dark:hover:bg-[var(--neon-blue)]/10 border border-gray-200 dark:border-[var(--neon-blue)]/30 hover:border-[var(--neon-blue)]/30 dark:hover:border-[var(--neon-blue)]/50 rounded-lg transition-colors group"
                         >
                               <LinkIcon className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
                               <span className="text-[var(--neon-blue)] hover:underline break-all text-sm font-medium group-hover:text-[var(--medium-blue)]">
@@ -2012,20 +2012,20 @@ export default function SubmodulePage() {
 
               {!currentSection.material && !(currentSection.urls?.length) && (
                     <div className="text-center py-12">
-                      <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500 text-lg">{t("No content available for this section.")}</p>
+                      <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                      <p className="text-gray-500 dark:text-[var(--dashboard-text-secondary)] text-lg">{t("No content available for this section.")}</p>
                     </div>
               )}
 
               {/* Mark as read */}
-                  <div className="mt-10 pt-8 border-t border-gray-200">
+                  <div className="mt-10 pt-8 border-t border-gray-200 dark:border-[var(--neon-blue)]/30">
                     <div>
                 {isRead(submoduleId) ? (
                         <button
                           type="button"
                           onClick={toggleComplete}
                           disabled={markingRead}
-                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                         >
                     <CheckCircle2 className="w-5 h-5 shrink-0" />
                           <span>{markingRead ? t("Updating…") : t("Mark as Incomplete")}</span>
@@ -2035,14 +2035,14 @@ export default function SubmodulePage() {
                     type="button"
                           onClick={toggleComplete}
                     disabled={markingRead}
-                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white dark:bg-[var(--navy-blue-light)] hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                   >
-                          <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white transition-colors" />
-                          <span className="text-[var(--neon-blue)] group-hover:text-white transition-colors">{markingRead ? t("Saving…") : t("Mark as Complete")}</span>
+                          <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white dark:group-hover:text-[var(--neon-blue)] transition-colors" />
+                          <span className="text-[var(--neon-blue)] group-hover:text-white dark:group-hover:text-[var(--neon-blue)] transition-colors">{markingRead ? t("Saving…") : t("Mark as Complete")}</span>
                   </button>
                 )}
                 {markReadError && (
-                        <p className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+                        <p className="mt-3 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg border border-red-200 dark:border-red-500/30">
                           {markReadError}
                         </p>
                 )}
@@ -2051,9 +2051,9 @@ export default function SubmodulePage() {
             </div>
           </article>
         ) : (
-              <div className="bg-white rounded-xl p-12 text-center border border-gray-200">
-                <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">{t("Section not found.")}</p>
+              <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl p-12 text-center border border-gray-200 dark:border-[var(--neon-blue)]/30">
+                <BookOpen className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-[var(--dashboard-text-secondary)] text-lg">{t("Section not found.")}</p>
           </div>
         )}
 
@@ -2062,7 +2062,7 @@ export default function SubmodulePage() {
           {prevUrl ? (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${prevUrl}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium shadow-sm hover:shadow-md"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 dark:border-[var(--neon-blue)]/30 bg-white dark:bg-[var(--navy-blue-light)] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)] dark:hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium shadow-sm hover:shadow-md"
             >
                   <ChevronLeft className="w-5 h-5 flex-shrink-0" />
                   <span>{t("Previous")}</span>
@@ -2073,7 +2073,7 @@ export default function SubmodulePage() {
           {nextUrl ? (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${nextUrl}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
             >
                   <span>
                     {sectionIndex === sections.length - 1 && hasQuiz
@@ -2087,7 +2087,7 @@ export default function SubmodulePage() {
           ) : (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium ml-auto shadow-sm hover:shadow-md"
+                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 dark:border-[var(--neon-blue)]/30 bg-white dark:bg-[var(--navy-blue-light)] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)] dark:hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium ml-auto shadow-sm hover:shadow-md"
             >
                   <ArrowLeft className="w-5 h-5 flex-shrink-0" />
                   <span>{t("Back to Course")}</span>

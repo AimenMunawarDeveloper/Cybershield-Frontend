@@ -34,9 +34,9 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <ThemeProvider>
-            <LanguageProvider>
-              <LayoutChrome>{children}</LayoutChrome>
-            </LanguageProvider>
+          <LanguageProvider>
+          <LayoutChrome>{children}</LayoutChrome>
+          </LanguageProvider>
           </ThemeProvider>
         </body>
       </html>
