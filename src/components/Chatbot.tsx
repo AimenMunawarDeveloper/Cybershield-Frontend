@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { MessageSquare, X, Send, Minimize2, Bot, User } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Message {
   id: string;
@@ -70,7 +71,7 @@ function formatInlineMarkdown(text: string, isUserMessage: boolean): React.React
       parts.push(
         <strong 
           key={`bold-${key++}`} 
-          className={isUserMessage ? "text-white font-semibold" : "text-gray-800 font-semibold"}
+          className={isUserMessage ? "text-white font-semibold" : "text-gray-800 dark:text-white font-semibold"}
         >
           {segment.content}
         </strong>
@@ -79,7 +80,7 @@ function formatInlineMarkdown(text: string, isUserMessage: boolean): React.React
       parts.push(
         <em 
           key={`italic-${key++}`} 
-          className={isUserMessage ? "text-white" : "text-gray-800"}
+          className={isUserMessage ? "text-white" : "text-gray-800 dark:text-white"}
         >
           {segment.content}
         </em>
@@ -120,7 +121,7 @@ function formatMarkdown(text: string, isUserMessage: boolean): React.ReactElemen
       const listNumber = trimmedLine.match(/^\d+\./)?.[0] || '';
       parts.push(
         <div key={`list-${lineIndex}`} className="flex items-start gap-2 my-1.5">
-          <span className={isUserMessage ? "text-white/80 mt-0.5 flex-shrink-0" : "text-gray-600 mt-0.5 flex-shrink-0"}>
+          <span className={isUserMessage ? "text-white/80 mt-0.5 flex-shrink-0" : "text-gray-600 dark:text-gray-300 mt-0.5 flex-shrink-0"}>
             {listNumber}
           </span>
           <span className="flex-1">{formattedContent}</span>
@@ -135,7 +136,7 @@ function formatMarkdown(text: string, isUserMessage: boolean): React.ReactElemen
       const formattedContent = formatInlineMarkdown(listContent, isUserMessage);
       parts.push(
         <div key={`list-${lineIndex}`} className="flex items-start gap-2 my-1.5">
-          <span className={isUserMessage ? "text-white/80 mt-0.5 flex-shrink-0" : "text-gray-600 mt-0.5 flex-shrink-0"}>•</span>
+          <span className={isUserMessage ? "text-white/80 mt-0.5 flex-shrink-0" : "text-gray-600 dark:text-gray-300 mt-0.5 flex-shrink-0"}>•</span>
           <span className="flex-1">{formattedContent}</span>
         </div>
       );
@@ -209,6 +210,7 @@ const getInitialMessages = (language: "en" | "ur"): Message[] => {
 export default function Chatbot() {
   const { language } = useLanguage();
   const { t, preTranslate, isTranslating } = useTranslation();
+  const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [translationReady, setTranslationReady] = useState(false);
@@ -540,29 +542,29 @@ export default function Chatbot() {
             transform: isMinimized ? "translateY(0)" : "translateY(0)",
           }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col h-full overflow-hidden">
+          <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--neon-blue)]/30 flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="bg-gradient-to-r from-[var(--neon-blue)] to-[#3a8bc2] text-white p-4 rounded-t-2xl flex items-center justify-between">
+            <div className="bg-gradient-to-r from-[var(--neon-blue)] to-[#3a8bc2] dark:from-[var(--neon-blue)] dark:to-[#4fc3f7] text-white p-4 rounded-t-2xl flex items-center justify-between shadow-lg dark:shadow-[var(--neon-blue)]/20">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center">
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-sm">Sentra</h3>
-                  <p className="text-xs text-white/80">{language === "ur" ? t("We typically reply in seconds") : "We typically reply in seconds"}</p>
+                  <p className="text-xs text-white/80 dark:text-white/70">{language === "ur" ? t("We typically reply in seconds") : "We typically reply in seconds"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsMinimized(!isMinimized)}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-white/20 dark:hover:bg-white/10 rounded-lg transition-colors"
                   aria-label={isMinimized ? "Expand" : "Minimize"}
                 >
                   <Minimize2 className="w-4 h-4" />
                 </button>
                 <button
                   onClick={closeChat}
-                  className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-1.5 hover:bg-white/20 dark:hover:bg-white/10 rounded-lg transition-colors"
                   aria-label="Close"
                 >
                   <X className="w-4 h-4" />
@@ -573,7 +575,7 @@ export default function Chatbot() {
             {/* Messages Container */}
             {!isMinimized && (
               <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-[var(--navy-blue)]">
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -590,7 +592,7 @@ export default function Chatbot() {
                         className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                           message.role === "user"
                             ? "bg-[var(--neon-blue)] text-white rounded-br-md"
-                            : "bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm"
+                            : "bg-white dark:bg-[var(--navy-blue-lighter)] text-gray-800 dark:text-white border border-gray-200 dark:border-[var(--neon-blue)]/30 rounded-bl-md shadow-sm"
                         }`}
                       >
                         <div className="text-sm leading-relaxed">
@@ -604,8 +606,8 @@ export default function Chatbot() {
                         </span>
                       </div>
                       {message.role === "user" && (
-                        <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                          <User className="w-4 h-4 text-gray-600" />
+                        <div className="w-8 h-8 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 text-gray-600 dark:text-white" />
                         </div>
                       )}
                     </div>
@@ -615,11 +617,11 @@ export default function Chatbot() {
                       <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0">
                         <Bot className="w-4 h-4 text-white" />
                       </div>
-                      <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-2.5 shadow-sm">
+                      <div className="bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-200 dark:border-[var(--neon-blue)]/30 rounded-2xl rounded-bl-md px-4 py-2.5 shadow-sm">
                         <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                          <div className="w-2 h-2 bg-gray-400 dark:bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                          <div className="w-2 h-2 bg-gray-400 dark:bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                          <div className="w-2 h-2 bg-gray-400 dark:bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                         </div>
                       </div>
                     </div>
@@ -628,7 +630,7 @@ export default function Chatbot() {
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-gray-200 p-4 bg-white">
+                <div className="border-t border-gray-200 dark:border-[var(--neon-blue)]/30 p-4 bg-white dark:bg-[var(--navy-blue-light)]">
                   <div className="flex gap-2">
                     <input
                       ref={inputRef}
@@ -637,7 +639,7 @@ export default function Chatbot() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder={language === "ur" ? t("Type your message...") : "Type your message..."}
-                      className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-sm text-gray-900 placeholder:text-gray-500 bg-white"
+                      className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-[var(--neon-blue)]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--navy-blue-lighter)]"
                       disabled={isLoading}
                     />
                     <button
@@ -658,7 +660,7 @@ export default function Chatbot() {
       {/* Floating Button */}
       <button
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 bg-[var(--neon-blue)] hover:bg-[#3a8bc2] text-white flex items-center justify-center group"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg dark:shadow-[var(--neon-blue)]/30 transition-all duration-300 hover:scale-110 bg-[var(--neon-blue)] dark:bg-[var(--neon-blue)] hover:bg-[#3a8bc2] dark:hover:bg-[#4fc3f7] text-white flex items-center justify-center group"
         aria-label={isOpen ? "Toggle chat" : "Open chat"}
       >
         <MessageSquare className="w-6 h-6" />

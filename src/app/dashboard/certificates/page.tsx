@@ -476,10 +476,10 @@ export default function CertificatesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[var(--navy-blue)] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-[var(--neon-blue)] mx-auto mb-4" />
-          <p className="text-gray-600">{t("Loading certificates...")}</p>
+          <p className="text-gray-600 dark:text-[var(--dashboard-text-secondary)]">{t("Loading certificates...")}</p>
         </div>
       </div>
     );
@@ -487,12 +487,12 @@ export default function CertificatesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8fafc] dark:bg-[var(--navy-blue)] flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button
             onClick={() => router.push("/dashboard")}
-            className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)]"
+            className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7]"
           >
             {t("Go to Dashboard")}
           </button>
@@ -502,40 +502,40 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen bg-white dark:bg-[var(--navy-blue)] p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header - Cisco Style */}
         <div className="mb-8">
           <button
             onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 text-gray-600 hover:text-[var(--neon-blue)] mb-6 transition-colors text-sm"
+            className="flex items-center gap-2 text-gray-600 dark:text-[var(--dashboard-text-secondary)] hover:text-[var(--neon-blue)] dark:hover:text-[var(--neon-blue)] mb-6 transition-colors text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             {t("Back to Dashboard")}
           </button>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-[var(--neon-blue)]/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-lg bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center">
               <Award className="w-5 h-5 text-[var(--neon-blue)]" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">{t("My Certificates")}</h1>
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t("My Certificates")}</h1>
             </div>
           </div>
-          <p className="text-sm text-gray-600 ml-[3.25rem]">
+          <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] ml-[3.25rem]">
             {displayCertificates.length} {displayCertificates.length !== 1 ? t("certificates") : t("certificate")} {t("earned")}
           </p>
         </div>
 
         {displayCertificates.length === 0 ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <Award className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("No Certificates Yet")}</h3>
-            <p className="text-sm text-gray-600 mb-6">
+          <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg border border-gray-200 dark:border-[var(--neon-blue)]/30 p-12 text-center">
+            <Award className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t("No Certificates Yet")}</h3>
+            <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-6">
               {t("Complete courses to earn certificates and showcase your achievements.")}
             </p>
             <button
               onClick={() => router.push("/dashboard/training-modules")}
-              className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+              className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium"
             >
               {t("Browse Courses")}
             </button>
@@ -545,29 +545,29 @@ export default function CertificatesPage() {
             {displayCertificates.map((cert) => (
               <div
                 key={cert._id}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-[var(--neon-blue)]/30 transition-all"
+                className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden hover:border-[var(--neon-blue)]/30 dark:hover:border-[var(--neon-blue)]/50 transition-all"
               >
                 <div className="p-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--neon-blue)]/10 flex items-center justify-center">
+                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center">
                         <Award className="w-6 h-6 text-[var(--neon-blue)]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-semibold text-gray-900 mb-2">
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
                           {cert.courseTitle}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
                           <div className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-gray-400" />
+                            <User className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                             <span>{cert.userName}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                            <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                             <span>{new Date(cert.issuedDate).toLocaleDateString()}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 text-gray-400" />
+                            <FileText className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
                             <span className="font-mono text-xs">{cert.certificateNumber}</span>
                           </div>
                         </div>
@@ -576,13 +576,13 @@ export default function CertificatesPage() {
                     <div className="flex gap-2 flex-shrink-0">
                       <button
                         onClick={() => setSelectedCertificate(cert)}
-                        className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium"
+                        className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium"
                       >
                         {t("View")}
                       </button>
                       <button
                         onClick={() => handleDownload(cert)}
-                        className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium flex items-center gap-2"
+                        className="px-4 py-2 border border-gray-300 dark:border-[var(--neon-blue)]/30 text-gray-700 dark:text-white rounded-md hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] transition-colors text-sm font-medium flex items-center gap-2"
                       >
                         <Download className="w-4 h-4" />
                         {t("Download")}
@@ -598,18 +598,18 @@ export default function CertificatesPage() {
         {/* Certificate Modal/View - Cisco Style */}
         {selectedCertificate && (
           <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-6 overflow-y-auto"
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-6 overflow-y-auto"
             onClick={() => setSelectedCertificate(null)}
           >
             <div
-              className="bg-white rounded-lg max-w-5xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-lg"
+              className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg max-w-5xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-lg"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900">{t("Certificate Details")}</h2>
+              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("Certificate Details")}</h2>
                 <button
                   onClick={() => setSelectedCertificate(null)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors p-1"
                   aria-label="Close"
                 >
                   <X className="w-5 h-5" />
@@ -633,16 +633,16 @@ export default function CertificatesPage() {
                 courseCreator={selectedCertificate.course?.createdByName}
                 language={language}
               />
-              <div className="mt-6 pt-4 border-t border-gray-200 flex justify-end gap-3">
+              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-[var(--neon-blue)]/30 flex justify-end gap-3">
                 <button
                   onClick={() => setSelectedCertificate(null)}
-                  className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium"
+                  className="px-5 py-2.5 border border-gray-300 dark:border-[var(--neon-blue)]/30 text-gray-700 dark:text-white rounded-md hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] transition-colors text-sm font-medium"
                 >
                   {t("Close")}
                 </button>
                 <button
                   onClick={() => handleDownload(selectedCertificate)}
-                  className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] transition-colors text-sm font-medium flex items-center gap-2"
+                  className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium flex items-center gap-2"
                 >
                   <Download className="w-4 h-4" />
                   {t("Download Certificate")}
