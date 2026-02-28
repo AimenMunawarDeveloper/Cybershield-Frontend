@@ -540,7 +540,7 @@ export default function WhatsAppPhishingPage() {
 
   if (hasAccess === null) {
     return (
-      <div className="p-8 text-center text-white">
+      <div className="p-8 text-center text-[var(--dashboard-text-primary)] dark:text-white">
         <p>{t("Loading...")}</p>
       </div>
     );
@@ -552,7 +552,7 @@ export default function WhatsAppPhishingPage() {
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)] text-lg">
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
@@ -562,9 +562,9 @@ export default function WhatsAppPhishingPage() {
 
   if (hasAccess === false) {
     return (
-      <div className="p-8 text-center text-white">
+      <div className="p-8 text-center text-[var(--dashboard-text-primary)] dark:text-white">
         <h1 className="text-2xl font-semibold">{t("Access Restricted")}</h1>
-        <p className="mt-2 text-sm text-gray-300">
+        <p className="mt-2 text-sm text-[var(--dashboard-text-secondary)] dark:text-gray-300">
           {accessError ||
             t("This page is available to system and client administrators only.")}
         </p>
@@ -591,27 +591,27 @@ export default function WhatsAppPhishingPage() {
               </div>
             </div>
 
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
                 {t("WhatsApp Phishing")}
                 <span className="block text-[var(--neon-blue)] mt-1">{t("Awareness Training")}</span>
                 </h1>
               
-              <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
                 {t("Protect your organization by training users to identify and respond to phishing messages. Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Shield className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Realistic Scenarios")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Realistic Scenarios")}</span>
               </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <AlertTriangle className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Security Training")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Security Training")}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Lock className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Safe Testing")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Safe Testing")}</span>
                 </div>
               </div>
             </div>
@@ -620,7 +620,7 @@ export default function WhatsAppPhishingPage() {
 
         {/* How WhatsApp Phishing Works Section */}
         <div className="relative z-10 mb-8">
-          <h2 className="text-3xl font-bold text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
+          <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
             {t("How WhatsApp Phishing Simulation Works")}
           </h2>
           <div className="dashboard-card rounded-lg p-6 md:p-8">
@@ -634,10 +634,10 @@ export default function WhatsAppPhishingPage() {
                 />
               </div>
               <div className="space-y-4">
-                <p className="text-white text-lg">
+                <p className="text-[var(--dashboard-text-primary)] dark:text-white text-lg">
                   {t("Our WhatsApp phishing simulation sends realistic phishing messages directly to your employees' WhatsApp accounts to test their security awareness.")}
                 </p>
-                <ul className="space-y-3 text-white">
+                <ul className="space-y-3 text-[var(--dashboard-text-primary)] dark:text-white">
                   <li className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                     <span>
@@ -673,7 +673,7 @@ export default function WhatsAppPhishingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="mb-8">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                <h2 className="text-3xl font-bold text-white underline decoration-[var(--neon-blue)]">
+                <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white underline decoration-[var(--neon-blue)]">
                   {t("Phishing Message Templates")}
                 </h2>
                 <button
@@ -685,7 +685,7 @@ export default function WhatsAppPhishingPage() {
                   {t("Custom Template")}
                 </button>
               </div>
-              <p className="text-base text-[var(--medium-grey)] max-w-2xl">
+              <p className="text-base text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] max-w-2xl">
                 {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
@@ -694,7 +694,7 @@ export default function WhatsAppPhishingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
               {templates.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <p className="text-[var(--medium-grey)]">
+                  <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                     {t("No templates available. Please seed the database first.")}
                   </p>
                 </div>
@@ -740,13 +740,13 @@ export default function WhatsAppPhishingPage() {
                         <MessageSquare className="w-5 h-5 text-[var(--neon-blue)]" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                        <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
                           {t(template.title)}
                         </h3>
                       </div>
                     </div>
                     
-                    <p className="text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
+                    <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
                       {t(template.description)}
                     </p>
 
@@ -783,7 +783,7 @@ export default function WhatsAppPhishingPage() {
             {/* See More Button */}
             {templates.length > INITIAL_VISIBLE_TEMPLATES && (
               <div className="text-center">
-                <p className="text-[var(--medium-grey)] text-sm mb-4">
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm mb-4">
                   {t("Showing")} {Math.min(visibleTemplates, templates.length)} {t("of")} {templates.length} {t("templates")}
                 </p>
                 {visibleTemplates < templates.length ? (
@@ -796,7 +796,7 @@ export default function WhatsAppPhishingPage() {
                 ) : (
                   <button
                     onClick={() => setVisibleTemplates(INITIAL_VISIBLE_TEMPLATES)}
-                    className="px-8 py-3 bg-[var(--navy-blue-lighter)] text-white rounded-lg font-medium hover:bg-[var(--navy-blue)] transition-colors border border-[var(--neon-blue)]/30"
+                    className="px-8 py-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)] transition-colors border border-gray-300 dark:border-[var(--neon-blue)]/30"
                   >
                     {t("Show Less")}
                   </button>
@@ -814,10 +814,10 @@ export default function WhatsAppPhishingPage() {
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {t("WhatsApp Phishing Campaigns")}
                 </h1>
-                <p className="text-[var(--medium-grey)] text-sm">
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                   {t("Create and manage phishing awareness campaigns")}
                 </p>
               </div>
@@ -835,7 +835,7 @@ export default function WhatsAppPhishingPage() {
         {/* Error Display */}
         {error && (
           <div className="relative z-10">
-            <div className="bg-[var(--crimson-red)]/20 border border-[var(--crimson-red)] rounded-lg p-4 text-white">
+            <div className="bg-[var(--crimson-red)]/20 border border-[var(--crimson-red)] rounded-lg p-4 text-[var(--dashboard-text-primary)] dark:text-white">
               <p className="text-sm">{error}</p>
             </div>
           </div>
@@ -846,10 +846,10 @@ export default function WhatsAppPhishingPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("Total Campaigns")}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {campaigns.length}
                 </p>
               </div>
@@ -862,10 +862,10 @@ export default function WhatsAppPhishingPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("Active Campaigns")}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {campaigns.filter((c) => c.status === "running").length}
                 </p>
               </div>
@@ -878,10 +878,10 @@ export default function WhatsAppPhishingPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("Total Targets")}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {campaigns.reduce((sum, c) => sum + c.targetUsers.length, 0)}
                 </p>
               </div>
@@ -894,8 +894,8 @@ export default function WhatsAppPhishingPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">{t("Completed")}</p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Completed")}</p>
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {campaigns.filter((c) => c.status === "completed").length}
                 </p>
               </div>
@@ -910,27 +910,27 @@ export default function WhatsAppPhishingPage() {
         <div className="relative z-10">
           <div className="dashboard-card rounded-lg p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-white mb-2">
+              <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">
                 {t("Recent Campaigns")}
               </h3>
-              <p className="text-sm text-[var(--medium-grey)]">
+              <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                 {t("Manage your WhatsApp phishing awareness campaigns")}
               </p>
             </div>
 
             {loading ? (
               <div className="text-center py-8">
-                <div className="text-[var(--medium-grey)]">
+                <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("Loading campaigns...")}
                 </div>
               </div>
             ) : campaigns.length === 0 ? (
               <div className="text-center py-12">
-                <MessageSquare className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <MessageSquare className="w-16 h-16 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">
                   {t("No campaigns yet")}
                 </h3>
-                <p className="text-sm text-[var(--medium-grey)]">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("WhatsApp phishing campaigns will appear here once they are created")}
                 </p>
               </div>
@@ -939,7 +939,7 @@ export default function WhatsAppPhishingPage() {
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign._id}
-                    className="bg-[var(--navy-blue-lighter)] rounded-lg p-4"
+                    className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-lighter)] rounded-lg p-4 border border-[var(--dashboard-card-border)] dark:border-transparent"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
@@ -947,10 +947,10 @@ export default function WhatsAppPhishingPage() {
                           {getStatusIcon(campaign.status)}
                         </div>
                         <div>
-                          <h4 className="text-sm font-semibold text-white">
+                          <h4 className="text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
                             {t(campaign.name)}
                           </h4>
-                          <p className="text-xs text-[var(--medium-grey)]">
+                          <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                             {t(campaign.description)}
                           </p>
                         </div>
@@ -963,7 +963,7 @@ export default function WhatsAppPhishingPage() {
                         >
                           {t(campaign.status)}
                         </span>
-                        <button className="p-1 text-[var(--medium-grey)] hover:text-white transition-colors">
+                        <button className="p-1 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors">
                           <svg
                             className="w-4 h-4"
                             fill="none"
@@ -983,37 +983,37 @@ export default function WhatsAppPhishingPage() {
 
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-xs mb-3">
                       <div>
-                        <p className="text-[var(--medium-grey)]">{t("Targets")}</p>
-                        <p className="text-white font-semibold">
+                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Targets")}</p>
+                        <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
                           {campaign.targetUsers.length}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">{t("Sent")}</p>
-                        <p className="text-white font-semibold">
+                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Sent")}</p>
+                        <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
                           {campaign.stats.totalSent}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">{t("Delivered")}</p>
-                        <p className="text-white font-semibold">
+                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivered")}</p>
+                        <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
                           {campaign.stats.totalDelivered}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">{t("Read")}</p>
-                        <p className="text-white font-semibold">
+                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Read")}</p>
+                        <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
                           {campaign.stats.totalRead}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">{t("Clicked")}</p>
-                        <p className="text-white font-semibold">
+                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Clicked")}</p>
+                        <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
                           {campaign.stats.totalClicked ?? 0}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[var(--medium-grey)]">{t("Credentials entered")}</p>
+                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Credentials entered")}</p>
                         <p className="text-amber-400 font-semibold">
                           {campaign.stats.totalReported ?? 0}
                         </p>
@@ -1025,7 +1025,7 @@ export default function WhatsAppPhishingPage() {
                       {campaign.status === "scheduled" && (
                         <button
                           onClick={() => handleStartCampaign(campaign._id)}
-                          className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                          className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
                         >
                           <Play className="w-3 h-3" />
                           {t("Start Now")}
@@ -1034,7 +1034,7 @@ export default function WhatsAppPhishingPage() {
                       {campaign.status === "draft" && (
                         <button
                           onClick={() => handleStartCampaign(campaign._id)}
-                          className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                          className="flex items-center gap-2 px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
                         >
                           <Play className="w-3 h-3" />
                           {t("Start Campaign")}
@@ -1052,20 +1052,20 @@ export default function WhatsAppPhishingPage() {
       {/* Template Preview Modal */}
       {selectedTemplatePreview && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-[var(--navy-blue)] rounded-2xl p-6 max-w-2xl w-full border border-[var(--neon-blue)]/30">
+          <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue)] rounded-2xl p-6 max-w-2xl w-full border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/30">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">{t(selectedTemplatePreview.title)}</h3>
+              <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t(selectedTemplatePreview.title)}</h3>
               <button
                 onClick={() => setSelectedTemplatePreview(null)}
-                className="text-[var(--medium-grey)] hover:text-white transition-colors"
+                className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 mb-4">
-              <p className="text-white whitespace-pre-wrap font-mono text-sm">{t(selectedTemplatePreview.content)}</p>
+            <div className="bg-gray-50 dark:bg-[var(--navy-blue-lighter)] rounded-lg p-4 mb-4 border border-gray-200 dark:border-transparent">
+              <p className="text-[var(--dashboard-text-primary)] dark:text-white whitespace-pre-wrap font-mono text-sm">{t(selectedTemplatePreview.content)}</p>
             </div>
             <button
               onClick={() => {
@@ -1079,7 +1079,7 @@ export default function WhatsAppPhishingPage() {
                 setSelectedTemplatePreview(null);
                 setShowCreateModal(true);
               }}
-              className="w-full px-4 py-3 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors font-semibold"
+              className="w-full px-4 py-3 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors font-semibold"
             >
               {t("Use This Template")}
             </button>

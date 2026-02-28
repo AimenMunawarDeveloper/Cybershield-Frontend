@@ -197,12 +197,12 @@ export default function CampaignDetailModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--navy-blue-light)] rounded-2xl p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)] rounded-2xl p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto border border-[var(--dashboard-card-border)] dark:border-transparent">
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex-1">
-            <h2 className="text-2xl font-bold text-white mb-2">{campaign.name}</h2>
-            <p className="text-[var(--medium-grey)]">{campaign.description}</p>
+            <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-2">{campaign.name}</h2>
+            <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{campaign.description}</p>
             
             <div className="flex gap-3 mt-4">
               {campaign.emailConfig.enabled && (
@@ -225,20 +225,20 @@ export default function CampaignDetailModal({
           
           <button
             onClick={onClose}
-            className="text-[var(--medium-grey)] hover:text-white transition-colors"
+            className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-[var(--medium-grey)]/20">
+        <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-[var(--medium-grey)]/20">
           <button
             onClick={() => setActiveTab("overview")}
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === "overview"
                 ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
-                : "text-[var(--medium-grey)] hover:text-white"
+                : "text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white"
             }`}
           >
             {t("Overview")}
@@ -248,7 +248,7 @@ export default function CampaignDetailModal({
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === "targets"
                 ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
-                : "text-[var(--medium-grey)] hover:text-white"
+                : "text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white"
             }`}
           >
             {t("Target Users")} ({campaign.targetUsers.length})
@@ -258,7 +258,7 @@ export default function CampaignDetailModal({
             className={`px-4 py-2 font-medium transition-colors ${
               activeTab === "analytics"
                 ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
-                : "text-[var(--medium-grey)] hover:text-white"
+                : "text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white"
             }`}
           >
             {t("Analytics")}
@@ -271,58 +271,58 @@ export default function CampaignDetailModal({
             {/* Dates */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {campaign.scheduleDate && (
-                <div className="bg-[var(--navy-blue)] rounded-lg p-4">
+                <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                   <div className="flex items-center gap-2 mb-2">
                     <Calendar className="w-4 h-4 text-[var(--neon-blue)]" />
-                    <span className="text-sm text-[var(--medium-grey)]">{t("Scheduled")}</span>
+                    <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Scheduled")}</span>
                   </div>
-                  <p className="text-white">{formatDate(campaign.scheduleDate)}</p>
+                  <p className="text-[var(--dashboard-text-primary)] dark:text-white">{formatDate(campaign.scheduleDate)}</p>
                 </div>
               )}
               {campaign.startDate && (
-                <div className="bg-[var(--navy-blue)] rounded-lg p-4">
+                <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                   <div className="flex items-center gap-2 mb-2">
                     <Clock className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-[var(--medium-grey)]">{t("Started")}</span>
+                    <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Started")}</span>
                   </div>
-                  <p className="text-white">{formatDate(campaign.startDate)}</p>
+                  <p className="text-[var(--dashboard-text-primary)] dark:text-white">{formatDate(campaign.startDate)}</p>
                 </div>
               )}
               {campaign.endDate && (
-                <div className="bg-[var(--navy-blue)] rounded-lg p-4">
+                <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle2 className="w-4 h-4 text-purple-400" />
-                    <span className="text-sm text-[var(--medium-grey)]">{t("Completed")}</span>
+                    <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Completed")}</span>
                   </div>
-                  <p className="text-white">{formatDate(campaign.endDate)}</p>
+                  <p className="text-[var(--dashboard-text-primary)] dark:text-white">{formatDate(campaign.endDate)}</p>
                 </div>
               )}
             </div>
 
             {/* Email Config */}
             {campaign.emailConfig.enabled && (
-              <div className="bg-[var(--navy-blue)] rounded-lg p-4 border border-blue-500/30">
+              <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-4 border border-blue-500/30">
                 <div className="flex items-center gap-2 mb-4">
                   <Mail className="w-5 h-5 text-blue-400" />
-                  <h3 className="text-lg font-semibold text-white">{t("Email Configuration")}</h3>
+                  <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Email Configuration")}</h3>
                 </div>
                 <div className="space-y-3">
                   {campaign.emailConfig.senderEmail && (
                     <div>
-                      <span className="text-sm text-[var(--medium-grey)]">{t("Sender")}:</span>
-                      <p className="text-white">{campaign.emailConfig.senderEmail}</p>
+                      <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Sender")}:</span>
+                      <p className="text-[var(--dashboard-text-primary)] dark:text-white">{campaign.emailConfig.senderEmail}</p>
                     </div>
                   )}
                   {campaign.emailConfig.subject && (
                     <div>
-                      <span className="text-sm text-[var(--medium-grey)]">{t("Subject")}:</span>
-                      <p className="text-white">{campaign.emailConfig.subject}</p>
+                      <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Subject")}:</span>
+                      <p className="text-[var(--dashboard-text-primary)] dark:text-white">{campaign.emailConfig.subject}</p>
                     </div>
                   )}
                   {campaign.emailConfig.bodyContent && (
                     <div>
-                      <span className="text-sm text-[var(--medium-grey)]">{t("Body")}:</span>
-                      <p className="text-white text-sm line-clamp-3">{campaign.emailConfig.bodyContent}</p>
+                      <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Body")}:</span>
+                      <p className="text-[var(--dashboard-text-primary)] dark:text-white text-sm line-clamp-3">{campaign.emailConfig.bodyContent}</p>
                     </div>
                   )}
                 </div>
@@ -331,22 +331,22 @@ export default function CampaignDetailModal({
 
             {/* WhatsApp Config */}
             {campaign.whatsappConfig.enabled && (
-              <div className="bg-[var(--navy-blue)] rounded-lg p-4 border border-green-500/30">
+              <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-4 border border-green-500/30">
                 <div className="flex items-center gap-2 mb-4">
                   <MessageSquare className="w-5 h-5 text-green-400" />
-                  <h3 className="text-lg font-semibold text-white">{t("WhatsApp Configuration")}</h3>
+                  <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("WhatsApp Configuration")}</h3>
                 </div>
                 <div className="space-y-3">
                   {campaign.whatsappConfig.messageTemplate && (
                     <div>
-                      <span className="text-sm text-[var(--medium-grey)]">{t("Message")}:</span>
-                      <p className="text-white text-sm whitespace-pre-wrap">{campaign.whatsappConfig.messageTemplate}</p>
+                      <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Message")}:</span>
+                      <p className="text-[var(--dashboard-text-primary)] dark:text-white text-sm whitespace-pre-wrap">{campaign.whatsappConfig.messageTemplate}</p>
                     </div>
                   )}
                   {campaign.whatsappConfig.landingPageUrl && (
                     <div>
-                      <span className="text-sm text-[var(--medium-grey)]">{t("Landing Page")}:</span>
-                      <p className="text-white text-sm">{campaign.whatsappConfig.landingPageUrl}</p>
+                      <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Landing Page")}:</span>
+                      <p className="text-[var(--dashboard-text-primary)] dark:text-white text-sm">{campaign.whatsappConfig.landingPageUrl}</p>
                     </div>
                   )}
                 </div>
@@ -360,11 +360,11 @@ export default function CampaignDetailModal({
             {campaign.targetUsers.map((target, index) => (
               <div
                 key={index}
-                className="bg-[var(--navy-blue)] rounded-lg p-4 border border-[var(--medium-grey)]/20"
+                className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-4 border border-gray-200 dark:border-[var(--medium-grey)]/20"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-white font-medium mb-2">{target.name}</p>
+                    <p className="text-[var(--dashboard-text-primary)] dark:text-white font-medium mb-2">{target.name}</p>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* Email Status */}
@@ -372,14 +372,14 @@ export default function CampaignDetailModal({
                         <div className="flex items-start gap-3">
                           <Mail className="w-4 h-4 text-blue-400 mt-1" />
                           <div>
-                            <p className="text-sm text-[var(--medium-grey)]">
+                            <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                               {target.email || t("No email")}
                             </p>
                             <p className={`text-sm font-medium ${getStatusColor(target.emailStatus)}`}>
                               {t(target.emailStatus.replace("_", " ").charAt(0).toUpperCase() + target.emailStatus.slice(1).replace("_", " "))}
                             </p>
                             {target.emailSentAt && (
-                              <p className="text-xs text-[var(--medium-grey)] mt-1">
+                              <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
                                 {t("Sent")}: {formatDate(target.emailSentAt)}
                               </p>
                             )}
@@ -407,14 +407,14 @@ export default function CampaignDetailModal({
                         <div className="flex items-start gap-3">
                           <MessageSquare className="w-4 h-4 text-green-400 mt-1" />
                           <div>
-                            <p className="text-sm text-[var(--medium-grey)]">
+                            <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                               {target.phoneNumber || t("No phone")}
                             </p>
                             <p className={`text-sm font-medium ${getStatusColor(target.whatsappStatus)}`}>
                               {t(target.whatsappStatus.replace("_", " ").charAt(0).toUpperCase() + target.whatsappStatus.slice(1).replace("_", " "))}
                             </p>
                             {target.whatsappSentAt && (
-                              <p className="text-xs text-[var(--medium-grey)] mt-1">
+                              <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
                                 {t("Sent")}: {formatDate(target.whatsappSentAt)}
                               </p>
                             )}
@@ -439,74 +439,74 @@ export default function CampaignDetailModal({
             {loadingAnalytics ? (
               <div className="text-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--neon-blue)] mx-auto mb-4"></div>
-                <p className="text-[var(--medium-grey)]">{t("Loading analytics...")}</p>
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Loading analytics...")}</p>
               </div>
             ) : analytics ? (
               <>
                 {/* Email Analytics */}
                 {analytics.email.enabled && (
-                  <div className="bg-[var(--navy-blue)] rounded-lg p-6 border border-blue-500/30">
+                  <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-6 border border-blue-500/30">
                     <div className="flex items-center gap-2 mb-6">
                       <Mail className="w-5 h-5 text-blue-400" />
-                      <h3 className="text-lg font-semibold text-white">{t("Email Analytics")}</h3>
+                      <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Email Analytics")}</h3>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <Send className="w-4 h-4 text-blue-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Sent")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Sent")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.email.totalSent}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.totalSent}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle2 className="w-4 h-4 text-green-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Delivered")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivered")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.email.totalDelivered}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.totalDelivered}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <Eye className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Opened")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Opened")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.email.totalOpened}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.totalOpened}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <MousePointerClick className="w-4 h-4 text-yellow-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Clicked")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Clicked")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.email.totalClicked}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.totalClicked}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Credentials entered")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Credentials entered")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.email.totalReported}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.totalReported}</p>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Delivery Rate")}</span>
-                        <p className="text-xl font-bold text-white">{analytics.email.deliveryRate}%</p>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivery Rate")}</span>
+                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.deliveryRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Open Rate")}</span>
-                        <p className="text-xl font-bold text-white">{analytics.email.openRate}%</p>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Open Rate")}</span>
+                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.openRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Click Rate")}</span>
-                        <p className="text-xl font-bold text-white">{analytics.email.clickRate}%</p>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Click Rate")}</span>
+                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.email.clickRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Failed")}</span>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Failed")}</span>
                         <p className="text-xl font-bold text-red-400">{analytics.email.totalFailed}</p>
                       </div>
                     </div>
@@ -515,72 +515,72 @@ export default function CampaignDetailModal({
 
                 {/* WhatsApp Analytics */}
                 {analytics.whatsapp.enabled && (
-                  <div className="bg-[var(--navy-blue)] rounded-lg p-6 border border-green-500/30">
+                  <div className="bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg p-6 border border-green-500/30">
                     <div className="flex items-center gap-2 mb-6">
                       <MessageSquare className="w-5 h-5 text-green-400" />
-                      <h3 className="text-lg font-semibold text-white">{t("WhatsApp Analytics")}</h3>
+                      <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("WhatsApp Analytics")}</h3>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <Send className="w-4 h-4 text-green-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Sent")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Sent")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalSent}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.totalSent}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <CheckCircle2 className="w-4 h-4 text-green-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Delivered")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivered")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalDelivered}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.totalDelivered}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <Eye className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Read")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Read")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalRead}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.totalRead}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
                           <MousePointerClick className="w-4 h-4 text-yellow-400" />
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Clicked")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Clicked")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalClicked}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.totalClicked}</p>
                       </div>
                       
-                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-[var(--medium-grey)]">{t("Credentials entered")}</span>
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Credentials entered")}</span>
                         </div>
-                        <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalReported ?? 0}</p>
+                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.totalReported ?? 0}</p>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Delivery Rate")}</span>
-                        <p className="text-xl font-bold text-white">{analytics.whatsapp.deliveryRate}%</p>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivery Rate")}</span>
+                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.deliveryRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Read Rate")}</span>
-                        <p className="text-xl font-bold text-white">{analytics.whatsapp.readRate}%</p>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Read Rate")}</span>
+                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.readRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Click Rate")}</span>
-                        <p className="text-xl font-bold text-white">{analytics.whatsapp.clickRate}%</p>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Click Rate")}</span>
+                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.clickRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Report rate")}</span>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Report rate")}</span>
                         <p className="text-xl font-bold text-amber-400">{analytics.whatsapp.reportRate ?? 0}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--medium-grey)]">{t("Failed")}</span>
+                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Failed")}</span>
                         <p className="text-xl font-bold text-red-400">{analytics.whatsapp.totalFailed}</p>
                       </div>
                     </div>
@@ -589,8 +589,8 @@ export default function CampaignDetailModal({
               </>
             ) : (
               <div className="text-center py-12">
-                <TrendingUp className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                <p className="text-[var(--medium-grey)]">{t("No analytics available")}</p>
+                <TrendingUp className="w-16 h-16 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mx-auto mb-4" />
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("No analytics available")}</p>
               </div>
             )}
           </div>

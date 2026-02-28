@@ -325,7 +325,7 @@ export default function SimulationsPage() {
 
   if (hasAccess === null) {
     return (
-      <div className="p-8 text-center text-white">
+      <div className="p-8 text-center text-[var(--dashboard-text-primary)] dark:text-white">
         <p>{t("Loading...")}</p>
       </div>
     );
@@ -333,9 +333,9 @@ export default function SimulationsPage() {
 
   if (hasAccess === false) {
     return (
-      <div className="p-8 text-center text-white">
+      <div className="p-8 text-center text-[var(--dashboard-text-primary)] dark:text-white">
         <h1 className="text-2xl font-semibold">{t("Access Restricted")}</h1>
-        <p className="mt-2 text-sm text-gray-300">
+        <p className="mt-2 text-sm text-[var(--dashboard-text-secondary)] dark:text-gray-300">
           {accessError ||
             t("This page is available to system and client administrators only.")}
         </p>
@@ -349,7 +349,7 @@ export default function SimulationsPage() {
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)] text-lg">
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
@@ -373,29 +373,29 @@ export default function SimulationsPage() {
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
                 {t("Campaign Simulations")}
                 <span className="block text-[var(--neon-blue)] mt-1">
                   {t("Unified Multi-Channel Security Training")}
                 </span>
               </h1>
               
-              <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
                 {t("Create and manage comprehensive phishing campaigns across WhatsApp and Email channels simultaneously.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <MessageSquare className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Multi-Channel")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Multi-Channel")}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <BarChart3 className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Unified Analytics")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Unified Analytics")}</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
                   <Calendar className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Smart Scheduling")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Smart Scheduling")}</span>
                 </div>
               </div>
             </div>
@@ -408,14 +408,14 @@ export default function SimulationsPage() {
             {/* Header with Create Button */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-white">{t("All Campaigns")}</h2>
-                <p className="text-[var(--medium-grey)] mt-1">
+                <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("All Campaigns")}</h2>
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
                   {t("Manage your multi-channel phishing simulations")}
                 </p>
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-xl hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] dark:to-black text-white rounded-xl hover:from-[var(--medium-blue)] dark:hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
               >
                 <Plus className="w-5 h-5" />
                 {t("Create Campaign")}
@@ -436,15 +436,15 @@ export default function SimulationsPage() {
                 <div className="w-20 h-20 bg-[var(--neon-blue)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-10 h-10 text-[var(--neon-blue)]" />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-2">
+                <h3 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">
                   {t("No campaigns yet")}
                 </h3>
-                <p className="text-[var(--medium-grey)] mb-6">
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-6">
                   {t("Create your first unified campaign to get started")}
                 </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-black text-white rounded-xl hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] dark:to-black text-white rounded-xl hover:from-[var(--medium-blue)] dark:hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
                 >
                   <Plus className="w-5 h-5" />
                   {t("Create Campaign")}
@@ -461,10 +461,10 @@ export default function SimulationsPage() {
                     <div className="p-6 flex flex-col flex-1">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                          <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
                             {campaign.name}
                           </h3>
-                          <p className="text-sm text-[var(--medium-grey)] line-clamp-2">
+                          <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] line-clamp-2">
                             {campaign.description}
                           </p>
                         </div>
@@ -501,18 +501,18 @@ export default function SimulationsPage() {
                         <div className="bg-[var(--navy-blue)] rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-1">
                             <Users className="w-4 h-4 text-[var(--neon-blue)]" />
-                            <span className="text-xs text-[var(--medium-grey)]">{t("Targets")}</span>
+                            <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Targets")}</span>
                           </div>
-                          <p className="text-xl font-bold text-white">
+                          <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                             {campaign.targetUsers.length}
                           </p>
                         </div>
                         <div className="bg-[var(--navy-blue)] rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-1">
                             <CheckCircle2 className="w-4 h-4 text-green-400" />
-                            <span className="text-xs text-[var(--medium-grey)]">{t("Sent")}</span>
+                            <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Sent")}</span>
                           </div>
-                          <p className="text-xl font-bold text-white">
+                          <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                             {(campaign.stats.totalEmailSent || 0) + (campaign.stats.totalWhatsappSent || 0)}
                           </p>
                         </div>
@@ -520,7 +520,7 @@ export default function SimulationsPage() {
 
                       {/* Dates */}
                       {campaign.scheduleDate && (
-                        <div className="flex items-center gap-2 text-xs text-[var(--medium-grey)] mb-4">
+                        <div className="flex items-center gap-2 text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-4">
                           <Clock className="w-3 h-3" />
                           <span>{t("Scheduled")}: {formatDate(campaign.scheduleDate)}</span>
                         </div>

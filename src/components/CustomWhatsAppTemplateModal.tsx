@@ -51,61 +51,61 @@ export default function CustomWhatsAppTemplateModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-[var(--neon-blue)]/20">
+      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">{t("Custom Template")}</h2>
+          <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Custom Template")}</h2>
           <button
             onClick={handleClose}
             disabled={isLoading}
-            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors disabled:opacity-50"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-[var(--dashboard-text-primary)] dark:text-white" />
           </button>
         </div>
 
-        <p className="text-sm text-[var(--medium-grey)] mb-4">
+        <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-4">
           {t("Create a custom WhatsApp phishing template. Add a landing page URL (optional) and the message body. The template will be saved to the list above.")}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              {t("Template name")} <span className="text-[var(--medium-grey)]">({t("optional")})</span>
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              {t("Template name")} <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">({t("optional")})</span>
             </label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("e.g. Custom Prize Notification")}
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Link className="w-4 h-4 inline mr-2" />
-              {t("Landing page URL")} <span className="text-[var(--medium-grey)]">({t("optional")})</span>
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <Link className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
+              {t("Landing page URL")} <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">({t("optional")})</span>
             </label>
             <input
               type="url"
               value={landingPageUrl}
               onChange={(e) => setLandingPageUrl(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder="https://example.com/phishing-page"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <MessageSquare className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <MessageSquare className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Message body")} <span className="text-red-400">*</span>
             </label>
             <textarea
               value={messageTemplate}
               onChange={(e) => setMessageTemplate(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("Enter the WhatsApp message content")}
               rows={6}
               required
@@ -118,14 +118,14 @@ export default function CustomWhatsAppTemplateModal({
               type="button"
               onClick={handleClose}
               disabled={isLoading}
-              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors disabled:opacity-50"
             >
               {t("Cancel")}
             </button>
             <button
               type="submit"
               disabled={isLoading || !messageTemplate.trim()}
-              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading ? (
                 <>

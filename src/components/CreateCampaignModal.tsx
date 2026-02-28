@@ -215,20 +215,20 @@ export default function CreateCampaignModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-[var(--dashboard-card-border)] dark:border-transparent">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">{t("Create New Campaign")}</h2>
+          <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Create New Campaign")}</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-[var(--dashboard-text-primary)] dark:text-white" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
               {t("Campaign Name")}
             </label>
             <input
@@ -237,13 +237,13 @@ export default function CreateCampaignModal({
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("Enter campaign name")}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
               {t("Description")}
             </label>
             <textarea
@@ -254,14 +254,14 @@ export default function CreateCampaignModal({
                   description: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("Describe the campaign purpose")}
               rows={3}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
               {t("Message Template")}
             </label>
             <textarea
@@ -272,15 +272,15 @@ export default function CreateCampaignModal({
                   messageTemplate: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("Enter the phishing simulation message")}
               rows={6}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Link className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <Link className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Landing Page URL")}
             </label>
             <input
@@ -292,50 +292,50 @@ export default function CreateCampaignModal({
                   landingPageUrl: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={(process.env.NEXT_PUBLIC_LANDING_BASE_URL || "https://cybershieldlearningportal.vercel.app") + "/ke"}
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-white mb-3">
-              <Users className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-3">
+              <Users className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Target Users")} ({manualUsers.length} {t("selected")})
             </label>
             <div className="mb-4">
               <button
                 type="button"
                 onClick={() => setShowAddUserForm(!showAddUserForm)}
-                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
                 {t("Add User")}
               </button>
             </div>
             {showAddUserForm && (
-              <div className="mb-4 p-4 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--medium-grey)]">
+              <div className="mb-4 p-4 bg-gray-50 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--medium-grey)]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                   <div>
-                    <label className="block text-xs text-[var(--medium-grey)] mb-1">
+                    <label className="block text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-1">
                       {t("Full Name")}
                     </label>
                     <input
                       type="text"
                       value={newUserName}
                       onChange={(e) => setNewUserName(e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--navy-blue)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
                       placeholder={t("Enter full name")}
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[var(--medium-grey)] mb-1">
+                    <label className="block text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-1">
                       {t("Phone Number")}
                     </label>
                     <input
                       type="tel"
                       value={newUserPhone}
                       onChange={(e) => setNewUserPhone(e.target.value)}
-                      className="w-full px-3 py-2 bg-[var(--navy-blue)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
+                      className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none text-sm"
                       placeholder={t("+923001234567")}
                     />
                   </div>
@@ -344,7 +344,7 @@ export default function CreateCampaignModal({
                   <button
                     type="button"
                     onClick={handleAddUser}
-                    className="px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm"
+                    className="px-3 py-1 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
                   >
                     {t("Add")}
                   </button>
@@ -355,7 +355,7 @@ export default function CreateCampaignModal({
                       setNewUserName("");
                       setNewUserPhone("");
                     }}
-                    className="px-3 py-1 text-[var(--medium-grey)] hover:text-white transition-colors text-sm"
+                    className="px-3 py-1 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors text-sm"
                   >
                     {t("Cancel")}
                   </button>
@@ -363,9 +363,9 @@ export default function CreateCampaignModal({
               </div>
             )}
             {manualUsers.length === 0 ? (
-              <div className="text-center py-8 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--medium-grey)]">
-                <Users className="w-12 h-12 text-[var(--medium-grey)] mx-auto mb-2" />
-                <div className="text-[var(--medium-grey)] text-sm">
+              <div className="text-center py-8 bg-gray-50 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--medium-grey)]">
+                <Users className="w-12 h-12 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mx-auto mb-2" />
+                <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                   {t('No users added yet. Click "Add User" to get started.')}
                 </div>
               </div>
@@ -374,13 +374,13 @@ export default function CreateCampaignModal({
                 {manualUsers.map((user) => (
                   <div
                     key={user._id}
-                    className="flex items-center justify-between p-3 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--medium-grey)]"
+                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--medium-grey)]"
                   >
                     <div>
-                      <div className="text-sm font-medium text-white">
+                      <div className="text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white">
                         {t(user.firstName)} {t(user.lastName)}
                       </div>
-                      <div className="text-xs text-[var(--medium-grey)]">
+                      <div className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                         {user.phoneNumber}
                       </div>
                     </div>
@@ -397,8 +397,8 @@ export default function CreateCampaignModal({
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Calendar className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <Calendar className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Schedule Date (Optional)")}
             </label>
             <input
@@ -410,21 +410,21 @@ export default function CreateCampaignModal({
                   scheduleDate: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
             />
           </div>
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors"
+              className="px-4 py-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors"
             >
               {t("Cancel")}
             </button>
             <button
               type="submit"
               onClick={() => console.log("Create Campaign button clicked!")}
-              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
+              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors"
             >
               {t("Create Campaign")}
             </button>
