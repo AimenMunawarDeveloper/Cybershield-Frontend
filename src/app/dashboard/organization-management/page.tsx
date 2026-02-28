@@ -15,7 +15,7 @@ interface User {
   status: "invited" | "active" | "suspended";
   groups: string[];
   points?: number;
-  riskScore?: number;
+  learningScore?: number;
   createdAt: string;
 }
 

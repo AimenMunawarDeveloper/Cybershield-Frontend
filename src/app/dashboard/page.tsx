@@ -21,7 +21,7 @@ interface UserProfile {
   orgId?: string;
   orgName?: string;
   points?: number;
-  riskScore?: number;
+  learningScore?: number;
   emailRiskScore?: number;
 }
 

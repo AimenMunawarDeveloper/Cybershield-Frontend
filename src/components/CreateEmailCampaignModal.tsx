@@ -26,6 +26,13 @@ interface User {
   _id: string;
   email: string;
   displayName: string;
+  role?: string;
+}
+
+interface UserProfile {
+  _id: string;
+  orgId?: string;
+  role: string;
 }
 
 export default function CreateEmailCampaignModal({
@@ -40,6 +47,9 @@ export default function CreateEmailCampaignModal({
   const { getToken } = useAuth();
   const HARDCODED_SENDER_EMAIL = "cybershieldlearningportal@gmail.com";
   
+  // User profile for RBAC
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  
   const [formData, setFormData] = useState<EmailCampaignData>({
     sentBy: HARDCODED_SENDER_EMAIL,
     sentTo: "",
@@ -51,24 +61,57 @@ export default function CreateEmailCampaignModal({
   const [loadingUsers, setLoadingUsers] = useState(false);
 
 
-  // Fetch all users from database
+  // Fetch user profile for RBAC
   useEffect(() => {
     if (isLoaded && user && isOpen) {
+      const fetchProfile = async () => {
+        try {
+          const apiClient = new ApiClient(getToken);
+          const profileData = await apiClient.getUserProfile();
+          setProfile(profileData);
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      };
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user, isOpen]);
+
+  // Fetch users from database based on role
+  useEffect(() => {
+    if (isLoaded && user && isOpen && profile) {
       const fetchUsers = async () => {
         try {
           setLoadingUsers(true);
           const apiClient = new ApiClient(getToken);
-          const data = await apiClient.getAllUsers(1, 1000); // Fetch up to 1000 users
-          setAllUsers(data.users || []);
+          
+          if (profile.role === "client_admin" && profile.orgId) {
+            // For client admins: fetch users from their organization
+            const data = await apiClient.getOrgUsers(profile.orgId, 1, 1000);
+            setAllUsers(data.users || []);
+          } else if (profile.role === "system_admin") {
+            // For system admins: fetch all users and filter for non_affiliated only
+            const data = await apiClient.getAllUsers(1, 1000);
+            const nonAffiliatedUsers = (data.users || []).filter(
+              (user: User) => user.role === "non_affiliated"
+            );
+            setAllUsers(nonAffiliatedUsers);
+          } else {
+            // Fallback: empty array for other roles
+            setAllUsers([]);
+          }
         } catch (error) {
           console.error("Error fetching users:", error);
+          setAllUsers([]);
         } finally {
           setLoadingUsers(false);
         }
       };
       fetchUsers();
     }
-  }, [isLoaded, user, isOpen, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user, isOpen, profile]);
 
   // Sync selected users with textarea (only from dropdown selection)
   useEffect(() => {
@@ -87,15 +130,6 @@ export default function CreateEmailCampaignModal({
         subject: initialData.subject || prev.subject,
         bodyContent: initialData.bodyContent || prev.bodyContent,
       }));
-      
-      // If initialData has sentTo, try to match with users
-      if (initialData.sentTo && allUsers.length > 0) {
-        const emails = initialData.sentTo.split(",").map((e) => e.trim()).filter(Boolean);
-        const matchedUsers = allUsers.filter((user) => emails.includes(user.email));
-        if (matchedUsers.length > 0) {
-          setSelectedUsers(matchedUsers);
-        }
-      }
     } else if (!isOpen) {
       setFormData({
         sentBy: HARDCODED_SENDER_EMAIL, // Always use hardcoded email
@@ -104,8 +138,21 @@ export default function CreateEmailCampaignModal({
         bodyContent: "",
       });
       setSelectedUsers([]);
+      setProfile(null);
+      setAllUsers([]);
     }
-  }, [isOpen, initialData, allUsers]);
+  }, [isOpen, initialData]);
+
+  // Match users when allUsers is loaded and initialData has sentTo
+  useEffect(() => {
+    if (isOpen && initialData?.sentTo && allUsers.length > 0) {
+      const emails = initialData.sentTo.split(",").map((e) => e.trim()).filter(Boolean);
+      const matchedUsers = allUsers.filter((user) => emails.includes(user.email));
+      if (matchedUsers.length > 0) {
+        setSelectedUsers(matchedUsers);
+      }
+    }
+  }, [isOpen, initialData?.sentTo, allUsers]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
