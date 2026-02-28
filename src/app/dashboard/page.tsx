@@ -10,6 +10,7 @@ import BarChartCard from "@/components/BarChartCard";
 import DataTable from "@/components/DataTable";
 import ActivityFeed from "@/components/ActivityFeed";
 import FloatingChat from "@/components/FloatingChat";
+import UserEmailRiskSection from "@/components/UserEmailRiskSection";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface UserProfile {
@@ -21,6 +22,7 @@ interface UserProfile {
   orgName?: string;
   points?: number;
   riskScore?: number;
+  emailRiskScore?: number;
 }
 
 export default function DashboardPage() {
@@ -200,9 +202,9 @@ export default function DashboardPage() {
             icon: "star",
           },
           metric3: {
-            label: t("Risk Score"),
-            value: `${profile.riskScore || "3.5"}/10`,
-            change: "-0.8",
+            label: t("Email risk score"),
+            value: typeof profile.emailRiskScore === "number" ? profile.emailRiskScore.toFixed(2) : "0.00",
+            change: "/ 1.00",
             icon: "shield-check",
           },
           metric4: {
@@ -227,9 +229,9 @@ export default function DashboardPage() {
             icon: "star",
           },
           metric3: {
-            label: t("Risk Score"),
-            value: `${profile.riskScore || "5.2"}/10`,
-            change: "-0.5",
+            label: t("Email risk score"),
+            value: typeof profile.emailRiskScore === "number" ? profile.emailRiskScore.toFixed(2) : "0.00",
+            change: "/ 1.00",
             icon: "shield-check",
           },
           metric4: {
@@ -645,6 +647,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* User email risk scores (admins only) */}
+        <UserEmailRiskSection getToken={getToken} profile={profile} />
 
         {/* Area Chart Section */}
         <div className="mt-8 relative z-10">
