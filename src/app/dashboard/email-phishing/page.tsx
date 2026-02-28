@@ -256,7 +256,8 @@ export default function EmailPhishingPage() {
       fetchTemplates();
       fetchEmails();
     }
-  }, [hasAccess, fetchTemplates, fetchEmails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasAccess]);
 
   const handleSendEmail = async (emailData: {
     sentBy: string;

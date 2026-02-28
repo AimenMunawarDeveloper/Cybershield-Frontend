@@ -25,6 +25,13 @@ interface User {
   _id: string;
   email: string;
   displayName: string;
+  role?: string;
+}
+
+interface UserProfile {
+  _id: string;
+  orgId?: string;
+  role: string;
 }
 
 export default function CreateUnifiedCampaignModal({
@@ -40,6 +47,9 @@ export default function CreateUnifiedCampaignModal({
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // User profile for RBAC
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   
   // Campaign basics
   const [name, setName] = useState("");
@@ -81,24 +91,57 @@ export default function CreateUnifiedCampaignModal({
   const [showEmailTemplateSelector, setShowEmailTemplateSelector] = useState(false);
   const [showWhatsappTemplateSelector, setShowWhatsappTemplateSelector] = useState(false);
   
-  // Fetch all users from database
+  // Fetch user profile for RBAC
   useEffect(() => {
     if (isLoaded && user && isOpen) {
+      const fetchProfile = async () => {
+        try {
+          const apiClient = new ApiClient(getToken);
+          const profileData = await apiClient.getUserProfile();
+          setProfile(profileData);
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      };
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user, isOpen]);
+
+  // Fetch users from database based on role
+  useEffect(() => {
+    if (isLoaded && user && isOpen && profile) {
       const fetchUsers = async () => {
         try {
           setLoadingUsers(true);
           const apiClient = new ApiClient(getToken);
-          const data = await apiClient.getAllUsers(1, 1000); // Fetch up to 1000 users
-          setAllUsers(data.users || []);
+          
+          if (profile.role === "client_admin" && profile.orgId) {
+            // For client admins: fetch users from their organization
+            const data = await apiClient.getOrgUsers(profile.orgId, 1, 1000);
+            setAllUsers(data.users || []);
+          } else if (profile.role === "system_admin") {
+            // For system admins: fetch all users and filter for non_affiliated only
+            const data = await apiClient.getAllUsers(1, 1000);
+            const nonAffiliatedUsers = (data.users || []).filter(
+              (user: User) => user.role === "non_affiliated"
+            );
+            setAllUsers(nonAffiliatedUsers);
+          } else {
+            // Fallback: empty array for other roles
+            setAllUsers([]);
+          }
         } catch (error) {
           console.error("Error fetching users:", error);
+          setAllUsers([]);
         } finally {
           setLoadingUsers(false);
         }
       };
       fetchUsers();
     }
-  }, [isLoaded, user, isOpen, getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user, isOpen, profile]);
 
   // Fetch templates
   useEffect(() => {
@@ -189,7 +232,7 @@ export default function CreateUnifiedCampaignModal({
       };
       fetchTemplates();
     }
-  }, [isOpen, emailEnabled, whatsappEnabled, getToken, language, preTranslate]);
+  }, [isOpen, emailEnabled, whatsappEnabled, language, preTranslate]);
 
   const handleSelectEmailTemplate = async (template: any) => {
     // Translate on selection to ensure Urdu is stored even if cache wasn't ready
@@ -229,6 +272,8 @@ export default function CreateUnifiedCampaignModal({
     setShowEmailTemplateSelector(false);
     setShowWhatsappTemplateSelector(false);
     setError(null);
+    setProfile(null);
+    setAllUsers([]);
   };
   
   const handleAddUser = () => {

@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Medal, Globe, Building2, Award, Trophy } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
+import { Medal, Globe, Building2, Award, Trophy, Loader2 } from "lucide-react";
 import NetworkBackground from "@/components/NetworkBackground";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ApiClient } from "@/lib/api";
 
 type LeaderboardType = "global" | "organization";
 
@@ -14,29 +17,11 @@ interface LeaderboardEntry {
   learningScore: number;
 }
 
-// Hardcoded data for demo
-const GLOBAL_LEADERBOARD: LeaderboardEntry[] = [
-  { position: 1, name: "Alex Chen", email: "alex.chen@company.com", learningScore: 98 },
-  { position: 2, name: "Sarah Mitchell", email: "sarah.m@tech.io", learningScore: 95 },
-  { position: 3, name: "James Wilson", email: "j.wilson@enterprise.org", learningScore: 92 },
-  { position: 4, name: "Emma Davis", email: "emma.davis@corp.net", learningScore: 89 },
-  { position: 5, name: "Omar Hassan", email: "o.hassan@global.co", learningScore: 87 },
-  { position: 6, name: "Priya Sharma", email: "priya.s@digital.com", learningScore: 84 },
-  { position: 7, name: "Marcus Johnson", email: "marcus.j@secure.io", learningScore: 81 },
-  { position: 8, name: "Luna Park", email: "luna.park@cyber.shield", learningScore: 79 },
-  { position: 9, name: "David Kim", email: "d.kim@defense.co", learningScore: 76 },
-  { position: 10, name: "Zara Ahmed", email: "z.ahmed@learning.org", learningScore: 73 },
-];
-
-const ORG_LEADERBOARD: LeaderboardEntry[] = [
-  { position: 1, name: "Sarah Mitchell", email: "sarah.m@tech.io", learningScore: 95 },
-  { position: 2, name: "James Wilson", email: "j.wilson@enterprise.org", learningScore: 92 },
-  { position: 3, name: "Emma Davis", email: "emma.davis@corp.net", learningScore: 89 },
-  { position: 4, name: "Marcus Johnson", email: "marcus.j@secure.io", learningScore: 81 },
-  { position: 5, name: "Luna Park", email: "luna.park@cyber.shield", learningScore: 79 },
-  { position: 6, name: "David Kim", email: "d.kim@defense.co", learningScore: 76 },
-  { position: 7, name: "Zara Ahmed", email: "z.ahmed@learning.org", learningScore: 73 },
-];
+interface UserProfile {
+  _id: string;
+  orgId?: string;
+  role: string;
+}
 
 function getOrdinal(n: number): string {
   const s = ["th", "st", "nd", "rd"];
@@ -46,9 +31,120 @@ function getOrdinal(n: number): string {
 
 export default function LeaderboardsPage() {
   const { t } = useTranslation();
+  const { getToken } = useAuth();
+  const { user, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState<LeaderboardType>("global");
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [orgLeaderboard, setOrgLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const entries = activeTab === "global" ? GLOBAL_LEADERBOARD : ORG_LEADERBOARD;
+  // Fetch user profile
+  useEffect(() => {
+    if (isLoaded && user) {
+      const fetchProfile = async () => {
+        try {
+          const apiClient = new ApiClient(getToken);
+          const profileData = await apiClient.getUserProfile();
+          setProfile(profileData);
+        } catch (error) {
+          console.error("Error fetching profile:", error);
+        }
+      };
+      fetchProfile();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user]);
+
+  // Fetch global leaderboard (only non_affiliated users sorted by learningScore)
+  useEffect(() => {
+    if (isLoaded && user) {
+      const fetchGlobalLeaderboard = async () => {
+        try {
+          setLoading(true);
+          const apiClient = new ApiClient(getToken);
+          const data = await apiClient.getAllUsers(1, 1000);
+          
+          // Filter to only show non_affiliated users and sort by learningScore descending
+          const users = (data.users || [])
+            .filter((u: any) => u.role === "non_affiliated")
+            .map((u: any) => ({
+              position: 0, // Will be set after sorting
+              name: u.displayName || u.email,
+              email: u.email,
+              learningScore: u.learningScore || 0,
+            }))
+            .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.learningScore - a.learningScore)
+            .map((entry: LeaderboardEntry, index: number) => ({
+              ...entry,
+              position: index + 1,
+            }));
+          
+          setGlobalLeaderboard(users);
+        } catch (error) {
+          console.error("Error fetching global leaderboard:", error);
+          setGlobalLeaderboard([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchGlobalLeaderboard();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user]);
+
+  // Fetch organization leaderboard
+  useEffect(() => {
+    if (isLoaded && user && profile && profile.orgId) {
+      const fetchOrgLeaderboard = async () => {
+        try {
+          const apiClient = new ApiClient(getToken);
+          // Ensure orgId is a string
+          const orgIdString = typeof profile.orgId === 'string' ? profile.orgId : String(profile.orgId);
+          const data = await apiClient.getOrgUsers(orgIdString, 1, 1000);
+          
+          console.log("Org users data:", data); // Debug log
+          console.log("Total users fetched:", data.users?.length || 0); // Debug log
+          
+          // Filter out only system_admin (they don't belong to specific orgs)
+          // Show all users in the organization: affiliated users and client_admin (they belong to the org)
+          const allUsers = data.users || [];
+          const orgUsers = allUsers.filter((u: any) => u.role !== "system_admin");
+          
+          console.log("Org users (excluding system_admin):", orgUsers.length); // Debug log
+          console.log("User roles in org:", allUsers.map((u: any) => ({ email: u.email, role: u.role }))); // Debug log
+          
+          const users = orgUsers
+            .map((u: any) => ({
+              position: 0, // Will be set after sorting
+              name: u.displayName || u.email,
+              email: u.email,
+              learningScore: u.learningScore || 0,
+            }))
+            .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.learningScore - a.learningScore)
+            .map((entry: LeaderboardEntry, index: number) => ({
+              ...entry,
+              position: index + 1,
+            }));
+          
+          console.log("Filtered org leaderboard users:", users); // Debug log
+          setOrgLeaderboard(users);
+        } catch (error) {
+          console.error("Error fetching organization leaderboard:", error);
+          console.error("Error details:", error instanceof Error ? error.message : String(error));
+          setOrgLeaderboard([]);
+        }
+      };
+      fetchOrgLeaderboard();
+    } else if (profile && !profile.orgId) {
+      // User doesn't have an organization
+      console.log("User has no orgId, setting org leaderboard to empty");
+      setOrgLeaderboard([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoaded, user, profile]);
+
+  const entries = activeTab === "global" ? globalLeaderboard : orgLeaderboard;
   const topThree = entries.slice(0, 3);
   // Podium order: 2nd (left), 1st (center), 3rd (right)
   const podiumOrder = [topThree[1], topThree[0], topThree[2]];
@@ -74,6 +170,19 @@ export default function LeaderboardsPage() {
       .join("")
       .slice(0, 2)
       .toUpperCase();
+
+  if (loading || !isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-[var(--neon-blue)] mx-auto mb-4" />
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)]">
+            {t("Loading leaderboard...")}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
@@ -105,12 +214,13 @@ export default function LeaderboardsPage() {
       <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Top 3 Podium */}
-          <div className="mb-14">
-            <h2 className="text-center text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] mb-8">
-              {t("Top 3")}
-            </h2>
-            <div className="grid grid-cols-3 gap-4 items-end max-w-2xl mx-auto">
-              {podiumOrder.map((entry) => (
+          {topThree.length > 0 && (
+            <div className="mb-14">
+              <h2 className="text-center text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] mb-8">
+                {t("Top 3")}
+              </h2>
+              <div className="grid grid-cols-3 gap-4 items-end max-w-2xl mx-auto">
+                {podiumOrder.filter(Boolean).map((entry) => (
                 <div
                   key={`podium-${activeTab}-${entry.position}`}
                   className="flex flex-col items-center"
@@ -151,9 +261,20 @@ export default function LeaderboardsPage() {
                     {entry.position}
                   </div>
                 </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
+          {topThree.length === 0 && (
+            <div className="mb-14 text-center">
+              <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
+                {activeTab === "global"
+                  ? t("No users found for global leaderboard.")
+                  : t("No users found in your organization.")}
+              </p>
+            </div>
+          )}
 
           {/* Tabs: Global | Organization */}
           <div className="flex justify-center mb-10">
@@ -193,8 +314,9 @@ export default function LeaderboardsPage() {
           </div>
 
           {/* Leaderboard list */}
-          <ul className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 overflow-hidden bg-white dark:bg-[var(--navy-blue)]/40">
-            {entries.map((entry, index) => (
+          {entries.length > 0 ? (
+            <ul className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 overflow-hidden bg-white dark:bg-[var(--navy-blue)]/40">
+              {entries.map((entry, index) => (
               <li
                 key={`${activeTab}-${entry.position}-${entry.email}`}
                 className={`grid grid-cols-[auto_1fr_auto] gap-4 items-center px-4 py-4 border-b border-gray-200 dark:border-[var(--neon-blue)]/10 last:border-b-0 ${
@@ -223,8 +345,17 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
               </li>
-            ))}
-          </ul>
+              ))}
+            </ul>
+          ) : (
+            <div className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 bg-white dark:bg-[var(--navy-blue)]/40 p-8 text-center">
+              <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
+                {activeTab === "global"
+                  ? t("No users found for global leaderboard.")
+                  : t("No users found in your organization.")}
+              </p>
+            </div>
+          )}
 
           <p className="mt-6 text-center text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
             {activeTab === "global"

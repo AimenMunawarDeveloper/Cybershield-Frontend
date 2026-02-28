@@ -18,10 +18,17 @@ interface Organization {
   createdAt: string;
 }
 
+interface UserProfile {
+  _id: string;
+  orgId?: string;
+  role: string;
+}
+
 export default function SystemAdminPanel() {
   const { t, preTranslate, language } = useTranslation();
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -101,6 +108,8 @@ export default function SystemAdminPanel() {
         "Syncing users from Clerk...",
         "User sync completed",
         "User sync failed",
+        "This page is only accessible to System Administrators.",
+        "Failed to fetch profile",
       ];
 
       await preTranslate(staticStrings);
@@ -112,10 +121,17 @@ export default function SystemAdminPanel() {
 
   useEffect(() => {
     if (isLoaded && user) {
-      fetchOrganizations();
+      fetchProfile();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, user]);
+
+  useEffect(() => {
+    if (profile?.role === "system_admin") {
+      fetchOrganizations();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -130,6 +146,16 @@ export default function SystemAdminPanel() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownOpen]);
+
+  const fetchProfile = async () => {
+    try {
+      const apiClient = new ApiClient(getToken);
+      const profileData = await apiClient.getUserProfile();
+      setProfile(profileData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("Failed to fetch profile"));
+    }
+  };
 
   const fetchOrganizations = async () => {
     try {
@@ -256,7 +282,7 @@ export default function SystemAdminPanel() {
     }
   };
 
-  if (!isLoaded || !translationReady) {
+  if (!isLoaded || !translationReady || (user && !profile)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -276,6 +302,25 @@ export default function SystemAdminPanel() {
           <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-4">{t("Access Denied")}</h1>
           <p className="text-[var(--dashboard-text-secondary)] mb-4">
             {t("Please sign in to access this page.")}
+          </p>
+          <Link
+            href="/dashboard"
+            className="text-[var(--neon-blue)] hover:opacity-80 transition-colors"
+          >
+            {t("← Back to Dashboard")}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (profile && profile.role !== "system_admin") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-4">{t("Access Denied")}</h1>
+          <p className="text-[var(--dashboard-text-secondary)] mb-4">
+            {t("This page is only accessible to System Administrators.")}
           </p>
           <Link
             href="/dashboard"

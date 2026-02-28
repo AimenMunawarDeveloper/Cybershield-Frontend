@@ -22,7 +22,7 @@ interface UserProfile {
   orgName?: string;
   phoneNumber?: string | null;
   points?: number;
-  riskScore?: number;
+  learningScore?: number;
   emailRiskScore?: number;
   whatsappRiskScore?: number;
   lmsRiskScore?: number;

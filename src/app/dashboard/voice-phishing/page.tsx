@@ -164,7 +164,9 @@ export default function VoicePhishingPage() {
   } | null>(null);
   const [showTranscript, setShowTranscript] = useState(false);
   const [templates, setTemplates] = useState<any[]>([]);
+  const [defaultScenarios, setDefaultScenarios] = useState<any[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [loadingDefaultScenarios, setLoadingDefaultScenarios] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [templateForm, setTemplateForm] = useState({
@@ -185,6 +187,8 @@ export default function VoicePhishingPage() {
       scenario_description: string;
     };
   } | null>(null);
+  const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  const [deletingTemplate, setDeletingTemplate] = useState(false);
 
   const conversation = useConversation({
     overrides: conversationOverrides,
@@ -325,6 +329,7 @@ export default function VoicePhishingPage() {
     // Only fetch templates if user is an admin
     if (profile && (profile.role === "system_admin" || profile.role === "client_admin")) {
       fetchTemplates();
+      fetchDefaultScenarios();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile]);
@@ -390,6 +395,13 @@ export default function VoicePhishingPage() {
         "Create Template",
         "No templates found",
         "Create your first scenario template",
+        "Available Templates",
+        "Add these to your templates",
+        "No default scenarios available",
+        "Add",
+        "Added",
+        "Edit Template",
+        "Delete Template",
         "Edit Template",
         "Create Template",
         "Title",
@@ -417,6 +429,10 @@ export default function VoicePhishingPage() {
         "Failed to end conversation. Please check your connection and try again.",
         "An error occurred during the conversation",
         "Are you sure you want to delete this template?",
+        "Delete Template?",
+        "This action cannot be undone.",
+        "Deleting…",
+        "Delete",
       ];
 
       await preTranslate(staticStrings);
@@ -621,6 +637,34 @@ export default function VoicePhishingPage() {
     }
   };
 
+  const fetchDefaultScenarios = async () => {
+    try {
+      setLoadingDefaultScenarios(true);
+      const token = await getToken();
+      if (!token) return;
+
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+      const response = await fetch(`${API_BASE_URL}/voice-phishing-templates/defaults`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setDefaultScenarios(data.data || []);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch default scenarios:", error);
+    } finally {
+      setLoadingDefaultScenarios(false);
+    }
+  };
+
   const handleCreateTemplate = () => {
     setEditingTemplate(null);
     setTemplateForm({
@@ -643,17 +687,22 @@ export default function VoicePhishingPage() {
     setShowTemplateModal(true);
   };
 
-  const handleDeleteTemplate = async (templateId: string) => {
-    if (!confirm(t("Are you sure you want to delete this template?"))) return;
+  const handleDeleteTemplate = (templateId: string) => {
+    setTemplateToDelete(templateId);
+  };
+
+  const confirmDeleteTemplate = async () => {
+    if (!templateToDelete) return;
 
     try {
+      setDeletingTemplate(true);
       const token = await getToken();
       if (!token) return;
 
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
       const response = await fetch(
-        `${API_BASE_URL}/voice-phishing-templates/${templateId}`,
+        `${API_BASE_URL}/voice-phishing-templates/${templateToDelete}`,
         {
           method: "DELETE",
           headers: {
@@ -664,9 +713,12 @@ export default function VoicePhishingPage() {
 
       if (response.ok) {
         await fetchTemplates();
+        setTemplateToDelete(null);
       }
     } catch (error) {
       console.error("Failed to delete template:", error);
+    } finally {
+      setDeletingTemplate(false);
     }
   };
 
@@ -698,6 +750,46 @@ export default function VoicePhishingPage() {
     } catch (error) {
       console.error("Failed to save template:", error);
     }
+  };
+
+  const handleAddDefaultScenario = async (scenario: any) => {
+    try {
+      const token = await getToken();
+      if (!token) return;
+
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
+      const response = await fetch(`${API_BASE_URL}/voice-phishing-templates`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          title: scenario.title,
+          description: scenario.description,
+          type: scenario.type,
+          firstMessage: scenario.firstMessage,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchTemplates();
+      }
+    } catch (error) {
+      console.error("Failed to add default scenario:", error);
+    }
+  };
+
+  // Check if a default scenario has already been added to templates
+  const isDefaultScenarioAdded = (scenario: any) => {
+    return templates.some(
+      (template) =>
+        template.description === scenario.description &&
+        template.firstMessage === scenario.firstMessage &&
+        template.type === scenario.type
+    );
   };
 
   const fetchProfile = async () => {
@@ -1234,6 +1326,117 @@ export default function VoicePhishingPage() {
         </div>
       </div>
 
+      {/* Default Scenarios Section - Only visible to admins */}
+      {isAdmin && (
+        <div className="relative z-10 mt-8">
+          <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
+            <div className="flex items-center gap-3 mb-6">
+              <FileText className="w-6 h-6 text-[var(--neon-blue)]" />
+              <h3 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Available Templates")}</h3>
+              <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
+                ({t("Add these to your templates")})
+              </span>
+            </div>
+
+            {loadingDefaultScenarios ? (
+              <div className="text-center py-12">
+                <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
+              </div>
+            ) : defaultScenarios.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mx-auto mb-4 opacity-50" />
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("No default scenarios available")}</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {defaultScenarios.map((scenario) => {
+                  const isAdded = isDefaultScenarioAdded(scenario);
+                  return (
+                    <div
+                      key={scenario.id}
+                      className="group relative overflow-hidden bg-[var(--navy-blue-lighter)]/80 dark:bg-[var(--navy-blue-lighter)]/80 rounded-2xl border border-[var(--neon-blue)]/10 dark:border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/40 dark:hover:border-[var(--neon-blue)]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--neon-blue)]/10 dark:hover:shadow-[var(--neon-blue)]/20 hover:-translate-y-1"
+                    >
+                      {/* Gradient accent bar */}
+                      <div className={`absolute top-0 left-0 right-0 h-1 ${
+                        scenario.type === "phishing"
+                          ? "bg-gradient-to-r from-yellow-500/50 to-yellow-400/30"
+                          : "bg-gradient-to-r from-green-500/50 to-green-400/30"
+                      }`} />
+                      
+                      <div className="p-5">
+                        {/* Header with badge and action */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-2">
+                            <div className={`p-2 rounded-lg ${
+                              scenario.type === "phishing"
+                                ? "bg-yellow-500/10 dark:bg-yellow-500/20"
+                                : "bg-green-500/10 dark:bg-green-500/20"
+                            }`}>
+                              {scenario.type === "phishing" ? (
+                                <AlertTriangle className={`w-4 h-4 ${
+                                  scenario.type === "phishing"
+                                    ? "text-yellow-400"
+                                    : "text-green-400"
+                                }`} />
+                              ) : (
+                                <CheckCircle className="w-4 h-4 text-green-400" />
+                              )}
+                            </div>
+                            <span
+                              className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                                scenario.type === "phishing"
+                                  ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 dark:border-yellow-500/50"
+                                  : "bg-green-500/20 text-green-400 border border-green-500/40 dark:border-green-500/50"
+                              }`}
+                            >
+                              {scenario.type === "phishing" ? t("Phishing") : t("Normal")}
+                            </span>
+                          </div>
+                          {isAdded ? (
+                            <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 dark:bg-green-500/30 text-green-400 border border-green-500/40 dark:border-green-500/50 text-xs font-medium">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              {t("Added")}
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleAddDefaultScenario(scenario)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/90 transition-all duration-200 text-xs font-semibold shadow-sm hover:shadow-md hover:shadow-[var(--neon-blue)]/30"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              {t("Add")}
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Title */}
+                        <h4 className="text-[var(--dashboard-text-primary)] dark:text-white font-bold text-base mb-3 line-clamp-1 group-hover:text-[var(--neon-blue)] dark:group-hover:text-[var(--neon-blue)] transition-colors">
+                          {scenario.title}
+                        </h4>
+
+                        {/* Description */}
+                        <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-4 line-clamp-2 leading-relaxed">
+                          {scenario.description}
+                        </p>
+
+                        {/* First Message Preview */}
+                        <div className="pt-4 border-t border-[var(--neon-blue)]/10 dark:border-[var(--neon-blue)]/20">
+                          <div className="flex items-start gap-2">
+                            <MessageSquare className="w-4 h-4 text-[var(--neon-blue)] mt-0.5 flex-shrink-0" />
+                            <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] italic line-clamp-2 leading-relaxed">
+                              "{scenario.firstMessage}"
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Templates Management Section - Only visible to admins */}
       {isAdmin && (
         <div className="relative z-10 mt-8">
@@ -1265,44 +1468,82 @@ export default function VoicePhishingPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayTemplates.map((template) => (
                 <div
                   key={template._id}
-                  className="p-4 bg-[var(--navy-blue-lighter)]/80 rounded-xl border border-[var(--neon-blue)]/10 hover:border-[var(--neon-blue)]/30 transition-all group hover:scale-[1.02]"
+                  className="group relative overflow-hidden bg-[var(--navy-blue-lighter)]/80 dark:bg-[var(--navy-blue-lighter)]/80 rounded-2xl border border-[var(--neon-blue)]/10 dark:border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/40 dark:hover:border-[var(--neon-blue)]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--neon-blue)]/10 dark:hover:shadow-[var(--neon-blue)]/20 hover:-translate-y-1"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <span
-                      className={`text-xs px-3 py-1 rounded-full font-medium ${
-                        template.type === "phishing"
-                          ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
-                          : "bg-green-500/20 text-green-400 border border-green-500/30"
-                      }`}
-                    >
-                      {template.type === "phishing" ? t("Phishing") : t("Normal")}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleEditTemplate(template)}
-                        className="p-1.5 hover:bg-[var(--navy-blue)] rounded-lg transition-colors"
-                      >
-                        <Edit className="w-4 h-4 text-[var(--neon-blue)]" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTemplate(template._id)}
-                        className="p-1.5 hover:bg-[var(--navy-blue)] rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-400" />
-                      </button>
+                  {/* Gradient accent bar */}
+                  <div className={`absolute top-0 left-0 right-0 h-1 ${
+                    template.type === "phishing"
+                      ? "bg-gradient-to-r from-yellow-500/50 to-yellow-400/30"
+                      : "bg-gradient-to-r from-green-500/50 to-green-400/30"
+                  }`} />
+                  
+                  <div className="p-5">
+                    {/* Header with badge and actions */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-2 rounded-lg ${
+                          template.type === "phishing"
+                            ? "bg-yellow-500/10 dark:bg-yellow-500/20"
+                            : "bg-green-500/10 dark:bg-green-500/20"
+                        }`}>
+                          {template.type === "phishing" ? (
+                            <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4 text-green-400" />
+                          )}
+                        </div>
+                        <span
+                          className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                            template.type === "phishing"
+                              ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 dark:border-yellow-500/50"
+                              : "bg-green-500/20 text-green-400 border border-green-500/40 dark:border-green-500/50"
+                          }`}
+                        >
+                          {template.type === "phishing" ? t("Phishing") : t("Normal")}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleEditTemplate(template)}
+                          className="p-2 hover:bg-[var(--navy-blue)]/50 dark:hover:bg-[var(--navy-blue)]/80 rounded-lg transition-all duration-200 hover:scale-110 group/btn"
+                          title={t("Edit Template")}
+                        >
+                          <Edit className="w-4 h-4 text-[var(--neon-blue)] group-hover/btn:text-[var(--medium-blue)] transition-colors" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTemplate(template._id)}
+                          className="p-2 hover:bg-red-500/20 dark:hover:bg-red-500/30 rounded-lg transition-all duration-200 hover:scale-110 group/btn"
+                          title={t("Delete Template")}
+                        >
+                          <Trash2 className="w-4 h-4 text-red-400 group-hover/btn:text-red-500 transition-colors" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <h4 className="text-[var(--dashboard-text-primary)] dark:text-white font-bold text-base mb-3 line-clamp-1 group-hover:text-[var(--neon-blue)] dark:group-hover:text-[var(--neon-blue)] transition-colors">
+                      {template.title}
+                    </h4>
+
+                    {/* Description */}
+                    <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-4 line-clamp-2 leading-relaxed">
+                      {template.description}
+                    </p>
+
+                    {/* First Message Preview */}
+                    <div className="pt-4 border-t border-[var(--neon-blue)]/10 dark:border-[var(--neon-blue)]/20">
+                      <div className="flex items-start gap-2">
+                        <MessageSquare className="w-4 h-4 text-[var(--neon-blue)] mt-0.5 flex-shrink-0" />
+                        <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] italic line-clamp-2 leading-relaxed">
+                          "{template.firstMessage}"
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <h4 className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold mb-2">{template.title}</h4>
-                  <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-3 line-clamp-2">
-                    {template.description}
-                  </p>
-                  <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] italic line-clamp-2">
-                    "{template.firstMessage}"
-                  </p>
                 </div>
               ))}
             </div>
@@ -1543,6 +1784,46 @@ export default function VoicePhishingPage() {
                   {t("Cancel")}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {templateToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue)] rounded-3xl p-6 md:p-8 max-w-md w-full border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/30">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Delete Template?")}</h2>
+              <button
+                type="button"
+                onClick={() => setTemplateToDelete(null)}
+                disabled={deletingTemplate}
+                className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors disabled:opacity-50"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-6">
+              {t("Are you sure you want to delete this template?")} {t("This action cannot be undone.")}
+            </p>
+            <div className="flex items-center gap-4 pt-4">
+              <button
+                type="button"
+                onClick={() => setTemplateToDelete(null)}
+                disabled={deletingTemplate}
+                className="flex-1 px-6 py-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-[var(--navy-blue-lighter)]/80 transition-colors font-semibold border border-gray-300 dark:border-transparent disabled:opacity-50"
+              >
+                {t("Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteTemplate}
+                disabled={deletingTemplate}
+                className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deletingTemplate ? t("Deleting…") : t("Delete")}
+              </button>
             </div>
           </div>
         </div>
