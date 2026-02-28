@@ -132,37 +132,37 @@ export default function CreateEmailCampaignModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)] rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-[var(--dashboard-card-border)] dark:border-transparent">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">{t("Send Email")}</h2>
+          <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Send Email")}</h2>
           <button
             onClick={onClose}
             disabled={isLoading}
-            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors disabled:opacity-50"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors disabled:opacity-50"
           >
-            <X className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-[var(--dashboard-text-primary)] dark:text-white" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Mail className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <Mail className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Sent By")} <span className="text-red-400">*</span>
             </label>
             <input
               type="email"
               value={formData.sentBy}
               readOnly
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none opacity-75 cursor-not-allowed"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none opacity-75 cursor-not-allowed"
               required
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <Mail className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <Mail className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Sent To")} <span className="text-red-400">*</span>
             </label>
             
@@ -181,20 +181,20 @@ export default function CreateEmailCampaignModal({
             <textarea
               value={formData.sentTo}
               readOnly
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] opacity-75 cursor-not-allowed"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] opacity-75 cursor-not-allowed"
               placeholder={selectedUsers.length === 0 ? t("No users selected. Select users from dropdown above.") : ""}
               rows={3}
               required
               disabled={isLoading}
             />
-            <p className="text-xs text-[var(--medium-grey)] mt-1">
+            <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
               💡 {t("Select users from the dropdown above. Selected emails will appear here as comma-separated values.")}
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <FileText className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <FileText className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Subject")} <span className="text-red-400">*</span>
             </label>
             <input
@@ -203,7 +203,7 @@ export default function CreateEmailCampaignModal({
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, subject: e.target.value }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("Enter email subject")}
               required
               disabled={isLoading}
@@ -212,8 +212,8 @@ export default function CreateEmailCampaignModal({
 
     
           <div>
-            <label className="block text-sm font-medium text-white mb-2">
-              <FileText className="w-4 h-4 inline mr-2" />
+            <label className="block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2">
+              <FileText className="w-4 h-4 inline mr-2 text-[var(--dashboard-text-primary)] dark:text-white" />
               {t("Body")} <span className="text-red-400">*</span>
             </label>
             <textarea
@@ -224,7 +224,7 @@ export default function CreateEmailCampaignModal({
                   bodyContent: e.target.value,
                 }))
               }
-              className="w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none"
               placeholder={t("Enter email body content")}
               rows={8}
               required
@@ -237,14 +237,14 @@ export default function CreateEmailCampaignModal({
               type="button"
               onClick={onClose}
               disabled={isLoading}
-              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors disabled:opacity-50"
+              className="px-4 py-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors disabled:opacity-50"
             >
               {t("Cancel")}
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isLoading ? (
                 <>

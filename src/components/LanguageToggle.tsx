@@ -28,7 +28,7 @@ export default function LanguageToggle() {
         className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8 relative"
         title={`Current language: ${language === "en" ? "English" : "Urdu"}`}
       >
-        <Globe className="h-4 w-4 text-white" />
+        <Globe className="h-4 w-4 text-[var(--dashboard-text-primary)]" />
         {language === "ur" && (
           <span className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-[var(--neon-blue)] rounded-full"></span>
         )}
@@ -55,7 +55,7 @@ export default function LanguageToggle() {
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{lang.flag}</span>
-                    <span className="text-white text-sm font-medium">
+                    <span className="text-[var(--dashboard-text-primary)] text-sm font-medium">
                       {lang.label}
                     </span>
                   </div>
@@ -66,7 +66,7 @@ export default function LanguageToggle() {
               ))}
             </div>
             <div className="border-t border-[var(--sidebar-border)] px-4 py-2 bg-[var(--navy-blue)]">
-              <p className="text-xs text-[var(--medium-grey)]">
+              <p className="text-xs text-[var(--dashboard-text-secondary)]">
                 {language === "en" ? "Language" : "زبان"}
               </p>
             </div>

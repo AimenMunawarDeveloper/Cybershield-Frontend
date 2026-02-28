@@ -332,13 +332,13 @@ export default function ClientAdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">{t("Access Denied")}</h1>
-          <p className="text-[var(--medium-grey)] mb-4">
+          <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-4">{t("Access Denied")}</h1>
+          <p className="text-[var(--dashboard-text-secondary)] mb-4">
             {t("Please sign in to access this page.")}
           </p>
           <Link
             href="/dashboard"
-            className="text-[var(--neon-blue)] hover:text-white transition-colors"
+            className="text-[var(--neon-blue)] hover:opacity-80 transition-colors"
           >
             {t("← Back to Dashboard")}
           </Link>
@@ -351,13 +351,13 @@ export default function ClientAdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">{t("Access Denied")}</h1>
-          <p className="text-[var(--medium-grey)] mb-4">
+          <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-4">{t("Access Denied")}</h1>
+          <p className="text-[var(--dashboard-text-secondary)] mb-4">
             {t("This page is only accessible to Client Administrators.")}
           </p>
           <Link
             href="/dashboard"
-            className="text-[var(--neon-blue)] hover:text-white transition-colors"
+            className="text-[var(--neon-blue)] hover:opacity-80 transition-colors"
           >
             {t("← Back to Dashboard")}
           </Link>
@@ -384,10 +384,10 @@ export default function ClientAdminPanel() {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold text-[var(--dashboard-text-primary)]">
             {t("Organization Management")}
           </h1>
-              <p className="text-[var(--medium-grey)] text-lg">
+              <p className="text-[var(--dashboard-text-secondary)] text-lg">
             {t("Manage users and send invitations for your organization")}
           </p>
             </div>
@@ -402,14 +402,14 @@ export default function ClientAdminPanel() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-white group-hover:text-[var(--neon-blue)] transition-colors duration-300">
+            <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] group-hover:text-[var(--neon-blue)] transition-colors duration-300">
               {t("Invite Single User")}
             </h2>
           </div>
 
           <form onSubmit={handleSingleInvite} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">
+              <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] mb-3">
                 {t("Email Address")} *
               </label>
               <div className="relative">
@@ -425,7 +425,7 @@ export default function ClientAdminPanel() {
                   onChange={(e) =>
                     setInviteForm((prev) => ({ ...prev, email: e.target.value }))
                   }
-                  className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
                   placeholder={t("student@university.edu")}
                 />
               </div>
@@ -437,8 +437,8 @@ export default function ClientAdminPanel() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div>
-                  <p className="text-sm text-[var(--medium-grey)]">
-                    <span className="font-semibold text-white">{t("Note:")}</span> {t("The display name will be automatically set from the user's Clerk profile when they sign up.")}
+                  <p className="text-sm text-[var(--dashboard-text-secondary)]">
+                    <span className="font-semibold text-[var(--dashboard-text-primary)]">{t("Note:")}</span> {t("The display name will be automatically set from the user's Clerk profile when they sign up.")}
                   </p>
                 </div>
               </div>
@@ -513,10 +513,10 @@ export default function ClientAdminPanel() {
               </svg>
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white group-hover:text-[var(--electric-blue)] transition-colors duration-300">
+              <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] group-hover:text-[var(--electric-blue)] transition-colors duration-300">
                 {t("Bulk Invite Users")}
               </h2>
-              <p className="text-[var(--medium-grey)] text-sm">
+              <p className="text-[var(--dashboard-text-secondary)] text-sm">
                 {t("Send invitations to multiple users at once")}
               </p>
             </div>
@@ -524,7 +524,7 @@ export default function ClientAdminPanel() {
 
           <form onSubmit={handleBulkInvite} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">
+              <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] mb-3">
                 {t("Email Addresses")}
               </label>
               <div className="relative">
@@ -542,14 +542,14 @@ export default function ClientAdminPanel() {
                     }));
                     parseEmails(e.target.value);
                   }}
-                  className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--electric-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--electric-blue)]/50 focus:shadow-[0_0_20px_rgba(79,195,247,0.3)] resize-none"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--electric-blue)] focus:border-transparent text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] transition-all duration-300 hover:border-[var(--electric-blue)]/50 focus:shadow-[0_0_20px_rgba(79,195,247,0.3)] resize-none"
                   rows={4}
                   placeholder={`student1@university.edu, student2@university.edu
 student3@university.edu
 student4@university.edu, student5@university.edu`}
                 />
               </div>
-              <p className="text-xs text-[var(--medium-grey)] mt-2">
+              <p className="text-xs text-[var(--dashboard-text-secondary)] mt-2">
                 {t("Enter email addresses separated by commas or new lines. Display names will be set automatically from Clerk profiles.")}
               </p>
             </div>
@@ -561,7 +561,7 @@ student4@university.edu, student5@university.edu`}
                   <svg className="w-4 h-4 text-[var(--electric-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
                     {t("Emails to invite")} ({emailList.length})
                   </span>
                 </div>
@@ -571,7 +571,7 @@ student4@university.edu, student5@university.edu`}
                       key={index}
                       className="flex items-center justify-between bg-[var(--electric-blue)]/10 border border-[var(--electric-blue)]/30 rounded-lg px-3 py-2"
                     >
-                      <span className="text-sm text-white truncate flex-1 mr-2">
+                      <span className="text-sm text-[var(--dashboard-text-primary)] truncate flex-1 mr-2">
                         {email}
                       </span>
                       <button
@@ -580,7 +580,7 @@ student4@university.edu, student5@university.edu`}
                         className="flex-shrink-0 w-5 h-5 bg-[var(--crimson-red)]/20 hover:bg-[var(--crimson-red)]/30 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-[0_0_10px_rgba(215,38,56,0.4)] active:scale-95"
                         title="Remove email"
                       >
-                        <svg className="w-3 h-3 text-[var(--crimson-red)] hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-3 h-3 text-[var(--crimson-red)] hover:opacity-80 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
@@ -670,7 +670,7 @@ student4@university.edu, student5@university.edu`}
                 className={`py-4 px-6 border-b-2 font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
                   activeTab === "users"
                     ? "border-[var(--neon-blue)] text-[var(--neon-blue)] bg-[var(--neon-blue)]/5"
-                    : "border-transparent text-[var(--medium-grey)] hover:text-white hover:border-[var(--border)] hover:bg-[var(--navy-blue-lighter)]/30"
+                    : "border-transparent text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:border-[var(--border)] hover:bg-[var(--navy-blue-lighter)]/30"
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -680,7 +680,7 @@ student4@university.edu, student5@university.edu`}
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   activeTab === "users"
                     ? "bg-[var(--neon-blue)]/20 text-[var(--neon-blue)]"
-                    : "bg-[var(--medium-grey)]/20 text-[var(--medium-grey)]"
+                    : "bg-[var(--dashboard-text-secondary)]/20 text-[var(--dashboard-text-secondary)]"
                 }`}>
                   {users.length}
                 </span>
@@ -690,7 +690,7 @@ student4@university.edu, student5@university.edu`}
                 className={`py-4 px-6 border-b-2 font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
                   activeTab === "invites"
                     ? "border-[var(--neon-blue)] text-[var(--neon-blue)] bg-[var(--neon-blue)]/5"
-                    : "border-transparent text-[var(--medium-grey)] hover:text-white hover:border-[var(--border)] hover:bg-[var(--navy-blue-lighter)]/30"
+                    : "border-transparent text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:border-[var(--border)] hover:bg-[var(--navy-blue-lighter)]/30"
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -700,7 +700,7 @@ student4@university.edu, student5@university.edu`}
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   activeTab === "invites"
                     ? "bg-[var(--neon-blue)]/20 text-[var(--neon-blue)]"
-                    : "bg-[var(--medium-grey)]/20 text-[var(--medium-grey)]"
+                    : "bg-[var(--dashboard-text-secondary)]/20 text-[var(--dashboard-text-secondary)]"
                 }`}>
                   {invites.filter((u) => u.status === "invited").length}
                 </span>
@@ -711,7 +711,7 @@ student4@university.edu, student5@university.edu`}
           <div className="p-8">
             {loading && (
               <div className="text-center py-12">
-                <div className="inline-flex items-center gap-3 text-[var(--medium-grey)]">
+                <div className="inline-flex items-center gap-3 text-[var(--dashboard-text-secondary)]">
                   <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
@@ -739,7 +739,7 @@ student4@university.edu, student5@university.edu`}
                 <table className="min-w-full divide-y divide-[var(--border)]">
                   <thead className="bg-gradient-to-r from-[var(--navy-blue-lighter)] to-[var(--navy-blue-lighter)]/80">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -747,7 +747,7 @@ student4@university.edu, student5@university.edu`}
                           {t("User")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -755,7 +755,7 @@ student4@university.edu, student5@university.edu`}
                         {t("Status")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -763,7 +763,7 @@ student4@university.edu, student5@university.edu`}
                         {t("Groups")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -771,7 +771,7 @@ student4@university.edu, student5@university.edu`}
                         {t("Points")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--medium-grey)] uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -795,10 +795,10 @@ student4@university.edu, student5@university.edu`}
                               </span>
                             </div>
                             <div>
-                              <div className="text-sm font-semibold text-white">
+                              <div className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
                             {t(user.displayName)}
                           </div>
-                          <div className="text-sm text-[var(--medium-grey)]">
+                          <div className="text-sm text-[var(--dashboard-text-secondary)]">
                             {user.email}
                               </div>
                             </div>
@@ -817,7 +817,7 @@ student4@university.edu, student5@university.edu`}
                             {t(user.status)}
                           </span>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-sm text-white">
+                        <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--dashboard-text-primary)]">
                           {user.groups.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {user.groups.map((group, index) => (
@@ -830,13 +830,13 @@ student4@university.edu, student5@university.edu`}
                               ))}
                             </div>
                           ) : (
-                            <span className="text-[var(--medium-grey)]">-</span>
+                            <span className="text-[var(--dashboard-text-secondary)]">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-sm text-white font-semibold">
+                        <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--dashboard-text-primary)] font-semibold">
                           {user.points || 0}
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--medium-grey)]">
+                        <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--dashboard-text-secondary)]">
                           {new Date(user.createdAt).toLocaleDateString()}
                         </td>
                       </tr>
@@ -853,10 +853,10 @@ student4@university.edu, student5@university.edu`}
                         </svg>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-white mb-1">
+                        <p className="text-lg font-semibold text-[var(--dashboard-text-primary)] mb-1">
                           {activeTab === "users" ? t("No users found") : t("No pending invites")}
                         </p>
-                        <p className="text-[var(--medium-grey)]">
+                        <p className="text-[var(--dashboard-text-secondary)]">
                     {activeTab === "users"
                             ? t("Start by inviting users to your organization.") 
                             : t("All invitations have been accepted or there are no pending invites.")}

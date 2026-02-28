@@ -891,21 +891,21 @@ export default function CreateTrainingModuleModal({
   if (!isOpen) return null;
 
   const inputClass =
-    "w-full px-3 py-2 bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)] rounded-lg text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none";
-  const labelClass = "block text-sm font-medium text-white mb-2";
+    "w-full px-3 py-2 bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-lighter)] border border-[var(--dashboard-card-border)] dark:border-[var(--medium-grey)] rounded-lg text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)] focus:outline-none";
+  const labelClass = "block text-sm font-medium text-[var(--dashboard-text-primary)] dark:text-white mb-2";
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--navy-blue-light)] rounded-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl border border-[var(--medium-grey)]">
+      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)] rounded-xl p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl border border-[var(--dashboard-card-border)] dark:border-[var(--medium-grey)]">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">{isEditMode ? t("Edit Course") : t("Add Course")}</h2>
+          <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{isEditMode ? t("Edit Course") : t("Add Course")}</h2>
           <button
             type="button"
             onClick={() => {
               resetForm();
               onClose();
             }}
-            className="p-2 hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors text-white"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors text-[var(--dashboard-text-primary)] dark:text-white"
           >
             <X className="w-5 h-5" />
           </button>
@@ -945,8 +945,8 @@ export default function CreateTrainingModuleModal({
                   onClick={() => setLevel("basic")}
                   className={`flex-1 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
                     level === "basic"
-                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-white"
-                      : "border-[var(--medium-grey)] text-[var(--medium-grey)] hover:border-white/50 hover:text-white"
+                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] dark:text-white"
+                      : "border-gray-300 dark:border-[var(--medium-grey)] text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:border-[var(--neon-blue)] dark:hover:border-white/50 hover:text-[var(--neon-blue)] dark:hover:text-white"
                   }`}
                 >
                   {t("Basic")}
@@ -956,8 +956,8 @@ export default function CreateTrainingModuleModal({
                   onClick={() => setLevel("advanced")}
                   className={`flex-1 px-4 py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
                     level === "advanced"
-                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-white"
-                      : "border-[var(--medium-grey)] text-[var(--medium-grey)] hover:border-white/50 hover:text-white"
+                      ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] dark:text-white"
+                      : "border-gray-300 dark:border-[var(--medium-grey)] text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:border-[var(--neon-blue)] dark:hover:border-white/50 hover:text-[var(--neon-blue)] dark:hover:text-white"
                   }`}
                 >
                   {t("Advanced")}
@@ -972,7 +972,7 @@ export default function CreateTrainingModuleModal({
               <Award className="w-4 h-4 text-[var(--neon-blue)]" />
               {t("Badges (optional)")}
             </label>
-            <p className="text-sm text-[var(--medium-grey)] mb-3">
+            <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-3">
               {t("Click a badge to select or deselect. Selected badges will appear in the course sidebar.")}
             </p>
             <div className="flex flex-wrap gap-3">
@@ -990,7 +990,7 @@ export default function CreateTrainingModuleModal({
                     className={`flex flex-col items-center justify-center rounded-xl border-2 p-3 w-24 min-h-[4.5rem] transition-all hover:shadow-md ${
                       isSelected
                         ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 ring-2 ring-[var(--neon-blue)]/50"
-                        : "border-[var(--medium-grey)] bg-[var(--navy-blue-lighter)]/50 hover:border-[var(--neon-blue)]/60"
+                        : "border-gray-300 dark:border-[var(--medium-grey)] bg-gray-50 dark:bg-[var(--navy-blue-lighter)]/50 hover:border-[var(--neon-blue)]/60"
                     }`}
                     title={isSelected ? t("Click to deselect") : t("Click to select")}
                   >
@@ -1002,14 +1002,14 @@ export default function CreateTrainingModuleModal({
                       {Icon ? (
                         <Icon
                           className={`w-5 h-5 flex-shrink-0 ${
-                            isSelected ? "text-[var(--neon-blue)]" : "text-[var(--medium-grey)]"
+                            isSelected ? "text-[var(--neon-blue)]" : "text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]"
                           }`}
                         />
                       ) : null}
                     </div>
                     <span
                       className={`text-[10px] font-medium text-center leading-tight line-clamp-2 px-0.5 ${
-                        isSelected ? "text-white" : "text-[var(--medium-grey)]"
+                        isSelected ? "text-[var(--neon-blue)] dark:text-white" : "text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]"
                       }`}
                     >
                       {badgeLabel}
@@ -1031,6 +1031,7 @@ export default function CreateTrainingModuleModal({
                 onClick={addModule}
                 disabled={modules.length >= limits.maxModules}
                 className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
                 {t("Add module")}
@@ -1077,8 +1078,8 @@ export default function CreateTrainingModuleModal({
                           updateModule(moduleIndex, { title: e.target.value })
                         }
                         onClick={(e) => e.stopPropagation()}
-                        className={`flex-1 bg-transparent border-none text-white font-medium focus:outline-none focus:ring-0 ${
-                          !mod.title ? "placeholder-[var(--medium-grey)]" : ""
+                        className={`flex-1 bg-transparent border-none text-[var(--dashboard-text-primary)] dark:text-white font-medium focus:outline-none focus:ring-0 ${
+                          !mod.title ? "placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)]" : ""
                         }`}
                         placeholder={t("Module title (e.g. Types of Cyber Threats)")}
                       />
@@ -1094,9 +1095,9 @@ export default function CreateTrainingModuleModal({
                         <Trash2 className="w-4 h-4" />
                       </button>
                       {isExpanded ? (
-                        <ChevronDown className="w-5 h-5 text-[var(--medium-grey)] flex-shrink-0" />
+                        <ChevronDown className="w-5 h-5 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] flex-shrink-0" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-[var(--medium-grey)] flex-shrink-0" />
+                        <ChevronRight className="w-5 h-5 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] flex-shrink-0" />
                       )}
                     </div>
 
@@ -1105,7 +1106,7 @@ export default function CreateTrainingModuleModal({
                       <div className="p-4 space-y-4" onClick={(e) => e.stopPropagation()}>
                         {/* Sections (indented like image) */}
                         <div className="space-y-1">
-                          <span className="text-xs font-medium text-[var(--medium-grey)] uppercase tracking-wide">
+                          <span className="text-xs font-medium text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] uppercase tracking-wide">
                             {t("Sections")}
                           </span>
                           {mod.sections.map((section, sectionIndex) => (
@@ -1114,7 +1115,7 @@ export default function CreateTrainingModuleModal({
                               className="ml-4 pl-3 border-l-2 border-[var(--neon-blue)]/40 space-y-3 py-2"
                             >
                               <div className="flex items-center gap-2">
-                                <ChevronRight className="w-4 h-4 text-[var(--medium-grey)] flex-shrink-0" />
+                                <ChevronRight className="w-4 h-4 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] flex-shrink-0" />
                                 <input
                                   type="text"
                                   value={section.title}
@@ -1153,8 +1154,8 @@ export default function CreateTrainingModuleModal({
                                 />
                                 <div className="mt-2">
                                   <div className="flex items-center gap-2 mb-1">
-                                    <LinkIcon className="w-4 h-4 text-[var(--medium-grey)]" />
-                                    <span className="text-sm text-white">{t("URLs (optional)")}</span>
+                                    <LinkIcon className="w-4 h-4 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
+                                    <span className="text-sm text-[var(--dashboard-text-primary)] dark:text-white">{t("URLs (optional)")}</span>
                                   </div>
                                   {section.urls.map((url, urlIndex) => (
                                     <div key={urlIndex} className="flex gap-2 mb-2">
@@ -1202,15 +1203,15 @@ export default function CreateTrainingModuleModal({
                                 {/* Media Upload Section */}
                                 <div className="mt-4">
                                   <div className="flex items-center gap-2 mb-2">
-                                    <ImageIcon className="w-4 h-4 text-[var(--medium-grey)]" />
-                                    <span className="text-sm text-white">{t("Images & Videos")}</span>
+                                    <ImageIcon className="w-4 h-4 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
+                                    <span className="text-sm text-[var(--dashboard-text-primary)] dark:text-white">{t("Images & Videos")}</span>
                                   </div>
                                   
                                   {/* Existing Media */}
                                   {section.media && section.media.length > 0 && (
                                     <div className="space-y-2 mb-3">
                                       {section.media.map((mediaItem, mediaIndex) => (
-                                        <div key={`${moduleIndex}-${sectionIndex}-${mediaIndex}-${mediaItem.url}`} className="flex items-start gap-2 p-2 bg-[var(--navy-blue-lighter)]/30 rounded border border-[var(--medium-grey)]/30">
+                                        <div key={`${moduleIndex}-${sectionIndex}-${mediaIndex}-${mediaItem.url}`} className="flex items-start gap-2 p-2 bg-gray-50 dark:bg-[var(--navy-blue-lighter)]/30 rounded border border-gray-200 dark:border-[var(--medium-grey)]/30">
                                           {mediaItem.type === 'image' ? (
                                             <img
                                               src={mediaItem.url}
@@ -1237,7 +1238,7 @@ export default function CreateTrainingModuleModal({
                                               className={inputClass + " text-xs mb-1"}
                                               placeholder={t("Caption (optional)")}
                                             />
-                                            <p className="text-xs text-gray-400 truncate">
+                                            <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-gray-400 truncate">
                                               {mediaItem.alt || mediaItem.url.substring(0, 30)}
                                             </p>
                                           </div>
@@ -1328,37 +1329,39 @@ export default function CreateTrainingModuleModal({
                         </div>
 
                         {/* Module Quiz - separate block after sections */}
-                        <div className="border-t border-[var(--medium-grey)]/50 pt-4">
+                        <div className="border-t border-gray-200 dark:border-[var(--medium-grey)]/50 pt-4">
                           <button
                             type="button"
                             onClick={() => {
                               if (mod.quiz.length === 0) addQuizToModule(moduleIndex);
                               else setExpandedQuiz(isQuizExpanded ? null : moduleIndex);
                             }}
-                            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-[var(--navy-blue-lighter)]/50 text-left"
+                            className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)]/50 text-left"
                           >
                             <HelpCircle className="w-5 h-5 text-[var(--neon-blue)]" />
-                            <span className="font-medium text-white">
+                            <span className="font-medium text-[var(--dashboard-text-primary)] dark:text-white">
                               {t("Module Quiz")}
                             </span>
                             {mod.quiz.length > 0 && (
-                              <span className="text-xs text-[var(--medium-grey)]">
+                              <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                                 {mod.quiz.length} {t("question(s)")}
                               </span>
                             )}
                             {mod.quiz.length === 0 ? (
                               <span className="text-sm text-[var(--medium-grey)] ml-auto">
                                 {t("Add quiz")} (0/{limits.maxMcq})
+                              <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] ml-auto">
+                                {t("Add quiz")}
                               </span>
                             ) : isQuizExpanded ? (
-                              <ChevronDown className="w-4 h-4 ml-auto text-[var(--medium-grey)]" />
+                              <ChevronDown className="w-4 h-4 ml-auto text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
                             ) : (
-                              <ChevronRight className="w-4 h-4 ml-auto text-[var(--medium-grey)]" />
+                              <ChevronRight className="w-4 h-4 ml-auto text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
                             )}
                           </button>
 
                           {mod.quiz.length === 0 && (
-                            <p className="text-xs text-[var(--medium-grey)] ml-8 mt-1">
+                            <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] ml-8 mt-1">
                               {t("Add questions with options and mark the correct answer.")}
                             </p>
                           )}
@@ -1368,10 +1371,10 @@ export default function CreateTrainingModuleModal({
                               {mod.quiz.map((q, questionIndex) => (
                                 <div
                                   key={questionIndex}
-                                  className="p-3 rounded-lg bg-[var(--navy-blue-lighter)] border border-[var(--medium-grey)]/50 space-y-3"
+                                  className="p-3 rounded-lg bg-gray-50 dark:bg-[var(--navy-blue-lighter)] border border-gray-200 dark:border-[var(--medium-grey)]/50 space-y-3"
                                 >
                                   <div className="flex items-start justify-between gap-2">
-                                    <span className="text-xs text-[var(--medium-grey)]">
+                                    <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                                       {t("Question")} {questionIndex + 1}
                                     </span>
                                     <button
@@ -1516,20 +1519,20 @@ export default function CreateTrainingModuleModal({
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--medium-grey)]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-[var(--medium-grey)]">
             <button
               type="button"
               onClick={() => {
                 resetForm();
                 onClose();
               }}
-              className="px-4 py-2 text-[var(--medium-grey)] hover:text-white transition-colors"
+              className="px-4 py-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors"
             >
               {t("Cancel")}
             </button>
             <button
               type="submit"
-              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors"
+              className="px-6 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors"
             >
               {isEditMode ? t("Save changes") : t("Add Course")}
             </button>

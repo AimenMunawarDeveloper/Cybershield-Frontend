@@ -273,13 +273,13 @@ export default function SystemAdminPanel() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">{t("Access Denied")}</h1>
-          <p className="text-[var(--medium-grey)] mb-4">
+          <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-4">{t("Access Denied")}</h1>
+          <p className="text-[var(--dashboard-text-secondary)] mb-4">
             {t("Please sign in to access this page.")}
           </p>
           <Link
             href="/dashboard"
-            className="text-[var(--neon-blue)] hover:text-white transition-colors"
+            className="text-[var(--neon-blue)] hover:opacity-80 transition-colors"
           >
             {t("← Back to Dashboard")}
           </Link>
@@ -306,10 +306,10 @@ export default function SystemAdminPanel() {
               </svg>
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-white">
+              <h1 className="text-4xl font-bold text-[var(--dashboard-text-primary)]">
                 {t("Organizations Management")}
               </h1>
-              <p className="text-[var(--medium-grey)] text-lg">
+              <p className="text-[var(--dashboard-text-secondary)] text-lg">
                 {t("Manage organizations and invite client administrators")}
               </p>
             </div>
@@ -324,7 +324,7 @@ export default function SystemAdminPanel() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-white group-hover:text-[var(--neon-blue)] transition-colors duration-300">
+            <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] group-hover:text-[var(--neon-blue)] transition-colors duration-300">
               {t("Create New Organization")}
             </h2>
           </div>
@@ -332,7 +332,7 @@ export default function SystemAdminPanel() {
           <form onSubmit={handleCreateOrganization} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-white mb-3">
+                <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] mb-3">
                   {t("Organization Name")} *
                 </label>
                 <div className="relative">
@@ -351,14 +351,14 @@ export default function SystemAdminPanel() {
                         name: e.target.value,
                       }))
                     }
-                    className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
+                    className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
                     placeholder={t("University Name")}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-white mb-3">
+                <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] mb-3">
                   {t("Description (Optional)")}
                 </label>
                 <div className="relative">
@@ -376,7 +376,7 @@ export default function SystemAdminPanel() {
                         description: e.target.value,
                       }))
                     }
-                    className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-white placeholder-[var(--medium-grey)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
+                    className="w-full pl-10 pr-4 py-3 bg-[var(--navy-blue-lighter)] border border-[var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] transition-all duration-300 hover:border-[var(--neon-blue)]/50 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)]"
                     placeholder={t("Brief description of the organization")}
                   />
                 </div>
@@ -451,7 +451,7 @@ export default function SystemAdminPanel() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-white group-hover:text-[var(--electric-blue)] transition-colors duration-300">
+            <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] group-hover:text-[var(--electric-blue)] transition-colors duration-300">
               {t("Invite Client Administrator")}
             </h2>
           </div>
@@ -459,7 +459,7 @@ export default function SystemAdminPanel() {
           <form onSubmit={handleInviteClientAdmin} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-white mb-3">
+                <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] mb-3">
                   {t("Email Address")}
                 </label>
                 <div className="relative">
@@ -485,7 +485,7 @@ export default function SystemAdminPanel() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-white mb-3">
+                <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] mb-3">
                   {t("Organization")}
                 </label>
                 <div className="relative dropdown-container">
@@ -500,7 +500,7 @@ export default function SystemAdminPanel() {
                               setInviteForm((prev) => ({ ...prev, orgId: org._id }));
                               setDropdownOpen(false);
                             }}
-                            className="w-full px-4 py-3 text-right text-white hover:bg-[var(--electric-blue)] transition-all duration-200 flex items-center justify-between"
+                            className="w-full px-4 py-3 text-right text-[var(--dashboard-text-primary)] hover:bg-[var(--electric-blue)] transition-all duration-200 flex items-center justify-between"
                           >
                             <span>{t(org.name)}</span>
                             <svg className="w-4 h-4 text-[var(--medium-grey)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -515,7 +515,7 @@ export default function SystemAdminPanel() {
                   <button
                     type="button"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="w-full px-4 py-4 bg-[var(--navy-blue)] border-2 border-[var(--border)] rounded-xl text-white 
+                    className="w-full px-4 py-4 bg-[var(--navy-blue)] border-2 border-[var(--border)] rounded-xl text-[var(--dashboard-text-primary)] 
               focus:outline-none focus:ring-2 focus:ring-[var(--electric-blue)] focus:border-[var(--electric-blue)]
               transition-all duration-300 cursor-pointer font-medium hover:border-[var(--electric-blue)]/60 hover:shadow-[0_0_20px_rgba(79,195,247,0.3)] flex items-center justify-between"
                   >
@@ -536,7 +536,7 @@ export default function SystemAdminPanel() {
                   </button>
                 </div>
                 {organizations.length === 0 && (
-                  <p className="mt-2 text-sm text-[var(--medium-grey)] flex items-center gap-2">
+                  <p className="mt-2 text-sm text-[var(--dashboard-text-secondary)] flex items-center gap-2">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -618,8 +618,8 @@ export default function SystemAdminPanel() {
                 </svg>
               </div>
               <div>
-                <h2 className="text-3xl font-bold text-white">{t("Organizations")}</h2>
-                <p className="text-[var(--medium-grey)] text-lg">
+                <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)]">{t("Organizations")}</h2>
+                <p className="text-[var(--dashboard-text-secondary)] text-lg">
                   {t("Manage and view all organizations")} ({organizations.length})
                 </p>
               </div>
@@ -641,8 +641,8 @@ export default function SystemAdminPanel() {
               <div className="flex flex-col items-center gap-6">
                 <div className="w-12 h-12 border-4 border-[var(--neon-blue)] border-t-transparent rounded-full animate-spin"></div>
                 <div className="text-center">
-                  <p className="text-xl font-semibold text-white mb-2">{t("Loading organizations...")}</p>
-                  <p className="text-[var(--medium-grey)]">{t("Please wait while we fetch the data")}</p>
+                  <p className="text-xl font-semibold text-[var(--dashboard-text-primary)] mb-2">{t("Loading organizations...")}</p>
+                  <p className="text-[var(--dashboard-text-secondary)]">{t("Please wait while we fetch the data")}</p>
                 </div>
               </div>
             </div>
@@ -669,7 +669,7 @@ export default function SystemAdminPanel() {
               <table className="w-full divide-y divide-[var(--border)]/30">
                 <thead className="bg-gradient-to-r from-[var(--navy-blue-lighter)] to-[var(--navy-blue-lighter)]/80">
                   <tr>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/4">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/4">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 rounded-lg flex items-center justify-center">
                           <svg className="w-3 h-3 text-[var(--neon-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -679,7 +679,7 @@ export default function SystemAdminPanel() {
                         {t("Organization")}
                       </div>
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/4">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/4">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 rounded-lg flex items-center justify-center">
                           <svg className="w-3 h-3 text-[var(--neon-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -689,7 +689,7 @@ export default function SystemAdminPanel() {
                         {t("Description")}
                       </div>
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/6">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 rounded-lg flex items-center justify-center">
                           <svg className="w-3 h-3 text-[var(--neon-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -699,7 +699,7 @@ export default function SystemAdminPanel() {
                         {t("Total")}
                       </div>
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/6">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 rounded-lg flex items-center justify-center">
                           <svg className="w-3 h-3 text-[var(--neon-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -709,7 +709,7 @@ export default function SystemAdminPanel() {
                         {t("Active")}
                       </div>
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/6">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 rounded-lg flex items-center justify-center">
                           <svg className="w-3 h-3 text-[var(--neon-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -719,7 +719,7 @@ export default function SystemAdminPanel() {
                         {t("Invited")}
                       </div>
                     </th>
-                    <th className="px-4 py-4 text-left text-xs font-bold text-white uppercase tracking-wider w-1/6">
+                    <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/6">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 rounded-lg flex items-center justify-center">
                           <svg className="w-3 h-3 text-[var(--neon-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -745,23 +745,23 @@ export default function SystemAdminPanel() {
                             </span>
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-bold text-white group-hover:text-[var(--neon-blue)] transition-colors duration-300 truncate">
+                            <div className="text-sm font-bold text-[var(--dashboard-text-primary)] group-hover:text-[var(--neon-blue)] transition-colors duration-300 truncate">
                               {t(org.name)}
                             </div>
-                            <div className="text-xs text-[var(--medium-grey)]">
+                            <div className="text-xs text-[var(--dashboard-text-secondary)]">
                               {org.clientAdminIds.length} {t("admin(s)")}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-xs text-white max-w-xs">
+                        <div className="text-xs text-[var(--dashboard-text-primary)] max-w-xs">
                           {org.description ? (
                             <div className="bg-[var(--navy-blue-lighter)]/30 rounded-lg p-2 border border-[var(--border)]/30">
-                              <p className="text-white text-xs truncate">{t(org.description)}</p>
+                              <p className="text-[var(--dashboard-text-primary)] text-xs truncate">{t(org.description)}</p>
                             </div>
                           ) : (
-                            <span className="text-[var(--medium-grey)] italic text-xs">
+                            <span className="text-[var(--dashboard-text-secondary)] italic text-xs">
                               {t("No description")}
                             </span>
                           )}
@@ -774,7 +774,7 @@ export default function SystemAdminPanel() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                             </svg>
                           </div>
-                          <span className="text-sm font-bold text-white">{org.totalUsers}</span>
+                          <span className="text-sm font-bold text-[var(--dashboard-text-primary)]">{org.totalUsers}</span>
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
@@ -794,7 +794,7 @@ export default function SystemAdminPanel() {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
                           </div>
-                          <span className="text-xs font-semibold text-[var(--medium-grey)]">
+                          <span className="text-xs font-semibold text-[var(--dashboard-text-secondary)]">
                             {new Date(org.createdAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -813,8 +813,8 @@ export default function SystemAdminPanel() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-white mb-3">{t("No organizations found")}</p>
-                      <p className="text-[var(--medium-grey)] text-lg">
+                      <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-3">{t("No organizations found")}</p>
+                      <p className="text-[var(--dashboard-text-secondary)] text-lg">
                         {t("Create an organization by using the form above to get started.")}
                       </p>
                     </div>

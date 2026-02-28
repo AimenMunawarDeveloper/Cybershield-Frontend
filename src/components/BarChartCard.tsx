@@ -249,12 +249,12 @@ export default function BarChartCard({
               dataKey="name"
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+              tick={{ fill: "var(--dashboard-text-secondary)", fontSize: 12 }}
             />
             <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+              tick={{ fill: "var(--dashboard-text-secondary)", fontSize: 12 }}
               domain={[0, Math.max(...chartData.map((d) => d.value)) + 50]}
             />
             <Bar
@@ -269,10 +269,10 @@ export default function BarChartCard({
 
       {/* Title Section */}
       <div className="mb-8">
-        <h3 className="text-lg font-bold text-white mb-1">{title}</h3>
+        <h3 className="text-lg font-bold text-[var(--dashboard-text-primary)] mb-1">{title}</h3>
         <p className="text-sm">
           <span className="text-[var(--success-green)]">(+15%)</span>
-          <span className="text-[var(--medium-grey)]"> {subtitle}</span>
+          <span className="text-[var(--dashboard-text-secondary)]"> {subtitle}</span>
         </p>
       </div>
 
@@ -283,10 +283,10 @@ export default function BarChartCard({
           return (
             <div key={index} className="flex flex-col items-center">
               <div className="w-8 h-8 mb-2 flex items-center justify-center">
-                <IconComponent className="w-6 h-6 text-white" />
+                <IconComponent className="w-6 h-6 text-[var(--dashboard-text-primary)]" />
               </div>
-              <p className="text-sm text-white mb-1">{metric.label}</p>
-              <p className="text-2xl font-bold text-white mb-2">
+              <p className="text-sm text-[var(--dashboard-text-primary)] mb-1">{metric.label}</p>
+              <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-2">
                 {metric.value}
               </p>
               <div

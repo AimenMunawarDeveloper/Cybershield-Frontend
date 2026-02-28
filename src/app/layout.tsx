@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import LayoutChrome from "@/components/LayoutChrome";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +33,11 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <LanguageProvider>
-          <LayoutChrome>{children}</LayoutChrome>
-          </LanguageProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <LayoutChrome>{children}</LayoutChrome>
+            </LanguageProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

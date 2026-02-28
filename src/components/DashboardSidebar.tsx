@@ -160,7 +160,7 @@ export function DashboardSidebar({
             alt="CyberShield Logo"
             width={180}
             height={60}
-            className="h-12 w-auto object-contain brightness-0 invert"
+            className="h-12 w-auto object-contain sidebar-logo"
           />
         </div>
         {/* Shiny line below logo */}
