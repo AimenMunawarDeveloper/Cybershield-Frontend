@@ -307,7 +307,7 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
-        {/* Blurred background element */}
+        {/* Blurred background element - shows in both dark and light mode */}
         <div className="blurred-background"></div>
 
         {/* Top Row Summary Cards */}
@@ -316,10 +316,10 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)]">
                   {metrics?.metric1.label}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
                   {metrics?.metric1.value}
                 </p>
                 <p
@@ -355,10 +355,10 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)]">
                   {metrics?.metric2.label}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
                   {metrics?.metric2.value}
                 </p>
                 <p
@@ -393,10 +393,10 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)]">
                   {metrics?.metric3.label}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
                   {metrics?.metric3.value}
                 </p>
                 <p
@@ -432,10 +432,10 @@ export default function DashboardPage() {
           <div className="dashboard-card rounded-lg p-4">
             <div className="flex items-center justify-between">
               <div className="text-left">
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)]">
                   {metrics?.metric4.label}
                 </p>
-                <p className="text-lg font-bold text-white">
+                <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
                   {metrics?.metric4.value}
                 </p>
                 <p
@@ -476,19 +476,19 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-8 relative overflow-hidden">
               <div className="relative z-10">
-                <p className="text-sm text-[var(--medium-grey)] mb-1">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] mb-1">
                   {welcomeMsg?.greeting}
                 </p>
-                <h2 className="text-2xl font-bold text-white mb-2">
+                <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] mb-2">
                   {welcomeMsg?.name}
                 </h2>
-                <p className="text-sm text-[var(--medium-grey)] mb-1">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] mb-1">
                   {t("Glad to see you again!")}
                 </p>
-                <p className="text-sm text-[var(--medium-grey)] mb-6">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] mb-6">
                   {welcomeMsg?.subtitle}
                 </p>
-                <div className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:text-white transition-colors">
+                <div className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:opacity-80 transition-colors">
                   <span className="text-sm">{welcomeMsg?.action}</span>
                   <svg
                     className="w-4 h-4 ml-1"
@@ -512,13 +512,13 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
                     ? t("Training Completion")
                     : t("Your Progress")}
                 </h3>
-                <p className="text-xs text-[var(--medium-grey)]">
+                <p className="text-xs text-[var(--dashboard-text-secondary)]">
                   {profile?.role === "system_admin" ||
                   profile?.role === "client_admin"
                     ? t("Average across users")
@@ -540,16 +540,16 @@ export default function DashboardPage() {
                 />
               </div>
               {/* Darker background box for percentage */}
-              <div className="bg-[var(--navy-blue)] rounded-lg p-4">
+              <div className="bg-[var(--navy-blue)] rounded-lg p-4 transition-colors">
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-white">
+                  <p className="text-3xl font-bold text-[var(--dashboard-text-primary)]">
                     {profile?.role === "affiliated"
                       ? "73%"
                       : profile?.role === "non_affiliated"
                       ? "45%"
                       : "85%"}
                   </p>
-                  <p className="text-xs text-[var(--medium-grey)]">
+                  <p className="text-xs text-[var(--dashboard-text-secondary)]">
                     {t("Courses completed")}
                   </p>
                 </div>
@@ -561,12 +561,12 @@ export default function DashboardPage() {
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
                   {t("Security Awareness")}
                 </h3>
-                <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center">
+                <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center transition-colors">
                   <svg
-                    className="w-4 h-4 text-white"
+                    className="w-4 h-4 text-[var(--dashboard-text-primary)]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -585,14 +585,14 @@ export default function DashboardPage() {
                 {/* Left Side - Stats Cards */}
                 <div className="space-y-3">
                   {/* Phishing Tests Card */}
-                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
-                    <p className="text-xs text-[var(--medium-grey)] mb-1">
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
+                    <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
                         ? t("Total Tests")
                         : t("Tests Passed")}
                     </p>
-                    <p className="text-lg font-bold text-white">
+                    <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
                       {profile?.role === "system_admin"
                         ? "1,247"
                         : profile?.role === "client_admin"
@@ -602,14 +602,14 @@ export default function DashboardPage() {
                   </div>
 
                   {/* Badges Card */}
-                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
-                    <p className="text-xs text-[var(--medium-grey)] mb-1">
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
+                    <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
                         ? t("Avg Badges")
                         : t("Your Badges")}
                     </p>
-                    <p className="text-lg font-bold text-white">
+                    <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
                       {profile?.role === "affiliated"
                         ? "8"
                         : profile?.role === "non_affiliated"
@@ -650,7 +650,7 @@ export default function DashboardPage() {
         <div className="mt-8 relative z-10">
           <div className="dashboard-card rounded-lg p-6">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
                 {profile?.role === "system_admin" ||
                 profile?.role === "client_admin"
                   ? t("User Activity Overview")

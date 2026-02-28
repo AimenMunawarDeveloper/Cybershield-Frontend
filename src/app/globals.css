@@ -150,10 +150,63 @@
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
+  /* Restore original sidebar-accent for dark mode */
+  --sidebar-accent: var(--navy-blue-lighter);
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  /* Ensure navy-blue colors remain unchanged in dark mode */
+  --navy-blue: #0f1a2a;
+  --navy-blue-light: #132235;
+  --navy-blue-lighter: #1a2a3f;
+}
+
+/* Light mode variables - matching training modules page style with warmer tones */
+.light {
+  --background: #f0f2f5;
+  --foreground: #111827;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: var(--neon-blue);
+  --primary-foreground: #ffffff;
+  --secondary: #e8ebf0;
+  --secondary-foreground: #111827;
+  --muted: #eef1f5;
+  --muted-foreground: #6b7280;
+  --accent: #e8ebf0;
+  --accent-foreground: #111827;
+  --destructive: #dc2626;
+  --border: #d1d5db;
+  --input: #ffffff;
+  --ring: var(--neon-blue);
+  --chart-1: var(--neon-blue);
+  --chart-2: var(--electric-blue);
+  --chart-3: var(--purple-blue);
+  --chart-4: var(--light-blue);
+  --chart-5: var(--medium-blue);
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: var(--neon-blue);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f4f8;
+  --sidebar-accent-foreground: #111827;
+  --sidebar-border: #d1d5db;
+  --sidebar-ring: var(--neon-blue);
+  
+  /* Dashboard-specific light mode variables - warmer, less white tones */
+  --dashboard-bg: #eef2f6;
+  --dashboard-card-bg: #ffffff;
+  --dashboard-card-border: #d1d5db;
+  --dashboard-text-primary: #111827;
+  --dashboard-text-secondary: #4b5563;
+  --dashboard-text-muted: #6b7280;
+  
+  /* Light mode - override CSS variables for backgrounds with warmer tones */
+  --navy-blue: var(--dashboard-bg);
+  --navy-blue-light: #f8fafc;
+  --navy-blue-lighter: #f1f5f9;
 }
 
 @layer base {
@@ -185,6 +238,17 @@
   animation: float 8s ease-in-out infinite;
 }
 
+/* Light mode blurred background - softer, warmer gradient */
+.light .blurred-background {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(171, 210, 235, 0.4) 0%,
+    rgba(79, 195, 247, 0.3) 30%,
+    rgba(81, 176, 236, 0.2) 60%,
+    transparent 90%
+  );
+}
+
 @keyframes float {
   0%,
   100% {
@@ -201,6 +265,44 @@
   backdrop-filter: blur(10px);
   position: relative;
   z-index: 1;
+}
+
+/* Light mode dashboard card */
+.light .dashboard-card {
+  background: var(--dashboard-card-bg);
+  border: 1px solid var(--dashboard-card-border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Sidebar logo - white in dark mode, dark in light mode */
+.sidebar-logo {
+  filter: brightness(0) invert(1);
+}
+
+.light .sidebar-logo {
+  filter: brightness(0);
+}
+
+/* Chart grid lines - theme-aware */
+:root {
+  --chart-grid-stroke: rgba(255, 255, 255, 0.1);
+}
+
+.light {
+  --chart-grid-stroke: rgba(0, 0, 0, 0.1);
+}
+
+/* Theme-aware text colors */
+:root {
+  --dashboard-text-primary: var(--white);
+  --dashboard-text-secondary: var(--medium-grey);
+  --dashboard-text-muted: var(--medium-grey);
+}
+
+.light {
+  --dashboard-text-primary: #111827;
+  --dashboard-text-secondary: #6b7280;
+  --dashboard-text-muted: #9ca3af;
 }
 
 @keyframes shimmer {

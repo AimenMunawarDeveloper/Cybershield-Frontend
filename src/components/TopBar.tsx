@@ -8,7 +8,7 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { Bell, Search } from "lucide-react";
+import { Bell, Search, Moon, Sun } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePathname } from "next/navigation";
@@ -23,6 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface TopBarProps {
   variant?: "main" | "dashboard";
@@ -64,10 +65,10 @@ function UserGreeting() {
 
   return (
     <div className="flex flex-col">
-      <span className="text-lg font-semibold text-white">
+      <span className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
         {t("Hello")} {firstName}
       </span>
-      <span className="text-sm text-[var(--medium-grey)]">
+      <span className="text-sm text-[var(--dashboard-text-secondary)]">
         {formatTime(currentTime)} • {formatDate(currentTime)}
       </span>
     </div>
@@ -81,13 +82,13 @@ function SearchBar() {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--medium-grey)]" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--dashboard-text-secondary)]" />
       <Input
         type="text"
         placeholder={t("Search...")}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-white placeholder-[var(--medium-grey)] focus:border-[var(--neon-blue)]"
+        className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] focus:border-[var(--neon-blue)]"
       />
     </div>
   );
@@ -103,6 +104,8 @@ export default function TopBar({
     pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
   const { isLoaded } = useAuth();
   const { t } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
   // Don't render TopBar on dashboard pages when variant is "main" since it will be handled by dashboard layout
   // IMPORTANT: All hooks must be called before any conditional returns to follow Rules of Hooks
@@ -132,7 +135,7 @@ export default function TopBar({
     <header
       className={`flex justify-between items-center gap-4 h-12 ${
         variant === "dashboard"
-          ? "bg-transparent my-2 px-4"
+          ? "bg-[var(--navy-blue)] my-2 px-4"
           : isAuthPage
           ? "bg-white w-full px-4 py-4"
           : "bg-[var(--navy-blue)] my-2 px-4"
@@ -200,9 +203,23 @@ export default function TopBar({
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={toggleTheme}
                   className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8"
                 >
-                  <Bell className="h-4 w-4 text-white" />
+                  {isDark ? (
+                    <Moon className="h-4 w-4 text-[var(--dashboard-text-primary)]" />
+                  ) : (
+                    <Sun className="h-4 w-4 text-[var(--dashboard-text-primary)]" />
+                  )}
+                </Button>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8"
+                >
+                  <Bell className="h-4 w-4 text-[var(--dashboard-text-primary)]" />
                 </Button>
               </NavigationMenuItem>
               <NavigationMenuItem>
