@@ -23,6 +23,8 @@ import {
   Lightbulb,
   X,
   RotateCcw,
+  Mail,
+  MessageCircle,
 } from "lucide-react";
 import { ApiClient } from "@/lib/api";
 import type { Course, CourseModule, ModuleSection, QuizQuestion } from "@/lib/coursesData";
@@ -267,12 +269,17 @@ function formatContent(material: string, translateFn?: (text: string) => string)
 const QUIZ_TIME_BASIC_SEC = 10 * 60;
 const QUIZ_TIME_ADVANCED_SEC = 15 * 60;
 
-function parseSubmoduleId(submoduleId: string): { moduleIndex: number; sectionIndex: number | "quiz" } | null {
+function parseSubmoduleId(submoduleId: string): { moduleIndex: number; sectionIndex: number | "quiz" | "activity" } | null {
   if (!submoduleId) return null;
   if (submoduleId.endsWith("-quiz")) {
     const moduleIndex = parseInt(submoduleId.slice(0, -5), 10);
     if (Number.isNaN(moduleIndex) || moduleIndex < 0) return null;
     return { moduleIndex, sectionIndex: "quiz" };
+  }
+  if (submoduleId.endsWith("-activity")) {
+    const moduleIndex = parseInt(submoduleId.slice(0, -9), 10);
+    if (Number.isNaN(moduleIndex) || moduleIndex < 0) return null;
+    return { moduleIndex, sectionIndex: "activity" };
   }
   const parts = submoduleId.split("-");
   if (parts.length !== 2) return null;
@@ -306,6 +313,7 @@ export default function SubmodulePage() {
   const moduleIndex = parsed?.moduleIndex ?? -1;
   const sectionIndex = parsed?.sectionIndex ?? -1;
   const isQuiz = sectionIndex === "quiz";
+  const isActivity = sectionIndex === "activity";
 
   const currentModule: CourseModule | null =
     displayCourse?.modules?.[moduleIndex] ?? null;
@@ -313,6 +321,7 @@ export default function SubmodulePage() {
     typeof sectionIndex === "number" && currentModule?.sections?.[sectionIndex]
       ? currentModule.sections[sectionIndex]
       : null;
+  const activityType = isActivity ? (currentModule?.activityType ?? null) : null;
 
   // Debug: Log section data to see if media is present
   useEffect(() => {
@@ -338,7 +347,115 @@ export default function SubmodulePage() {
   const [quizTimeExpired, setQuizTimeExpired] = useState(false);
   // Persist last quiz score so it stays visible after marking complete (isRead)
   const [lastQuizScore, setLastQuizScore] = useState<{ correctCount: number; total: number; scorePercent: number; passed: boolean } | null>(null);
+  const [activityStarted, setActivityStarted] = useState(false);
+  /** 5-minute countdown (seconds remaining) for email activity; 0 = not started or expired */
+  const [activityTimeRemainingSec, setActivityTimeRemainingSec] = useState(0);
+  const [activityTimeExpired, setActivityTimeExpired] = useState(false);
+  const [activityEmail, setActivityEmail] = useState("");
+  const [activityPhone, setActivityPhone] = useState("");
+  const [activityContactError, setActivityContactError] = useState<string | null>(null);
+  const [activitySendLoading, setActivitySendLoading] = useState(false);
+  const [activityEmailStatus, setActivityEmailStatus] = useState<{
+    passed: boolean | null;
+    hasEmail: boolean;
+    openedAt?: string | null;
+    clickedAt?: string | null;
+    credentialsEnteredAt?: string | null;
+  } | null>(null);
   const isRead = (submoduleIdParam: string) => completedIds.includes(submoduleIdParam);
+
+  const startActivity = useCallback(async () => {
+    setActivityContactError(null);
+    if (activityType === "email") {
+      const trimmed = activityEmail.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!trimmed) {
+        setActivityContactError(t("Please enter your email address."));
+        return;
+      }
+      if (!emailRegex.test(trimmed)) {
+        setActivityContactError(t("Please enter a valid email address."));
+        return;
+      }
+      setActivitySendLoading(true);
+      try {
+        const api = new ApiClient(getToken);
+        const res = await api.sendActivityEmail(courseId, trimmed, submoduleId);
+        setActivityStarted(true);
+        const limitMinutes = res?.timeLimitMinutes ?? 5;
+        setActivityTimeRemainingSec(limitMinutes * 60);
+        setActivityTimeExpired(false);
+      } catch (err) {
+        setActivityContactError(err instanceof Error ? err.message : t("Failed to send email. Please try again."));
+      } finally {
+        setActivitySendLoading(false);
+      }
+      return;
+    }
+    if (activityType === "whatsapp") {
+      const trimmed = activityPhone.trim();
+      const digitsOnly = trimmed.replace(/\D/g, "");
+      if (digitsOnly.length < 10) {
+        setActivityContactError(t("Please enter a valid phone number (at least 10 digits)."));
+        return;
+      }
+      setActivitySendLoading(true);
+      try {
+        const api = new ApiClient(getToken);
+        await api.sendActivityWhatsApp(courseId, trimmed);
+        setActivityStarted(true);
+      } catch (err) {
+        setActivityContactError(err instanceof Error ? err.message : t("Failed to send WhatsApp message. Please try again."));
+      } finally {
+        setActivitySendLoading(false);
+      }
+      return;
+    }
+    setActivityStarted(true);
+  }, [activityType, activityEmail, activityPhone, courseId, getToken, t]);
+
+  useEffect(() => {
+    if (!isActivity || activityType !== "email" || !activityStarted || !getToken || !courseId) return;
+    let cancelled = false;
+    const fetchStatus = async () => {
+      try {
+        const api = new ApiClient(getToken);
+        const res = await api.getActivityEmailStatus(courseId, submoduleId);
+        if (cancelled) return;
+        setActivityEmailStatus({
+          hasEmail: res.hasEmail ?? false,
+          passed: res.passed ?? null,
+          openedAt: res.openedAt ?? null,
+          clickedAt: res.clickedAt ?? null,
+          credentialsEnteredAt: res.credentialsEnteredAt ?? null,
+        });
+      } catch {
+        if (!cancelled) setActivityEmailStatus(null);
+      }
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 10000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [isActivity, activityType, activityStarted, courseId, submoduleId, getToken]);
+
+  // Activity 5-minute countdown: when email is sent, count down; at 0, mark expired and stop
+  useEffect(() => {
+    if (!isActivity || activityType !== "email" || !activityStarted || activityTimeRemainingSec <= 0) return;
+    const interval = setInterval(() => {
+      setActivityTimeRemainingSec((prev) => {
+        if (prev <= 1) {
+          setActivityTimeExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isActivity, activityType, activityStarted, activityTimeRemainingSec]);
+
   const allQuizAttempted =
     quizQuestions.length > 0 &&
     quizQuestions.every((_, qi) => Object.prototype.hasOwnProperty.call(quizSelections, qi));
@@ -459,23 +576,38 @@ export default function SubmodulePage() {
 
   const sections = currentModule?.sections ?? [];
   const hasQuiz = (currentModule?.quiz?.length ?? 0) > 0;
+  const hasActivity = !!(currentModule?.activityType);
   const canGoPrev =
-    isQuiz ? sections.length > 0 : sectionIndex > 0;
+    isQuiz ? sections.length > 0 : isActivity ? (hasQuiz || sections.length > 0) : sectionIndex > 0;
   const canGoNext = isQuiz
-    ? false
-    : sectionIndex < sections.length - 1 || hasQuiz;
+    ? hasActivity
+    : isActivity
+      ? false
+      : sectionIndex < sections.length - 1 || hasQuiz || hasActivity;
   const prevUrl = isQuiz
     ? `${moduleIndex}-${sections.length - 1}`
-    : sectionIndex > 0
-      ? `${moduleIndex}-${sectionIndex - 1}`
-      : null;
-  const nextUrl = isQuiz
-    ? null
-    : sectionIndex < sections.length - 1
-      ? `${moduleIndex}-${sectionIndex + 1}`
-      : hasQuiz
+    : isActivity
+      ? hasQuiz
         ? `${moduleIndex}-quiz`
+        : sections.length > 0
+          ? `${moduleIndex}-${sections.length - 1}`
+          : null
+      : sectionIndex > 0
+        ? `${moduleIndex}-${sectionIndex - 1}`
         : null;
+  const nextUrl = isQuiz
+    ? hasActivity
+      ? `${moduleIndex}-activity`
+      : null
+    : isActivity
+      ? null
+      : sectionIndex < sections.length - 1
+        ? `${moduleIndex}-${sectionIndex + 1}`
+        : hasQuiz
+          ? `${moduleIndex}-quiz`
+          : hasActivity
+            ? `${moduleIndex}-activity`
+            : null;
 
   useEffect(() => {
     if (!getToken || !courseId) return;
@@ -555,6 +687,34 @@ export default function SubmodulePage() {
         "Retake Quiz",
         "Complete Quiz",
         "Start Quiz",
+        "Start Activity",
+        "Activity",
+        "Email",
+        "WhatsApp",
+        "This activity will be completed via Email.",
+        "This activity will be completed via WhatsApp.",
+        "Complete this activity by following the instructions sent to your email.",
+        "Complete this activity by following the instructions sent via WhatsApp.",
+        "Complete this activity as instructed.",
+        "Email address",
+        "Phone number",
+        "Please enter your email address.",
+        "Please enter a valid email address.",
+        "Please enter a valid phone number (at least 10 digits).",
+        "e.g. you@example.com",
+        "e.g. +1 234 567 8900",
+        "Phone",
+        "Sending email...",
+        "Sending message...",
+        "Failed to send email. Please try again.",
+        "Failed to send WhatsApp message. Please try again.",
+        "Passed",
+        "Failed",
+        "Pending",
+        "You opened the email without clicking links or entering credentials. You can mark as complete.",
+        "You clicked a link or entered credentials. To pass this activity, open the email only—do not click links or enter credentials. This activity cannot be marked complete.",
+        "Open the email without clicking links or entering credentials to pass.",
+        "You cannot complete this activity because you clicked a link or entered credentials in the email.",
         "You have",
         "minutes to complete this quiz.",
         "Time's up!",
@@ -820,7 +980,11 @@ export default function SubmodulePage() {
   const getTotalItems = useCallback(() => {
     if (!displayCourse) return 0;
     return displayCourse.modules.reduce(
-      (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
+      (acc, m) =>
+        acc +
+        (m.sections?.length ?? 0) +
+        ((m.quiz?.length ?? 0) > 0 ? 1 : 0) +
+        (m.activityType ? 1 : 0),
       0
     );
   }, [displayCourse]);
@@ -960,7 +1124,7 @@ export default function SubmodulePage() {
                       {hasQuiz && (
                         <button
                           onClick={() => router.push(`/dashboard/training-modules/${courseId}/${modIdx}-quiz`)}
-                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors ${
+                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 ${
                             modIdx === moduleIndex && isQuiz
                               ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
                               : "text-gray-700 hover:bg-gray-100"
@@ -972,6 +1136,23 @@ export default function SubmodulePage() {
                             <FileQuestion className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
                           )}
                           <span>{t("Module Quiz")}</span>
+                        </button>
+                      )}
+                      {mod.activityType && (
+                        <button
+                          onClick={() => router.push(`/dashboard/training-modules/${courseId}/${modIdx}-activity`)}
+                          className={`w-full px-4 py-2.5 pl-12 flex items-center gap-2 text-left text-sm transition-colors border-b border-gray-100 last:border-b-0 ${
+                            modIdx === moduleIndex && isActivity
+                              ? "bg-[var(--neon-blue)]/5 text-[var(--neon-blue)] font-medium"
+                              : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {isRead(`${modIdx}-activity`) ? (
+                            <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                          ) : (
+                            <MessageCircle className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                          )}
+                          <span>{t("Activity")}</span>
                         </button>
                       )}
                     </div>
@@ -1000,7 +1181,14 @@ export default function SubmodulePage() {
                 <h1 className="text-lg font-semibold text-gray-900">{displayCourse.courseTitle}</h1>
                 {currentModule && (
                   <p className="text-sm text-gray-500">
-                    {currentModule.title} {isQuiz ? `• ${t("Module Quiz")}` : currentSection ? `• ${currentSection.title}` : ""}
+                    {currentModule.title}{" "}
+                    {isQuiz
+                      ? `• ${t("Module Quiz")}`
+                      : isActivity
+                        ? `• ${t("Activity")}`
+                        : currentSection
+                          ? `• ${currentSection.title}`
+                          : ""}
                   </p>
                 )}
               </div>
@@ -1319,6 +1507,216 @@ export default function SubmodulePage() {
                 </>
                 )}
           </article>
+        ) : isActivity ? (
+              <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                {!activityStarted ? (
+                  <div className="px-8 py-12">
+                    <div className="max-w-md mx-auto">
+                      <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 flex items-center justify-center mx-auto mb-6">
+                        {activityType === "whatsapp" ? (
+                          <MessageCircle className="w-10 h-10 text-[var(--neon-blue)]" />
+                        ) : (
+                          <Mail className="w-10 h-10 text-[var(--neon-blue)]" />
+                        )}
+                      </div>
+                      <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">{t("Activity")}</h1>
+                      {currentModule?.title && (
+                        <p className="text-gray-600 mb-6 text-center">{currentModule.title}</p>
+                      )}
+                      <p className="text-gray-700 mb-6 text-center">
+                        {activityType === "email"
+                          ? t("This activity will be completed via Email.")
+                          : activityType === "whatsapp"
+                            ? t("This activity will be completed via WhatsApp.")
+                            : t("Complete this activity as instructed.")}
+                      </p>
+                      {(activityType === "email" || activityType === "whatsapp") && (
+                        <div className="mb-6 text-left">
+                          <label htmlFor="activity-contact" className="block text-sm font-medium text-gray-700 mb-2">
+                            {activityType === "email" ? t("Email address") : t("Phone number")}
+                          </label>
+                          {activityType === "email" ? (
+                            <input
+                              id="activity-contact"
+                              type="email"
+                              value={activityEmail}
+                              onChange={(e) => {
+                                setActivityEmail(e.target.value);
+                                setActivityContactError(null);
+                              }}
+                              placeholder={t("e.g. you@example.com")}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] outline-none text-gray-900"
+                            />
+                          ) : (
+                            <input
+                              id="activity-contact"
+                              type="tel"
+                              value={activityPhone}
+                              onChange={(e) => {
+                                setActivityPhone(e.target.value);
+                                setActivityContactError(null);
+                              }}
+                              placeholder={t("e.g. +1 234 567 8900")}
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-[var(--neon-blue)] outline-none text-gray-900"
+                            />
+                          )}
+                          {activityContactError && (
+                            <p className="mt-2 text-sm text-red-600">{activityContactError}</p>
+                          )}
+                        </div>
+                      )}
+                      <div className="text-center">
+                        <button
+                          type="button"
+                          onClick={() => startActivity()}
+                          disabled={activitySendLoading}
+                          className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-lg font-semibold shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                          {activitySendLoading ? (
+                            <>
+                              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                              {activityType === "email" ? t("Sending email...") : t("Sending message...")}
+                            </>
+                          ) : (
+                            <>
+                              <PlayCircle className="w-6 h-6" />
+                              {t("Start Activity")}
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-8 py-8">
+                    <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 rounded-xl p-6 mb-8">
+                      <div className="flex items-center gap-4 mb-4">
+                        {activityType === "whatsapp" ? (
+                          <MessageCircle className="w-10 h-10 text-[var(--neon-blue)]" />
+                        ) : (
+                          <Mail className="w-10 h-10 text-[var(--neon-blue)]" />
+                        )}
+                        <div>
+                          <h2 className="text-xl font-bold text-gray-900">{t("Activity")}</h2>
+                          <p className="text-sm text-gray-600">
+                            {activityType === "email" ? t("Email") : activityType === "whatsapp" ? t("WhatsApp") : t("Activity")}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-gray-700 mb-2">
+                        {activityType === "email"
+                          ? t("Complete this activity by following the instructions sent to your email.")
+                          : activityType === "whatsapp"
+                            ? t("Complete this activity by following the instructions sent via WhatsApp.")
+                            : t("Complete this activity as instructed.")}
+                      </p>
+                      {(activityType === "email" && activityEmail.trim()) || (activityType === "whatsapp" && activityPhone.trim()) ? (
+                        <p className="text-sm text-gray-600 mt-2">
+                          {activityType === "email"
+                            ? t("Email") + ": " + activityEmail.trim()
+                            : t("Phone") + ": " + activityPhone.trim()}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    {activityType === "email" && activityEmailStatus?.hasEmail && (() => {
+                      const passed = activityEmailStatus.passed === true;
+                      const failedAfterOpen = activityEmailStatus.passed === false && activityEmailStatus.openedAt != null;
+                      return (
+                      <div
+                        className={`mb-6 rounded-xl border-2 p-4 ${
+                          passed
+                            ? "bg-green-50 border-green-500 text-green-800"
+                            : failedAfterOpen
+                              ? "bg-red-50 border-red-500 text-red-800"
+                              : "bg-amber-50 border-amber-500 text-amber-800"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          {passed ? (
+                            <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                          ) : failedAfterOpen ? (
+                            <X className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                          ) : (
+                            <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+                          )}
+                          <div>
+                            {passed && (
+                              <>
+                                <p className="font-semibold">{t("Passed")}</p>
+                                <p className="text-sm mt-1">
+                                  {t("You opened the email without clicking links or entering credentials. You can mark as complete.")}
+                                </p>
+                              </>
+                            )}
+                            {failedAfterOpen && (
+                              <>
+                                <p className="font-semibold">{t("Failed")}</p>
+                                <p className="text-sm mt-1">
+                                  {t("You clicked a link or entered credentials. To pass this activity, open the email only—do not click links or enter credentials. This activity cannot be marked complete.")}
+                                </p>
+                              </>
+                            )}
+                            {!passed && !failedAfterOpen && (
+                              <>
+                                <p className="font-semibold">{t("Pending")}</p>
+                                <p className="text-sm mt-1">
+                                  {t("Open the email without clicking links or entering credentials to pass.")}
+                                </p>
+                                {activityTimeExpired ? (
+                                  <p className="text-sm mt-2 font-medium text-red-600">
+                                    {t("Time's up. You did not complete within 5 minutes.")}
+                                  </p>
+                                ) : activityTimeRemainingSec > 0 ? (
+                                  <p className="text-sm mt-2 font-medium text-amber-700">
+                                    {t("Complete within")} {Math.floor(activityTimeRemainingSec / 60)}:{String(activityTimeRemainingSec % 60).padStart(2, "0")}
+                                  </p>
+                                ) : null}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ); })()}
+
+                    <div className="pt-6 border-t border-gray-200">
+                      {isRead(submoduleId) ? (
+                        <button
+                          type="button"
+                          onClick={toggleComplete}
+                          disabled={markingRead}
+                          className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+                        >
+                          <CheckCircle2 className="w-5 h-5 shrink-0" />
+                          <span>{markingRead ? t("Updating…") : t("Mark as Incomplete")}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={toggleComplete}
+                          disabled={markingRead || (activityType === "email" && activityTimeExpired) || (activityType === "email" && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false && activityEmailStatus.openedAt != null)}
+                          className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                        >
+                          <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white transition-colors" />
+                          <span className="text-[var(--neon-blue)] group-hover:text-white transition-colors">
+                            {markingRead ? t("Saving…") : t("Mark as Complete")}
+                          </span>
+                        </button>
+                      )}
+                      {activityType === "email" && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false && activityEmailStatus.openedAt != null && (
+                        <p className="mt-2 text-sm text-red-600">
+                          {t("You cannot complete this activity because you clicked a link or entered credentials in the email.")}
+                        </p>
+                      )}
+                      {markReadError && (
+                        <p className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+                          {markReadError}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </article>
         ) : currentSection ? (
               <article className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 {/* Section Header */}
@@ -1485,7 +1883,13 @@ export default function SubmodulePage() {
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${nextUrl}`)}
                   className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
             >
-                  <span>{sectionIndex === sections.length - 1 && hasQuiz ? t("Module Quiz") : t("Next")}</span>
+                  <span>
+                    {sectionIndex === sections.length - 1 && hasQuiz
+                      ? t("Module Quiz")
+                      : sectionIndex === sections.length - 1 && hasActivity && !hasQuiz
+                        ? t("Activity")
+                        : t("Next")}
+                  </span>
                   <ChevronRight className="w-5 h-5 flex-shrink-0" />
             </button>
           ) : (
