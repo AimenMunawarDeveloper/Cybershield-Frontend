@@ -1030,8 +1030,7 @@ export default function CreateTrainingModuleModal({
                 type="button"
                 onClick={addModule}
                 disabled={modules.length >= limits.maxModules}
-                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" />
                 {t("Add module")}
@@ -1350,8 +1349,6 @@ export default function CreateTrainingModuleModal({
                             {mod.quiz.length === 0 ? (
                               <span className="text-sm text-[var(--medium-grey)] ml-auto">
                                 {t("Add quiz")} (0/{limits.maxMcq})
-                              <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] ml-auto">
-                                {t("Add quiz")}
                               </span>
                             ) : isQuizExpanded ? (
                               <ChevronDown className="w-4 h-4 ml-auto text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
