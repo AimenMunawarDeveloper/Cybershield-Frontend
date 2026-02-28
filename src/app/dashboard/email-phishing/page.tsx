@@ -380,7 +380,7 @@ export default function EmailPhishingPage() {
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)] text-lg">{t("Loading...")}</p>
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-lg">{t("Loading...")}</p>
         </div>
       </div>
     );
@@ -390,10 +390,10 @@ export default function EmailPhishingPage() {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen px-4 text-center">
         <div>
-          <h1 className="text-2xl font-semibold text-white">
+          <h1 className="text-2xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
             {t("Access Restricted")}
           </h1>
-          <p className="mt-2 text-sm text-gray-300">
+          <p className="mt-2 text-sm text-[var(--dashboard-text-secondary)] dark:text-gray-300">
             {accessError ||
               t("This page is available to system and client administrators only.")}
           </p>
@@ -408,7 +408,7 @@ export default function EmailPhishingPage() {
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)] text-lg">
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
@@ -435,27 +435,27 @@ export default function EmailPhishingPage() {
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
                 {t("Email Phishing")}
                 <span className="block text-[var(--neon-blue)] mt-1">{t("Awareness Training")}</span>
               </h1>
               
-              <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
                 {t("Protect your organization by training users to identify and respond to phishing emails. Use our realistic templates to simulate real-world phishing scenarios and build cybersecurity awareness.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--neon-blue)] dark:border-opacity-30 backdrop-blur-sm">
                   <Shield className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Realistic Scenarios")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Realistic Scenarios")}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--neon-blue)] dark:border-opacity-30 backdrop-blur-sm">
                   <AlertTriangle className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Security Training")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Security Training")}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--neon-blue)] dark:border-opacity-30 backdrop-blur-sm">
                   <Lock className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Safe Testing")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Safe Testing")}</span>
                 </div>
               </div>
             </div>
@@ -465,10 +465,10 @@ export default function EmailPhishingPage() {
         {/* How Email Phishing Works Section */}
         <div className="relative z-10 mb-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-bold text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
+            <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
               {t("How Email Phishing Simulation Works")}
             </h2>
-            <div className="dashboard-card rounded-lg p-6 md:p-8 bg-[var(--navy-blue-light)]">
+            <div className="dashboard-card rounded-lg p-6 md:p-8 bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div className="relative h-64 md:h-80 rounded-lg overflow-hidden">
                   <Image
@@ -479,10 +479,10 @@ export default function EmailPhishingPage() {
                   />
                 </div>
                 <div className="space-y-4">
-                  <p className="text-white text-lg">
+                  <p className="text-[var(--dashboard-text-primary)] dark:text-white text-lg">
                     {t("Our email phishing simulation sends realistic phishing emails directly to your employees' inboxes to test their security awareness and response.")}
                   </p>
-                  <ul className="space-y-3 text-white">
+                  <ul className="space-y-3 text-[var(--dashboard-text-primary)] dark:text-white">
                     <li className="flex items-start gap-3">
                       <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
                       <span>
@@ -519,7 +519,7 @@ export default function EmailPhishingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="mb-8">
               <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                <h2 className="text-3xl font-bold text-white underline decoration-[var(--neon-blue)]">
+                <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white underline decoration-[var(--neon-blue)]">
                   {t("Phishing Email Templates")}
                 </h2>
                 <button
@@ -531,7 +531,7 @@ export default function EmailPhishingPage() {
                   {t("Custom Template")}
                 </button>
               </div>
-              <p className="text-base text-[var(--medium-grey)] max-w-2xl">
+              <p className="text-base text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] max-w-2xl">
                 {t("Choose from our collection of realistic phishing templates designed to test and improve your team's security awareness.")}
               </p>
             </div>
@@ -540,12 +540,12 @@ export default function EmailPhishingPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
               {loadingTemplates ? (
                 <div className="col-span-full text-center py-12">
-                  <div className="text-[var(--medium-grey)]">{t("Loading templates...")}</div>
+                  <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Loading templates...")}</div>
                 </div>
               ) : templates.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                  <p className="text-[var(--medium-grey)]">{t("No templates available. Please seed the database first.")}</p>
+                  <Mail className="w-16 h-16 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mx-auto mb-4" />
+                  <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("No templates available. Please seed the database first.")}</p>
                 </div>
               ) : (
                 templates.slice(0, visibleTemplates).map((template) => (
@@ -589,13 +589,13 @@ export default function EmailPhishingPage() {
                         <Mail className="w-5 h-5 text-[var(--neon-blue)]" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                        <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
                           {t(template.title)}
                         </h3>
                       </div>
                     </div>
                     
-                    <p className="text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
+                    <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm leading-relaxed mb-6 flex-1">
                       {t(template.description)}
                     </p>
 
@@ -631,7 +631,7 @@ export default function EmailPhishingPage() {
             {/* See More Button */}
             {templates.length > INITIAL_VISIBLE_TEMPLATES && (
               <div className="text-center">
-                <p className="text-[var(--medium-grey)] text-sm mb-4">
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm mb-4">
                   {t("Showing")} {Math.min(visibleTemplates, templates.length)} {t("of")} {templates.length} {t("templates")}
                 </p>
                 {visibleTemplates < templates.length ? (
@@ -644,7 +644,7 @@ export default function EmailPhishingPage() {
                 ) : (
                   <button
                     onClick={() => setVisibleTemplates(INITIAL_VISIBLE_TEMPLATES)}
-                    className="px-8 py-3 bg-[var(--navy-blue-lighter)] text-white rounded-lg font-medium hover:bg-[var(--navy-blue)] transition-colors border border-[var(--neon-blue)]/30"
+                    className="px-8 py-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)] transition-colors border border-gray-300 dark:border-[var(--neon-blue)]/30"
                   >
                     {t("Show Less")}
                   </button>
@@ -663,10 +663,10 @@ export default function EmailPhishingPage() {
                 <Mail className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
                   {t("Email Phishing Campaigns")}
                 </h1>
-                <p className="text-[var(--medium-grey)] text-sm">
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                   {t("Create and manage phishing awareness campaigns")}
                 </p>
               </div>
@@ -706,25 +706,25 @@ export default function EmailPhishingPage() {
           <div className="relative z-10">
             <div className="dashboard-card rounded-lg p-6">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-white mb-2">
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">
                   {t("Recent Emails")}
                 </h3>
-                <p className="text-sm text-[var(--medium-grey)]">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("Manage your email phishing awareness campaigns")}
                 </p>
               </div>
 
               {loadingEmails ? (
                 <div className="text-center py-8">
-                  <div className="text-[var(--medium-grey)]">{t("Loading emails...")}</div>
+                  <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Loading emails...")}</div>
                 </div>
               ) : emails.length === 0 ? (
                 <div className="text-center py-12">
-                  <Mail className="w-16 h-16 text-[var(--medium-grey)] mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">
+                  <Mail className="w-16 h-16 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">
                     {t("No emails yet")}
                   </h3>
-                  <p className="text-sm text-[var(--medium-grey)]">
+                  <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                     {t("Email phishing campaigns will appear here once they are created")}
                   </p>
                 </div>
@@ -733,7 +733,7 @@ export default function EmailPhishingPage() {
                   {emails.map((email) => (
                     <div
                       key={email._id}
-                      className="bg-[var(--navy-blue-lighter)] rounded-lg p-4"
+                      className="bg-gray-50 dark:bg-[var(--navy-blue-lighter)] rounded-lg p-4"
                     >
                       <div className="flex items-start gap-3">
                         {email.status === "sent" ? (
@@ -743,32 +743,32 @@ export default function EmailPhishingPage() {
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
-                            <p className="text-white font-semibold truncate">
+                            <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold truncate">
                               {t(email.subject)}
                             </p>
                             <div className="flex items-center gap-2 flex-shrink-0">
                               {email.openedAt && (
-                                <span className="text-xs px-2 py-1 rounded-full bg-blue-900/30 text-blue-400 border border-blue-500/30 flex items-center gap-1">
+                                <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 flex items-center gap-1">
                                   <Eye className="w-3 h-3" />
                                   {t("Opened")}
                                 </span>
                               )}
                               {email.clickedAt && (
-                                <span className="text-xs px-2 py-1 rounded-full bg-purple-900/30 text-purple-400 border border-purple-500/30 flex items-center gap-1">
+                                <span className="text-xs px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 flex items-center gap-1">
                                   <MousePointerClick className="w-3 h-3" />
                                   {t("Clicked")}
                                 </span>
                               )}
                               {email.credentialsEnteredAt && (
-                                <span className="text-xs px-2 py-1 rounded-full bg-amber-900/30 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                                <span className="text-xs px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 flex items-center gap-1">
                                   {t("Credentials entered")}
                                 </span>
                               )}
                               <span
                                 className={`text-xs px-2 py-1 rounded-full ${
                                   email.status === "sent"
-                                    ? "bg-green-900/30 text-green-400 border border-green-500/30"
-                                    : "bg-red-900/30 text-red-400 border border-red-500/30"
+                                    ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-500/30"
+                                    : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-300 dark:border-red-500/30"
                                 }`}
                               >
                                 {email.status === "sent" ? t("Sent") : t("Failed")}
@@ -776,36 +776,36 @@ export default function EmailPhishingPage() {
                             </div>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-sm text-[var(--medium-grey)] truncate">
-                              <span className="text-white">{t("To")}:</span> {email.sentTo}
+                            <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] truncate">
+                              <span className="text-[var(--dashboard-text-primary)] dark:text-white">{t("To")}:</span> {email.sentTo}
                             </p>
-                            <p className="text-xs text-[var(--medium-grey)] truncate">
-                              <span className="text-white">{t("From")}:</span> {email.sentBy}
+                            <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] truncate">
+                              <span className="text-[var(--dashboard-text-primary)] dark:text-white">{t("From")}:</span> {email.sentBy}
                             </p>
-                            <div className="flex items-center gap-1 text-xs text-[var(--medium-grey)] mt-2">
+                            <div className="flex items-center gap-1 text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-2">
                               <Clock className="w-3 h-3" />
                               <span>{formatDate(email.createdAt)}</span>
                             </div>
                             {email.openedAt && (
-                              <div className="flex items-center gap-1 text-xs text-blue-400 mt-1">
+                              <div className="flex items-center gap-1 text-xs text-blue-700 dark:text-blue-400 mt-1">
                                 <Eye className="w-3 h-3" />
                                 <span>{t("First opened at")} {formatDate(email.openedAt)}</span>
                               </div>
                             )}
                             {email.clickedAt && (
-                              <div className="flex items-center gap-1 text-xs text-purple-400 mt-1">
+                              <div className="flex items-center gap-1 text-xs text-purple-700 dark:text-purple-400 mt-1">
                                 <MousePointerClick className="w-3 h-3" />
                                 <span>{t("First clicked at")} {formatDate(email.clickedAt)}</span>
                               </div>
                             )}
                             {email.credentialsEnteredAt && (
-                              <div className="flex items-center gap-1 text-xs text-amber-400 mt-1">
+                              <div className="flex items-center gap-1 text-xs text-amber-700 dark:text-amber-400 mt-1">
                                 <span>{t("Credentials entered at")} {formatDate(email.credentialsEnteredAt)}</span>
                               </div>
                             )}
                           </div>
                           {email.error && (
-                            <p className="text-xs text-red-400 mt-2">
+                            <p className="text-xs text-red-700 dark:text-red-400 mt-2">
                               {email.error}
                             </p>
                           )}
