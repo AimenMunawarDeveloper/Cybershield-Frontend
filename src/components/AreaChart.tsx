@@ -168,17 +168,17 @@ export default function AreaChart({
               />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid-stroke)" />
           <XAxis
             dataKey="month"
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+            tick={{ fill: "var(--dashboard-text-secondary)", fontSize: 12 }}
           />
           <YAxis
             axisLine={false}
             tickLine={false}
-            tick={{ fill: "var(--medium-grey)", fontSize: 12 }}
+            tick={{ fill: "var(--dashboard-text-secondary)", fontSize: 12 }}
             domain={yDomain}
             ticks={yTicks}
           />

@@ -240,7 +240,7 @@ export default function ActivityFeed({
     <div className="dashboard-card rounded-lg p-6">
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
+        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] mb-1">{title}</h3>
         <div className="flex items-center text-sm">
           <Check className="w-4 h-4 text-[var(--success-green)] mr-1" />
           <span className="text-[var(--success-green)]">{subtitle}</span>
@@ -260,10 +260,10 @@ export default function ActivityFeed({
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">
+                <p className="text-[var(--dashboard-text-primary)] text-sm font-medium truncate">
                   {activity.title}
                 </p>
-                <p className="text-[var(--medium-grey)] text-xs mt-1">
+                <p className="text-[var(--dashboard-text-secondary)] text-xs mt-1">
                   {activity.date}
                 </p>
               </div>

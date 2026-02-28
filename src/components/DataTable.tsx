@@ -204,14 +204,14 @@ export default function DataTable({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white mb-1">{title}</h3>
+          <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] mb-1">{title}</h3>
           <div className="flex items-center text-sm">
             <Check className="w-4 h-4 text-[var(--success-green)] mr-1" />
-            <span className="text-[var(--medium-grey)]">{subtitle}</span>
+            <span className="text-[var(--dashboard-text-secondary)]">{subtitle}</span>
           </div>
         </div>
         <button className="w-8 h-8 bg-[var(--navy-blue-lighter)] rounded-lg flex items-center justify-center hover:bg-[var(--navy-blue)] transition-colors">
-          <MoreVertical className="w-4 h-4 text-white" />
+          <MoreVertical className="w-4 h-4 text-[var(--dashboard-text-primary)]" />
         </button>
       </div>
 
@@ -221,26 +221,26 @@ export default function DataTable({
           {/* Table Header */}
           <thead>
             <tr className="border-b border-[var(--navy-blue-lighter)]">
-              <th className="text-left py-3 px-0 text-sm font-medium text-[var(--medium-grey)]">
+              <th className="text-left py-3 px-0 text-sm font-medium text-[var(--dashboard-text-secondary)]">
                 {userRole === "system_admin"
                   ? "ORGANIZATIONS"
                   : userRole === "client_admin"
                   ? "GROUPS"
                   : "COURSES"}
               </th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--medium-grey)]">
+              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--dashboard-text-secondary)]">
                 {userRole === "system_admin" || userRole === "client_admin"
                   ? "ADMINS"
                   : "MODULES"}
               </th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--medium-grey)]">
+              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--dashboard-text-secondary)]">
                 {userRole === "system_admin"
                   ? "USERS"
                   : userRole === "client_admin"
                   ? "STUDENTS"
                   : "SCORE"}
               </th>
-              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--medium-grey)]">
+              <th className="text-left py-3 px-4 text-sm font-medium text-[var(--dashboard-text-secondary)]">
                 {userRole === "system_admin" || userRole === "client_admin"
                   ? "ACTIVITY"
                   : "PROGRESS"}
@@ -265,7 +265,7 @@ export default function DataTable({
                         {item.item.icon}
                       </span>
                     </div>
-                    <span className="text-white text-sm">{item.item.name}</span>
+                    <span className="text-[var(--dashboard-text-primary)] text-sm">{item.item.name}</span>
                   </div>
                 </td>
 
@@ -277,7 +277,7 @@ export default function DataTable({
                         key={index}
                         className={`w-8 h-8 ${member.color} rounded-full flex items-center justify-center border-2 border-[var(--navy-blue-light)]`}
                       >
-                        <span className="text-white text-xs font-medium">
+                        <span className="text-[var(--dashboard-text-primary)] text-xs font-medium">
                           {member.name}
                         </span>
                       </div>
@@ -287,13 +287,13 @@ export default function DataTable({
 
                 {/* Metric */}
                 <td className="py-4 px-4">
-                  <span className="text-white text-sm">{item.metric}</span>
+                  <span className="text-[var(--dashboard-text-primary)] text-sm">{item.metric}</span>
                 </td>
 
                 {/* Completion/Progress */}
                 <td className="py-4 px-4">
                   <div className="flex items-center">
-                    <span className="text-white text-sm mr-2">
+                    <span className="text-[var(--dashboard-text-primary)] text-sm mr-2">
                       {item.completion}%
                     </span>
                     <div className="w-16 h-2 bg-[var(--navy-blue-lighter)] rounded-full overflow-hidden">
