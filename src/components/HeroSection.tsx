@@ -183,16 +183,16 @@ export default function HeroSection({ courses = [], translationReady = true }: H
   }, [displayModules.length]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Network Animation Background */}
       <NetworkBackground />
 
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
         <div className="space-y-8 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-white leading-tight">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--dashboard-text-primary)] leading-tight">
             {t("Master Cybersecurity, Protect Your Digital World.")}
           </h1>
-          <p className="text-xl text-[var(--light-blue)] leading-relaxed">
+          <p className="text-xl text-[var(--dashboard-text-secondary)] leading-relaxed">
             {t("Interactive training modules designed to enhance your cybersecurity awareness. Learn through engaging scenarios and real-world examples.")}
           </p>
           <button className="group inline-flex items-center space-x-3 bg-[var(--neon-blue)] text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-[var(--medium-blue)] transform hover:scale-105 transition-all duration-300">

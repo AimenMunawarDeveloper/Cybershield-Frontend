@@ -332,7 +332,7 @@ export default function TrainingModulesPage() {
 
       {/* About Us Section */}
       {translationReady && (
-        <div className="bg-white py-16 px-4 sm:px-6 lg:px-8">
+        <div className="bg-white pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Left Side - Text Content */}
@@ -420,7 +420,7 @@ export default function TrainingModulesPage() {
           {/* Header with Controls */}
           <div className="mb-8">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <h2 className="text-4xl font-bold text-white mb-4 md:mb-0">
+              <h2 className="text-4xl font-bold text-[var(--dashboard-text-primary)] mb-4 md:mb-0">
                 {t("Explore Our Course Catalog")}
               </h2>
               <div className="flex items-center gap-4">
@@ -442,28 +442,28 @@ export default function TrainingModulesPage() {
                 {/* Search Bar */}
                 <div className="flex-1 max-w-md">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white z-10" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[var(--dashboard-text-primary)] z-10" />
                     <input
                       type="text"
                       placeholder={t("Search Courses")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white placeholder-white/70 border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:bg-white/20"
+                      className="w-full pl-10 pr-4 py-2 rounded-lg text-sm bg-white dark:bg-white/10 backdrop-blur-sm text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:bg-white dark:focus:bg-white/20 shadow-sm"
                     />
                   </div>
                 </div>
 
                 {/* Filter Dropdown */}
                 <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-white/70" />
+                  <Filter className="w-4 h-4 text-[var(--dashboard-text-secondary)]" />
                   <select
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
-                    className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]"
+                    className="px-4 py-2 rounded-lg text-sm bg-white dark:bg-white/10 backdrop-blur-sm text-[var(--dashboard-text-primary)] border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] shadow-sm"
                   >
                     <option
                       value="all"
-                      className="bg-[var(--navy-blue)] text-white"
+                      className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                     >
                       {t("Show all trainings")}
                     </option>
@@ -472,27 +472,27 @@ export default function TrainingModulesPage() {
 
                 {/* Sort Dropdown */}
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-white/70">{t("Sort:")}</span>
+                  <span className="text-sm text-[var(--dashboard-text-secondary)]">{t("Sort:")}</span>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]"
+                    className="px-4 py-2 rounded-lg text-sm bg-white dark:bg-white/10 backdrop-blur-sm text-[var(--dashboard-text-primary)] border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] shadow-sm"
                   >
                     <option
                       value="newest"
-                      className="bg-[var(--navy-blue)] text-white"
+                      className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                     >
                       {t("Newest First")}
                     </option>
                     <option
                       value="oldest"
-                      className="bg-[var(--navy-blue)] text-white"
+                      className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                     >
                       {t("Oldest First")}
                     </option>
                     <option
                       value="alphabetical"
-                      className="bg-[var(--navy-blue)] text-white"
+                      className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                     >
                       {t("Alphabetical (A to Z)")}
                     </option>
@@ -502,13 +502,13 @@ export default function TrainingModulesPage() {
 
               <div className="flex items-center gap-4">
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-white/20">
+                <div className="flex items-center bg-white dark:bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-gray-300 dark:border-white/20 shadow-sm">
                   <button
                     onClick={() => setViewMode("grid")}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       viewMode === "grid"
                         ? "bg-[var(--neon-blue)] text-white shadow-sm"
-                        : "text-white/70 hover:text-white"
+                        : "text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:bg-gray-100 dark:hover:bg-white/10"
                     }`}
                   >
                     <Grid className="w-4 h-4" />
@@ -519,7 +519,7 @@ export default function TrainingModulesPage() {
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       viewMode === "table"
                         ? "bg-[var(--neon-blue)] text-white shadow-sm"
-                        : "text-white/70 hover:text-white"
+                        : "text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:bg-gray-100 dark:hover:bg-white/10"
                     }`}
                   >
                     <List className="w-4 h-4" />
@@ -528,28 +528,28 @@ export default function TrainingModulesPage() {
                 </div>
 
                 {/* Training Language Dropdown */}
-                <select className="px-4 py-2 rounded-lg text-sm bg-white/10 backdrop-blur-sm text-white border border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)]">
+                <select className="px-4 py-2 rounded-lg text-sm bg-white dark:bg-white/10 backdrop-blur-sm text-[var(--dashboard-text-primary)] border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] shadow-sm">
                   <option
                     value="en"
-                    className="bg-[var(--navy-blue)] text-white"
+                    className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                   >
                     English
                   </option>
                   <option
                     value="es"
-                    className="bg-[var(--navy-blue)] text-white"
+                    className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                   >
                     Spanish
                   </option>
                   <option
                     value="fr"
-                    className="bg-[var(--navy-blue)] text-white"
+                    className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                   >
                     French
                   </option>
                   <option
                     value="de"
-                    className="bg-[var(--navy-blue)] text-white"
+                    className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
                   >
                     German
                   </option>
@@ -562,7 +562,7 @@ export default function TrainingModulesPage() {
           {viewMode === "grid" ? (
             <>
               {loading && (
-                <div className="text-center py-12 text-white">{translationReady ? t("Loading courses...") : "Loading courses..."}</div>
+                <div className="text-center py-12 text-[var(--dashboard-text-primary)]">{translationReady ? t("Loading courses...") : "Loading courses..."}</div>
               )}
               {error && (
                 <div className="text-center py-12 text-red-300">{error}</div>
