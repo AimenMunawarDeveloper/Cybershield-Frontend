@@ -79,7 +79,7 @@ function formatMarkdown(text: string): React.ReactElement[] {
       const formattedContent = formatInlineMarkdown(listContent);
       parts.push(
         <div key={`list-${lineIndex}`} className="flex items-start gap-2 my-1.5">
-          <span className="text-[var(--medium-grey)] mt-0.5 flex-shrink-0">•</span>
+          <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-0.5 flex-shrink-0">•</span>
           <span className="flex-1">{formattedContent}</span>
         </div>
       );
@@ -110,7 +110,7 @@ function formatInlineMarkdown(text: string): React.ReactElement[] {
       parts.push(<span key={`text-${key++}`}>{text.substring(lastIndex, match.index)}</span>);
     }
     parts.push(
-      <strong key={`bold-${key++}`} className="text-white font-semibold">
+      <strong key={`bold-${key++}`} className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
         {match[1]}
       </strong>
     );
@@ -530,11 +530,11 @@ export default function CallDetailsPage() {
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-semibold text-white mb-2">{t("Error")}</h2>
-            <p className="text-[var(--medium-grey)] mb-6">{error || t("Conversation not found")}</p>
+            <h2 className="text-2xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">{t("Error")}</h2>
+            <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-6">{error || t("Conversation not found")}</p>
             <button
               onClick={() => router.back()}
-              className="px-6 py-3 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--neon-blue-dark)] transition-colors"
+              className="px-6 py-3 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors"
             >
               {t("Go Back")}
             </button>
@@ -569,12 +569,12 @@ export default function CallDetailsPage() {
         <div className="mb-8 md:mb-10">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-[var(--light-blue)] hover:text-white transition-colors mb-6"
+            className="flex items-center gap-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors mb-6"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>{t("Back to Call History")}</span>
           </button>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">{t("Call Details")}</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Call Details")}</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-10 lg:gap-12">
@@ -582,14 +582,14 @@ export default function CallDetailsPage() {
           <div className="lg:col-span-2 space-y-8 md:space-y-10">
             {/* Recording Player */}
             {displayConversation?.recordingUrl ? (
-              <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20 shadow-xl">
+              <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-2 rounded-xl bg-[var(--neon-blue)]/20 border border-[var(--neon-blue)]/30">
                     <Volume2 className="w-6 h-6 text-[var(--neon-blue)]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-white">{t("Call Recording")}</h2>
-                    <p className="text-sm text-[var(--medium-grey)]">{t("Listen to the full conversation")}</p>
+                    <h2 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Call Recording")}</h2>
+                    <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Listen to the full conversation")}</p>
                   </div>
                 </div>
                 
@@ -650,7 +650,7 @@ export default function CallDetailsPage() {
                       </div>
                       
                       {/* Time Display */}
-                      <div className="flex justify-between items-center mt-2 text-xs text-[var(--medium-grey)]">
+                      <div className="flex justify-between items-center mt-2 text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                         <span>{formatTime(currentTime)}</span>
                         <span>{formatTime(duration)}</span>
                       </div>
@@ -683,14 +683,14 @@ export default function CallDetailsPage() {
                 </div>
               </div>
             ) : displayConversation?.elevenLabsConversationId ? (
-              <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
+              <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-xl bg-[var(--medium-grey)]/20 border border-[var(--medium-grey)]/30">
-                    <Volume2 className="w-6 h-6 text-[var(--medium-grey)]" />
+                  <div className="p-2 rounded-xl bg-gray-200 dark:bg-[var(--medium-grey)]/20 border border-gray-300 dark:border-[var(--medium-grey)]/30">
+                    <Volume2 className="w-6 h-6 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
                   </div>
-                  <h2 className="text-xl font-semibold text-white">{t("Call Recording")}</h2>
+                  <h2 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Call Recording")}</h2>
                 </div>
-                <p className="text-[var(--medium-grey)] text-sm">
+                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                   {t("Recording is being processed or is not available yet. Please check back later.")}
                 </p>
               </div>
@@ -698,11 +698,11 @@ export default function CallDetailsPage() {
 
             {/* Score Card */}
             {displayConversation?.score !== null && displayConversation?.score !== undefined && (
-              <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
+              <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <Trophy className="w-8 h-8 text-yellow-400" />
-                    <h2 className="text-2xl font-semibold text-white">{t("Security Score")}</h2>
+                    <h2 className="text-2xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Security Score")}</h2>
                   </div>
                   <span
                     className={`text-5xl font-bold ${getScoreColor(displayConversation.score)}`}
@@ -711,20 +711,20 @@ export default function CallDetailsPage() {
                   </span>
                 </div>
                 <div className="text-center mb-6">
-                  <p className="text-lg text-[var(--medium-grey)]">
+                  <p className="text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                     {getDisplayScoreLabel(displayConversation.score)}
                   </p>
                 </div>
 
                 {displayConversation.scoreDetails && (
-                  <div className="space-y-4 pt-6 border-t border-[var(--medium-grey)]/20">
+                  <div className="space-y-4 pt-6 border-t border-gray-300 dark:border-[var(--medium-grey)]/20">
                     <div className="flex items-center gap-2">
                       {displayConversation.scoreDetails.fellForPhishing ? (
                         <XCircle className="w-5 h-5 text-red-400" />
                       ) : (
                         <CheckCircle className="w-5 h-5 text-green-400" />
                       )}
-                      <span className="text-white">
+                      <span className="text-[var(--dashboard-text-primary)] dark:text-white">
                         {displayConversation.scoreDetails.fellForPhishing
                           ? t("Fell for phishing attempt")
                           : t("Resisted phishing attempt")}
@@ -738,9 +738,9 @@ export default function CallDetailsPage() {
                       </div>
                     )}
                     
-                    <div className="text-[var(--medium-grey)]">
+                    <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                       {t("Resistance Level:")}{" "}
-                      <span className="text-white capitalize">
+                      <span className="text-[var(--dashboard-text-primary)] dark:text-white capitalize">
                         {displayConversation.scoreDetails.resistanceLevel}
                       </span>
                     </div>
@@ -751,22 +751,22 @@ export default function CallDetailsPage() {
 
             {/* Analysis Rationale */}
             {displayConversation?.scoreDetails?.analysisRationale && (
-              <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
+              <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
                 <div className="flex items-center gap-3 mb-4">
                   <BarChart3 className="w-6 h-6 text-[var(--neon-blue)]" />
-                  <h2 className="text-xl font-semibold text-white">{t("Analysis")}</h2>
+                  <h2 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Analysis")}</h2>
                 </div>
-                <div className="text-sm text-[var(--medium-grey)] leading-relaxed">
+                <div className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] leading-relaxed">
                   {formatMarkdown(displayConversation.scoreDetails.analysisRationale)}
                 </div>
               </div>
             )}
 
             {/* Transcript */}
-            <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--neon-blue)]/20">
+            <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
               <div className="flex items-center gap-3 mb-6">
                 <MessageSquare className="w-6 h-6 text-[var(--neon-blue)]" />
-                <h2 className="text-xl font-semibold text-white">{t("Transcript")}</h2>
+                <h2 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Transcript")}</h2>
               </div>
               
               {displayConversation?.transcript && displayConversation.transcript.length > 0 ? (
@@ -782,32 +782,32 @@ export default function CallDetailsPage() {
                         className={`max-w-[80%] rounded-2xl p-4 ${
                           msg.role === "user"
                             ? "bg-[var(--neon-blue)]/20 border border-[var(--neon-blue)]/30"
-                            : "bg-[var(--navy-blue-lighter)]/80 border border-[var(--medium-grey)]/20"
+                            : "bg-gray-100 dark:bg-[var(--navy-blue-lighter)]/80 border border-gray-300 dark:border-[var(--medium-grey)]/20"
                         }`}
                       >
                         <div className="flex items-center gap-2 mb-2">
                           {msg.role === "user" ? (
                             <User className="w-4 h-4 text-[var(--neon-blue)]" />
                           ) : (
-                            <Bot className="w-4 h-4 text-[var(--medium-grey)]" />
+                            <Bot className="w-4 h-4 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
                           )}
-                          <span className="text-xs text-[var(--medium-grey)] capitalize">
+                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] capitalize">
                             {msg.role}
                           </span>
                         </div>
-                        <p className="text-white text-sm leading-relaxed">{msg.message}</p>
+                        <p className="text-[var(--dashboard-text-primary)] dark:text-white text-sm leading-relaxed">{msg.message}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : displayConversation?.fullTranscript ? (
-                <div className="bg-[var(--navy-blue-lighter)]/50 rounded-xl p-4">
-                  <p className="text-white whitespace-pre-wrap text-sm leading-relaxed">
+                <div className="bg-gray-50 dark:bg-[var(--navy-blue-lighter)]/50 rounded-xl p-4">
+                  <p className="text-[var(--dashboard-text-primary)] dark:text-white whitespace-pre-wrap text-sm leading-relaxed">
                     {displayConversation.fullTranscript}
                   </p>
                 </div>
               ) : (
-                <div className="text-center py-8 text-[var(--medium-grey)]">
+                <div className="text-center py-8 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("No transcript available")}
                 </div>
               )}
@@ -817,15 +817,15 @@ export default function CallDetailsPage() {
           {/* Sidebar */}
           <div className="space-y-8 md:space-y-10">
             {/* Call Info Card */}
-            <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 border border-[var(--neon-blue)]/20">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
+              <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[var(--neon-blue)]" />
                 {t("Call Information")}
               </h3>
               
               <div className="space-y-4">
                 <div>
-                  <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm mb-1">
+                  <div className="flex items-center gap-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm mb-1">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         displayConversation?.scenarioType === "phishing"
@@ -836,22 +836,22 @@ export default function CallDetailsPage() {
                       {displayConversation?.scenarioType === "phishing" ? t("Phishing") : t("Normal")}
                     </span>
                   </div>
-                  <p className="text-white text-sm">{displayConversation?.scenarioDescription}</p>
+                  <p className="text-[var(--dashboard-text-primary)] dark:text-white text-sm">{displayConversation?.scenarioDescription}</p>
                 </div>
 
-                <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm">
+                <div className="flex items-center gap-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                   <Calendar className="w-4 h-4" />
                   <span>{displayConversation ? formatDate(displayConversation.createdAt) : ""}</span>
                 </div>
 
                 {displayConversation && displayConversation.duration > 0 && (
-                  <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm">
+                  <div className="flex items-center gap-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                     <Clock className="w-4 h-4" />
                     <span>{formatDuration(displayConversation.duration)}</span>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2 text-[var(--medium-grey)] text-sm">
+                <div className="flex items-center gap-2 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
                   <Phone className="w-4 h-4" />
                   <span className="capitalize">{displayConversation?.status}</span>
                 </div>
@@ -860,16 +860,16 @@ export default function CallDetailsPage() {
 
             {/* Metadata Card */}
             {displayConversation?.metadata && (
-              <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 border border-[var(--neon-blue)]/20">
-                <h3 className="text-lg font-semibold text-white mb-4">{t("Metadata")}</h3>
+              <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/20">
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4">{t("Metadata")}</h3>
                 <div className="space-y-2 text-sm">
                   {displayConversation.metadata.connectionType && (
-                    <div className="text-[var(--medium-grey)]">
-                      {t("Connection:")} <span className="text-white capitalize">{displayConversation.metadata.connectionType}</span>
+                    <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
+                      {t("Connection:")} <span className="text-[var(--dashboard-text-primary)] dark:text-white capitalize">{displayConversation.metadata.connectionType}</span>
                     </div>
                   )}
                   {displayConversation.metadata.userAgent && (
-                    <div className="text-[var(--medium-grey)]">
+                    <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                       <div className="text-xs break-all">{displayConversation.metadata.userAgent}</div>
                     </div>
                   )}

@@ -54,10 +54,10 @@ export default function LeaderboardsPage() {
   const podiumOrder = [topThree[1], topThree[0], topThree[2]];
 
   const getPositionStyle = (position: number) => {
-    if (position === 1) return "bg-amber-500/20 text-amber-400 border-amber-500/40";
-    if (position === 2) return "bg-slate-400/20 text-slate-300 border-slate-400/40";
-    if (position === 3) return "bg-amber-700/20 text-amber-600 border-amber-700/40";
-    return "bg-[var(--navy-blue)] text-[var(--light-blue)] border-[var(--neon-blue)]/30";
+    if (position === 1) return "bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/40";
+    if (position === 2) return "bg-slate-400/20 text-slate-600 dark:text-slate-300 border-slate-400/40";
+    if (position === 3) return "bg-amber-700/20 text-amber-700 dark:text-amber-600 border-amber-700/40";
+    return "bg-gray-200 dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] border-gray-300 dark:border-[var(--neon-blue)]/30";
   };
 
   const getTrophyStyle = (position: number) => {
@@ -88,13 +88,13 @@ export default function LeaderboardsPage() {
                 <Medal className="w-8 h-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
               {t("Leaderboards")}
               <span className="block text-[var(--neon-blue)] mt-1">
                 {t("Top performers by learning score")}
               </span>
             </h1>
-            <p className="text-base md:text-lg text-[var(--light-blue)] max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-2xl mx-auto">
               {t("See how you rank globally or within your organization.")}
             </p>
           </div>
@@ -102,11 +102,11 @@ export default function LeaderboardsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
+      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Top 3 Podium */}
           <div className="mb-14">
-            <h2 className="text-center text-lg font-semibold text-[var(--light-blue)] mb-8">
+            <h2 className="text-center text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] mb-8">
               {t("Top 3")}
             </h2>
             <div className="grid grid-cols-3 gap-4 items-end max-w-2xl mx-auto">
@@ -117,7 +117,7 @@ export default function LeaderboardsPage() {
                 >
                   {/* Avatar + medal */}
                   <div className="relative mb-3">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-[var(--navy-blue)] border-2 border-[var(--neon-blue)]/50 flex items-center justify-center text-xl sm:text-2xl font-bold text-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/20">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-200 dark:bg-[var(--navy-blue)] border-2 border-gray-400 dark:border-[var(--neon-blue)]/50 flex items-center justify-center text-xl sm:text-2xl font-bold text-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/20">
                       {getInitials(entry.name)}
                     </div>
                     <div
@@ -129,24 +129,24 @@ export default function LeaderboardsPage() {
                       <Trophy className="w-4 h-4" />
                     </div>
                   </div>
-                  <p className="font-bold text-white text-center text-sm sm:text-base truncate w-full max-w-[120px]">
+                  <p className="font-bold text-[var(--dashboard-text-primary)] dark:text-white text-center text-sm sm:text-base truncate w-full max-w-[120px]">
                     {entry.name}
                   </p>
-                  <p className="text-xs text-[var(--medium-grey)] text-center truncate w-full max-w-[120px] mt-0.5">
+                  <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-center truncate w-full max-w-[120px] mt-0.5">
                     {entry.email}
                   </p>
                   <div className="flex items-center gap-1.5 mt-2">
                     <Award className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
-                    <span className="font-semibold text-white text-sm tabular-nums">
+                    <span className="font-semibold text-[var(--dashboard-text-primary)] dark:text-white text-sm tabular-nums">
                       {entry.learningScore}
                     </span>
                   </div>
                   {/* Podium block */}
                   <div
-                    className={`w-full mt-4 rounded-t-lg border border-[var(--neon-blue)]/30 flex items-center justify-center font-bold text-[var(--light-blue)]/60 text-2xl sm:text-3xl
-                      ${entry.position === 1 ? "h-20 sm:h-24 bg-[var(--navy-blue)]/90" : ""}
-                      ${entry.position === 2 ? "h-14 sm:h-16 bg-[var(--navy-blue)]/80" : ""}
-                      ${entry.position === 3 ? "h-10 sm:h-12 bg-[var(--navy-blue)]/70" : ""}`}
+                    className={`w-full mt-4 rounded-t-lg border border-gray-300 dark:border-[var(--neon-blue)]/30 flex items-center justify-center font-bold text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)]/60 text-2xl sm:text-3xl
+                      ${entry.position === 1 ? "h-20 sm:h-24 bg-gray-200 dark:bg-[var(--navy-blue)]/90" : ""}
+                      ${entry.position === 2 ? "h-14 sm:h-16 bg-gray-200 dark:bg-[var(--navy-blue)]/80" : ""}
+                      ${entry.position === 3 ? "h-10 sm:h-12 bg-gray-200 dark:bg-[var(--navy-blue)]/70" : ""}`}
                   >
                     {entry.position}
                   </div>
@@ -157,14 +157,14 @@ export default function LeaderboardsPage() {
 
           {/* Tabs: Global | Organization */}
           <div className="flex justify-center mb-10">
-            <div className="inline-flex gap-6 p-1.5 bg-[var(--navy-blue)] rounded-xl border border-[var(--neon-blue)]/20">
+            <div className="inline-flex gap-6 p-1.5 bg-gray-200 dark:bg-[var(--navy-blue)] rounded-xl border border-gray-300 dark:border-[var(--neon-blue)]/20">
             <button
               type="button"
               onClick={() => setActiveTab("global")}
               className={`w-40 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all duration-200 ${
                 activeTab === "global"
                   ? "bg-[var(--neon-blue)] text-white shadow-lg shadow-[var(--neon-blue)]/30"
-                  : "text-[var(--light-blue)] hover:bg-white/5"
+                  : "text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] hover:bg-gray-300 dark:hover:bg-white/5"
               }`}
             >
               <Globe className="w-5 h-5" />
@@ -176,7 +176,7 @@ export default function LeaderboardsPage() {
               className={`w-40 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all duration-200 ${
                 activeTab === "organization"
                   ? "bg-[var(--neon-blue)] text-white shadow-lg shadow-[var(--neon-blue)]/30"
-                  : "text-[var(--light-blue)] hover:bg-white/5"
+                  : "text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] hover:bg-gray-300 dark:hover:bg-white/5"
               }`}
             >
               <Building2 className="w-5 h-5" />
@@ -186,20 +186,20 @@ export default function LeaderboardsPage() {
           </div>
 
           {/* Table header */}
-          <div className="grid grid-cols-[auto_1fr_auto] gap-4 px-4 py-3 rounded-t-xl bg-[var(--navy-blue)]/80 border border-[var(--neon-blue)]/20 border-b-0 text-[var(--medium-grey)] text-sm font-medium">
+          <div className="grid grid-cols-[auto_1fr_auto] gap-4 px-4 py-3 rounded-t-xl bg-gray-100 dark:bg-[var(--navy-blue)]/80 border border-gray-300 dark:border-[var(--neon-blue)]/20 border-b-0 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm font-medium">
             <span className="w-14 text-center">{t("Rank")}</span>
             <span>{t("Participant")}</span>
             <span className="w-24 text-right">{t("Score")}</span>
           </div>
 
           {/* Leaderboard list */}
-          <ul className="rounded-b-xl border border-[var(--neon-blue)]/20 border-t-0 overflow-hidden bg-[var(--navy-blue)]/40">
+          <ul className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 overflow-hidden bg-white dark:bg-[var(--navy-blue)]/40">
             {entries.map((entry, index) => (
               <li
                 key={`${activeTab}-${entry.position}-${entry.email}`}
-                className={`grid grid-cols-[auto_1fr_auto] gap-4 items-center px-4 py-4 border-b border-[var(--neon-blue)]/10 last:border-b-0 ${
-                  index % 2 === 0 ? "bg-[var(--navy-blue)]/30" : "bg-[var(--navy-blue)]/20"
-                } hover:bg-[var(--neon-blue)]/10 transition-colors`}
+                className={`grid grid-cols-[auto_1fr_auto] gap-4 items-center px-4 py-4 border-b border-gray-200 dark:border-[var(--neon-blue)]/10 last:border-b-0 ${
+                  index % 2 === 0 ? "bg-gray-50 dark:bg-[var(--navy-blue)]/30" : "bg-white dark:bg-[var(--navy-blue)]/20"
+                } hover:bg-gray-100 dark:hover:bg-[var(--neon-blue)]/10 transition-colors`}
               >
                 <div className="flex justify-center w-14">
                   <span
@@ -211,14 +211,14 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-bold text-white truncate">{entry.name}</p>
-                  <p className="text-xs text-[var(--medium-grey)] truncate mt-0.5">
+                  <p className="font-bold text-[var(--dashboard-text-primary)] dark:text-white truncate">{entry.name}</p>
+                  <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] truncate mt-0.5">
                     {entry.email}
                   </p>
                 </div>
                 <div className="flex items-center justify-end gap-1.5 w-24">
                   <Award className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
-                  <span className="font-semibold text-white tabular-nums">
+                  <span className="font-semibold text-[var(--dashboard-text-primary)] dark:text-white tabular-nums">
                     {entry.learningScore}
                   </span>
                 </div>
@@ -226,7 +226,7 @@ export default function LeaderboardsPage() {
             ))}
           </ul>
 
-          <p className="mt-6 text-center text-sm text-[var(--medium-grey)]">
+          <p className="mt-6 text-center text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
             {activeTab === "global"
               ? t("Global leaderboard shows top performers across all organizations.")
               : t("Organization leaderboard shows top performers within your organization.")}

@@ -114,10 +114,10 @@ const EmailForm: React.FC<EmailFormProps> = ({
     }));
   };
   return (
-    <div className="rounded-2xl p-8 border-2 bg-gradient-to-br from-[var(--navy-blue-lighter)] via-[var(--navy-blue)] to-[var(--navy-blue-lighter)] border-[#51b0ec] shadow-[0_0_40px_rgba(81,176,236,0.3)] backdrop-blur-sm">
+    <div className="rounded-2xl p-8 border-2 bg-[var(--dashboard-card-bg)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:via-[var(--navy-blue)] dark:to-[var(--navy-blue-lighter)] border-gray-300 dark:border-[#51b0ec] shadow-[0_0_40px_rgba(81,176,236,0.3)] backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-br from-[#51b0ec]/10 via-transparent to-[#4fc3f7]/10 rounded-2xl"></div>
       <div className="relative z-10">
-        <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-6 flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#51b0ec] to-[#4fc3f7] flex items-center justify-center shadow-[0_0_20px_rgba(81,176,236,0.6)]">
             <Mail className="w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           </div>
@@ -128,7 +128,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
 
         {/* Message */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
             {t("Message")} <span className="text-red-400">*</span>
           </label>
@@ -136,10 +136,10 @@ const EmailForm: React.FC<EmailFormProps> = ({
             ref={messageRef}
             value={formData.message}
             onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-            className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+            className={`w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
               errors.message 
                 ? "border-red-500/50 focus:border-red-500" 
-                : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+                : "border-gray-300 dark:border-[#51b0ec]/30 focus:border-[#51b0ec]"
             }`}
             placeholder={t("Enter the full email body")}
             rows={6}
@@ -147,7 +147,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
             disabled={isLoading}
           />
           <div className="flex justify-between items-center mt-2">
-            <span className="text-xs text-[var(--medium-grey)]">
+            <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
               {formData.message.length} {t("characters")}
             </span>
             {errors.message && (
@@ -161,14 +161,14 @@ const EmailForm: React.FC<EmailFormProps> = ({
 
         {/* Text (Optional) */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
             {t("Text (Optional)")}
           </label>
           <textarea
             value={formData.text}
             onChange={(e) => setFormData((prev) => ({ ...prev, text: e.target.value }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[#51b0ec]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
+            className="w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 border-gray-300 dark:border-[#51b0ec]/30 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
             placeholder={t("Same as message, optional")}
             rows={4}
             disabled={isLoading}
@@ -179,7 +179,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Subject */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
               {t("Subject")} <span className="text-red-400">*</span>
             </label>
@@ -187,10 +187,10 @@ const EmailForm: React.FC<EmailFormProps> = ({
               type="text"
               value={formData.subject}
               onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
-              className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+              className={`w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
                 errors.subject 
                   ? "border-red-500/50 focus:border-red-500" 
-                  : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+                  : "border-gray-300 dark:border-[#51b0ec]/30 focus:border-[#51b0ec]"
               }`}
               placeholder={t("Enter email subject")}
               required
@@ -206,7 +206,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
 
           {/* From */}
           <div>
-            <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+            <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
               <Mail className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
               {t("From")} <span className="text-red-400">*</span>
             </label>
@@ -214,12 +214,12 @@ const EmailForm: React.FC<EmailFormProps> = ({
               type="email"
               value={formData.from}
               onChange={(e) => setFormData((prev) => ({ ...prev, from: e.target.value }))}
-              className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+              className={`w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
                 errors.from 
                   ? "border-red-500/50 focus:border-red-500" 
                   : formData.from && !isValidEmail(formData.from)
                   ? "border-yellow-500/50 focus:border-yellow-500"
-                  : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+                  : "border-gray-300 dark:border-[#51b0ec]/30 focus:border-[#51b0ec]"
               }`}
               placeholder={t("Enter sender email address")}
               required
@@ -243,9 +243,9 @@ const EmailForm: React.FC<EmailFormProps> = ({
         {/* URLs (Optional) */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-semibold text-white flex items-center gap-2">
+            <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white flex items-center gap-2">
               <Link className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
-              {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--medium-grey)]">({formData.urls.length})</span>}
+              {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">({formData.urls.length})</span>}
             </label>
             <button
               type="button"
@@ -264,10 +264,10 @@ const EmailForm: React.FC<EmailFormProps> = ({
                   type="url"
                   value={url}
                   onChange={(e) => handleUrlChange(index, e.target.value)}
-                  className={`flex-1 px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+                  className={`flex-1 px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
                     url && !isValidUrl(url)
                       ? "border-yellow-500/50 focus:border-yellow-500"
-                      : "border-[#51b0ec]/30 focus:border-[#51b0ec]"
+                      : "border-gray-300 dark:border-[#51b0ec]/30 focus:border-[#51b0ec]"
                   }`}
                   placeholder={t("Enter URL (optional)")}
                   disabled={isLoading}
@@ -295,7 +295,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
 
         {/* Date */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
             {t("Date")} <span className="text-red-400">*</span>
           </label>
@@ -303,7 +303,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
             type="datetime-local"
             value={formData.date}
             onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[#51b0ec]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
+            className="w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 border-gray-300 dark:border-[#51b0ec]/30 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[#51b0ec] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300"
             required
             disabled={isLoading}
           />
@@ -355,31 +355,31 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
     }));
   };
   return (
-    <div className="rounded-2xl p-8 border-2 bg-gradient-to-br from-[var(--navy-blue-lighter)] via-[var(--navy-blue)] to-[var(--navy-blue-lighter)] border-[#25d366] shadow-[0_0_40px_rgba(37,211,102,0.3)] backdrop-blur-sm">
+    <div className="rounded-2xl p-8 border-2 bg-[var(--dashboard-card-bg)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:via-[var(--navy-blue)] dark:to-[var(--navy-blue-lighter)] border-gray-300 dark:border-[#25d366] shadow-[0_0_40px_rgba(37,211,102,0.3)] backdrop-blur-sm">
       <div className="absolute inset-0 bg-gradient-to-br from-[#25d366]/10 via-transparent to-[#128c7e]/10 rounded-2xl"></div>
       <div className="relative z-10">
-        <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-6 flex items-center gap-2">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#25d366] to-[#128c7e] flex items-center justify-center shadow-[0_0_20px_rgba(37,211,102,0.6)]">
             <MessageSquare className="w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           </div>
-          <span className="text-white">
+          <span className="text-[var(--dashboard-text-primary)] dark:text-white">
             {t("Report a WhatsApp Incident")}
           </span>
         </h3>
 
         {/* Message */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#25d366]" />
             {t("Message")} <span className="text-red-400">*</span>
           </label>
           <textarea
             value={formData.message}
             onChange={(e) => setFormData((prev) => ({ ...prev, message: e.target.value }))}
-            className={`w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
+            className={`w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
               errors.message 
                 ? "border-red-500/50 focus:border-red-500" 
-                : "border-[var(--medium-grey)]/30 focus:border-[#25d366]"
+                : "border-gray-300 dark:border-[var(--medium-grey)]/30 focus:border-[#25d366]"
             }`}
             placeholder={t("Enter the WhatsApp message content")}
             rows={8}
@@ -387,7 +387,7 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
             disabled={isLoading}
           />
           <div className="flex justify-between items-center mt-2">
-            <span className="text-xs text-[var(--medium-grey)]">
+            <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
               {formData.message.length} {t("characters")}
             </span>
             {errors.message && (
@@ -402,9 +402,9 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
         {/* URLs (Optional) */}
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-semibold text-white flex items-center gap-2">
+            <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white flex items-center gap-2">
               <Link className="w-5 h-5 text-[#25d366]" />
-              {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--medium-grey)]">({formData.urls.length})</span>}
+              {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">({formData.urls.length})</span>}
             </label>
             <button
               type="button"
@@ -423,10 +423,10 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
                   type="url"
                   value={url}
                   onChange={(e) => handleUrlChange(index, e.target.value)}
-                  className={`flex-1 px-4 py-3 bg-[var(--navy-blue)]/80 border-2 rounded-xl text-white placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
+                  className={`flex-1 px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
                     url && !isValidUrl(url)
                       ? "border-yellow-500/50 focus:border-yellow-500"
-                      : "border-[var(--medium-grey)]/30 focus:border-[#25d366]"
+                      : "border-gray-300 dark:border-[var(--medium-grey)]/30 focus:border-[#25d366]"
                   }`}
                   placeholder={t("Enter URL (optional)")}
                   disabled={isLoading}
@@ -454,7 +454,7 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
 
         {/* Sender (Optional) — matches training from / from_phone */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
             <MessageSquare className="w-5 h-5 text-[#25d366]" />
             {t("Sender (phone or name)")}
           </label>
@@ -462,7 +462,7 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
             type="text"
             value={formData.from || ""}
             onChange={(e) => setFormData((prev) => ({ ...prev, from: e.target.value }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[var(--medium-grey)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
+            className="w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 border-gray-300 dark:border-[var(--medium-grey)]/30 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
             placeholder={t("e.g. +92123456789 or contact name")}
             disabled={isLoading}
           />
@@ -470,7 +470,7 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
 
         {/* Date received (Optional) — matches training timestamp */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-white mb-3 flex items-center gap-2">
+          <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-3 flex items-center gap-2">
             <FileText className="w-5 h-5 text-[#25d366]" />
             {t("Date received")}
           </label>
@@ -478,7 +478,7 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
             type="datetime-local"
             value={formData.date || ""}
             onChange={(e) => setFormData((prev) => ({ ...prev, date: e.target.value }))}
-            className="w-full px-4 py-3 bg-[var(--navy-blue)]/80 border-2 border-[var(--medium-grey)]/30 rounded-xl text-white placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
+            className="w-full px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 border-gray-300 dark:border-[var(--medium-grey)]/30 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:border-[#25d366] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300"
             disabled={isLoading}
           />
         </div>
@@ -808,7 +808,7 @@ export default function IncidentReportingPage() {
       <div className="flex flex-1 items-center justify-center min-h-screen">
         <div className="text-center space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
-          <p className="text-[var(--light-blue)] text-lg">
+          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
@@ -833,26 +833,26 @@ export default function IncidentReportingPage() {
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
                 {t("Incident Reporting")}
               </h1>
               
-              <p className="text-base md:text-lg text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+              <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
                 {t("Report security incidents and suspicious activities to help protect your organization.")}
               </p>
               
               <div className="flex flex-wrap justify-center gap-3 mt-6">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--neon-blue)] dark:border-opacity-30 backdrop-blur-sm">
                   <Shield className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Secure Reporting")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Secure Reporting")}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--neon-blue)] dark:border-opacity-30 backdrop-blur-sm">
                   <AlertTriangle className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Quick Response")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Quick Response")}</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--navy-blue-lighter)] rounded-lg border border-[var(--neon-blue)] border-opacity-30 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-[var(--navy-blue-lighter)] rounded-lg border border-gray-300 dark:border-[var(--neon-blue)] dark:border-opacity-30 backdrop-blur-sm">
                   <FileText className="w-4 h-4 text-[var(--neon-blue)]" />
-                  <span className="text-white text-xs">{t("Confidential")}</span>
+                  <span className="text-[var(--dashboard-text-primary)] dark:text-white text-xs">{t("Confidential")}</span>
                 </div>
               </div>
             </div>
@@ -860,13 +860,13 @@ export default function IncidentReportingPage() {
         </div>
 
         {/* Form Section */}
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
+        <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-4">
                 {viewMode === "form" ? t("Report an Incident") : t("Incident Reports")}
               </h2>
-              <p className="text-lg text-[var(--medium-grey)] max-w-2xl mx-auto">
+              <p className="text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] max-w-2xl mx-auto">
                 {viewMode === "form" 
                   ? t("Fill out the form below to report a security incident. All fields marked with * are required.")
                   : t("View and manage all reported incidents")
@@ -876,14 +876,14 @@ export default function IncidentReportingPage() {
 
             {/* View Mode Toggle */}
             <div className="flex justify-center mb-8">
-              <div className="flex gap-3 bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-[var(--medium-grey)]/20">
+              <div className="flex gap-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-gray-300 dark:border-[var(--medium-grey)]/20">
                 <button
                   type="button"
                   onClick={() => setViewMode("form")}
                   className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
                     viewMode === "form"
                       ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
-                      : "text-[var(--medium-grey)] hover:text-white hover:bg-[var(--navy-blue)]/50"
+                      : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50"
                   }`}
                 >
                   <FileText className="w-5 h-5" />
@@ -895,7 +895,7 @@ export default function IncidentReportingPage() {
                   className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
                     viewMode === "table"
                       ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
-                      : "text-[var(--medium-grey)] hover:text-white hover:bg-[var(--navy-blue)]/50"
+                      : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50"
                   }`}
                 >
                   <Table2 className="w-5 h-5" />
@@ -914,14 +914,14 @@ export default function IncidentReportingPage() {
               <>
 
             {/* Tabs with Neon Effects */}
-            <div className="flex gap-3 mb-8 bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-[var(--medium-grey)] border-opacity-20 shadow-2xl">
+            <div className="flex gap-3 mb-8 bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-gray-300 dark:border-[var(--medium-grey)] dark:border-opacity-20 shadow-2xl">
               <button
                 type="button"
                 onClick={() => setActiveTab("email")}
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-500 relative overflow-hidden group ${
                   activeTab === "email"
                     ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_30px_rgba(81,176,236,0.6)] scale-105 border-2 border-[#51b0ec]"
-                    : "text-[var(--medium-grey)] hover:text-[#51b0ec] hover:bg-[var(--navy-blue)]/50 border-2 border-transparent"
+                    : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[#51b0ec] hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50 border-2 border-transparent"
                 }`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-r from-[#51b0ec]/20 to-[#4fc3f7]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${activeTab === "email" ? "opacity-100" : ""}`}></div>
@@ -937,7 +937,7 @@ export default function IncidentReportingPage() {
                 className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-500 relative overflow-hidden group ${
                   activeTab === "whatsapp"
                     ? "bg-gradient-to-r from-[#25d366] via-[#128c7e] to-[#25d366] text-white shadow-[0_0_30px_rgba(37,211,102,0.6)] scale-105 border-2 border-[#25d366]"
-                    : "text-[var(--medium-grey)] hover:text-[#25d366] hover:bg-[var(--navy-blue)]/50 border-2 border-transparent"
+                    : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[#25d366] hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50 border-2 border-transparent"
                 }`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-r from-[#25d366]/20 to-[#128c7e]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${activeTab === "whatsapp" ? "opacity-100" : ""}`}></div>
@@ -1004,7 +1004,7 @@ export default function IncidentReportingPage() {
                     type="button"
                     onClick={handleClear}
                     disabled={isLoading}
-                    className="px-8 py-4 text-[var(--medium-grey)] hover:text-white transition-all duration-300 font-semibold rounded-xl hover:bg-[var(--navy-blue-lighter)] border-2 border-transparent hover:border-[var(--medium-grey)]/30 disabled:opacity-50"
+                    className="px-8 py-4 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-all duration-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-[var(--navy-blue-lighter)] border-2 border-transparent hover:border-gray-300 dark:hover:border-[var(--medium-grey)]/30 disabled:opacity-50"
                   >
                     {t("Clear Form")}
                   </button>
@@ -1041,24 +1041,24 @@ export default function IncidentReportingPage() {
       {/* Success Toast */}
       {showSuccessToast && (
         <div className="fixed top-4 right-4 z-[101] animate-in slide-in-from-right-5 fade-in duration-300">
-          <div className="bg-gradient-to-br from-[var(--navy-blue-light)] to-[var(--navy-blue)] rounded-xl p-6 max-w-md w-full border-2 border-[var(--neon-blue)] shadow-[0_0_50px_rgba(81,176,236,0.5)] backdrop-blur-sm">
+          <div className="bg-[var(--dashboard-card-bg)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-light)] dark:to-[var(--navy-blue)] rounded-xl p-6 max-w-md w-full border-2 border-gray-300 dark:border-[var(--neon-blue)] shadow-[0_0_50px_rgba(81,176,236,0.5)] backdrop-blur-sm">
             <div className="flex items-start gap-4">
               <div className="flex-1">
-                <h3 className="text-xl font-bold text-white mb-1 bg-gradient-to-r from-[#51b0ec] to-[#4fc3f7] bg-clip-text text-transparent">
+                <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1 bg-gradient-to-r from-[#51b0ec] to-[#4fc3f7] bg-clip-text text-transparent">
                   {t("Report submitted")}
                 </h3>
                 
-                <p className="text-sm text-[var(--light-blue)] mb-1">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] mb-1">
                   {t("You've successfully reported the incident!")}
                 </p>
 
                 {lastAnalysis != null && (
-                  <div className="mt-3 pt-3 border-t border-[var(--medium-grey)]/30">
+                  <div className="mt-3 pt-3 border-t border-gray-300 dark:border-[var(--medium-grey)]/30">
                     <p className={`text-sm font-semibold ${lastAnalysis.is_phishing ? "text-red-400" : "text-green-400"}`}>
                       {lastAnalysis.is_phishing ? t("Phishing detected") : t("Not phishing")}
                     </p>
-                    <p className="text-sm text-[var(--light-blue)] mt-0.5">
-                      {t("Phishing probability")}: <span className="font-mono font-bold text-white">{(lastAnalysis.phishing_probability * 100).toFixed(1)}%</span>
+                    <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] mt-0.5">
+                      {t("Phishing probability")}: <span className="font-mono font-bold text-[var(--dashboard-text-primary)] dark:text-white">{(lastAnalysis.phishing_probability * 100).toFixed(1)}%</span>
                     </p>
                   </div>
                 )}
@@ -1068,7 +1068,7 @@ export default function IncidentReportingPage() {
                 onClick={() => {
                   setShowSuccessToast(false);
                 }}
-                className="text-[var(--medium-grey)] hover:text-white transition-colors flex-shrink-0"
+                className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors flex-shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
