@@ -25,6 +25,7 @@ interface UserProfile {
   riskScore?: number;
   emailRiskScore?: number;
   whatsappRiskScore?: number;
+  lmsRiskScore?: number;
 }
 
 export default function DashboardPage() {
@@ -206,9 +207,9 @@ export default function DashboardPage() {
             icon: "star",
           },
           metric3: {
-            label: t("Email / WhatsApp risk"),
-            value: [profile.emailRiskScore, profile.whatsappRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
-            change: "E / W",
+            label: t("Scores (Email / WhatsApp / LMS score)"),
+            value: [profile.emailRiskScore, profile.whatsappRiskScore, profile.lmsRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
+            change: "E / W / L",
             icon: "shield-check",
           },
           metric4: {
@@ -233,9 +234,9 @@ export default function DashboardPage() {
             icon: "star",
           },
           metric3: {
-            label: t("Email / WhatsApp risk"),
-            value: [profile.emailRiskScore, profile.whatsappRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
-            change: "E / W",
+            label: t("Scores (Email / WhatsApp / LMS score)"),
+            value: [profile.emailRiskScore, profile.whatsappRiskScore, profile.lmsRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
+            change: "E / W / L",
             icon: "shield-check",
           },
           metric4: {

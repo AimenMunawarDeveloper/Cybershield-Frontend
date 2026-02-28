@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Shield, Users } from "lucide-react";
+import { Shield, Users, GraduationCap } from "lucide-react";
 import { ApiClient } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -13,6 +13,7 @@ interface OrgUser {
   status?: string;
   emailRiskScore?: number;
   whatsappRiskScore?: number;
+  lmsRiskScore?: number;
 }
 
 interface UserEmailRiskSectionProps {
@@ -72,6 +73,14 @@ export default function UserEmailRiskSection({ getToken, profile }: UserEmailRis
     if (s <= 0.3) return { text: t("Low"), className: "text-[var(--neon-blue)]" };
     if (s <= 0.6) return { text: t("Medium"), className: "text-amber-400" };
     return { text: t("High"), className: "text-red-400" };
+  };
+
+  // LMS score: high is good (completion) — opposite of risk
+  const getLmsLevelLabel = (score: number | undefined) => {
+    const s = score ?? 0;
+    if (s <= 0.33) return { text: t("Low"), className: "text-[var(--dashboard-text-secondary)]" };
+    if (s <= 0.66) return { text: t("Medium"), className: "text-amber-400" };
+    return { text: t("High"), className: "text-[var(--success-green)]" };
   };
 
   return (
@@ -170,6 +179,79 @@ export default function UserEmailRiskSection({ getToken, profile }: UserEmailRis
                       <td className="py-3 px-2 text-[var(--dashboard-text-secondary)]">{t(u.role?.replace("_", " ") || "—")}</td>
                       <td className="py-3 px-2 font-mono text-[var(--dashboard-text-primary)]">{score}</td>
                       <td className={`py-3 px-2 font-medium ${levelRisk.className}`}>{levelRisk.text}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        {(pagination.total > 0 || displayUsers.length > 0) && (
+          <p className="text-xs text-[var(--dashboard-text-secondary)] mt-3">
+            {t("Showing")} {displayUsers.length} {t("of")} {pagination.total} {t("users")}
+          </p>
+        )}
+      </div>
+
+      {/* LMS score — separate from risk scores; high = good (completion) */}
+      <div className="dashboard-card rounded-lg p-6 mt-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <GraduationCap className="w-5 h-5 text-[var(--success-green)]" />
+            <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+              {t("LMS score")}
+            </h3>
+          </div>
+          {profile?.role === "system_admin" && orgs.length > 1 && (
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-[var(--dashboard-text-secondary)]">{t("Organization")}</label>
+              <select
+                value={selectedOrgId || ""}
+                onChange={(e) => setSelectedOrgId(e.target.value || null)}
+                className="bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3 py-2 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] outline-none"
+              >
+                {orgs.map((org) => (
+                  <option key={org._id} value={org._id}>{org.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+        <p className="text-xs text-[var(--dashboard-text-secondary)] mb-4">
+          {t("LMS score (0–1): based on training completion. 0 = no progress, 1 = all assigned courses done. Higher is better.")}
+        </p>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-[var(--neon-blue)] border-t-transparent" />
+          </div>
+        ) : displayUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-[var(--dashboard-text-secondary)]">
+            <Users className="w-12 h-12 mb-2 opacity-50" />
+            <p className="text-sm">{t("No users in this organization")}</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[var(--sidebar-border)]">
+                  <th className="text-left py-3 px-2 text-[var(--dashboard-text-secondary)] font-medium">{t("User")}</th>
+                  <th className="text-left py-3 px-2 text-[var(--dashboard-text-secondary)] font-medium">{t("Email")}</th>
+                  <th className="text-left py-3 px-2 text-[var(--dashboard-text-secondary)] font-medium">{t("Role")}</th>
+                  <th className="text-left py-3 px-2 text-[var(--dashboard-text-secondary)] font-medium">{t("LMS score")}</th>
+                  <th className="text-left py-3 px-2 text-[var(--dashboard-text-secondary)] font-medium">{t("Completion")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayUsers.map((u) => {
+                  const lmsScore = typeof u.lmsRiskScore === "number" ? u.lmsRiskScore.toFixed(2) : "0.00";
+                  const lmsLevel = getLmsLevelLabel(u.lmsRiskScore ?? 0);
+                  return (
+                    <tr key={u._id} className="border-b border-[var(--sidebar-border)]/50 hover:bg-[var(--navy-blue-lighter)]/50">
+                      <td className="py-3 px-2 text-[var(--dashboard-text-primary)]">{u.displayName || "—"}</td>
+                      <td className="py-3 px-2 text-[var(--dashboard-text-secondary)]">{u.email || "—"}</td>
+                      <td className="py-3 px-2 text-[var(--dashboard-text-secondary)]">{t(u.role?.replace("_", " ") || "—")}</td>
+                      <td className="py-3 px-2 font-mono text-[var(--dashboard-text-primary)]">{lmsScore}</td>
+                      <td className={`py-3 px-2 font-medium ${lmsLevel.className}`}>{lmsLevel.text}</td>
                     </tr>
                   );
                 })}
