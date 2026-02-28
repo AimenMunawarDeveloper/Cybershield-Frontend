@@ -204,6 +204,20 @@ export class ApiClient {
     return parseJsonSafe();
   }
 
+  async updateProfile(data: { phoneNumber?: string }) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error((err as any)?.error || (err as any)?.message || 'Failed to update profile');
+    }
+    return response.json();
+  }
+
   async getAllUsers(page = 1, limit = 1000, status?: string) {
     const headers = await this.getAuthHeaders();
     const params = new URLSearchParams({

@@ -20,9 +20,11 @@ interface UserProfile {
   role: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
   orgId?: string;
   orgName?: string;
+  phoneNumber?: string | null;
   points?: number;
   riskScore?: number;
   emailRiskScore?: number;
+  whatsappRiskScore?: number;
 }
 
 export default function DashboardPage() {
@@ -31,6 +33,8 @@ export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [savingPhone, setSavingPhone] = useState(false);
   const { t, preTranslate, language } = useTranslation();
   const [translationReady, setTranslationReady] = useState(false);
 
@@ -202,9 +206,9 @@ export default function DashboardPage() {
             icon: "star",
           },
           metric3: {
-            label: t("Email risk score"),
-            value: typeof profile.emailRiskScore === "number" ? profile.emailRiskScore.toFixed(2) : "0.00",
-            change: "/ 1.00",
+            label: t("Email / WhatsApp risk"),
+            value: [profile.emailRiskScore, profile.whatsappRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
+            change: "E / W",
             icon: "shield-check",
           },
           metric4: {
@@ -229,9 +233,9 @@ export default function DashboardPage() {
             icon: "star",
           },
           metric3: {
-            label: t("Email risk score"),
-            value: typeof profile.emailRiskScore === "number" ? profile.emailRiskScore.toFixed(2) : "0.00",
-            change: "/ 1.00",
+            label: t("Email / WhatsApp risk"),
+            value: [profile.emailRiskScore, profile.whatsappRiskScore].map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
+            change: "E / W",
             icon: "shield-check",
           },
           metric4: {
@@ -302,15 +306,56 @@ export default function DashboardPage() {
 
   const metrics = getRoleBasedMetrics();
   const welcomeMsg = getWelcomeMessage();
+  const showPhonePrompt =
+    profile && (profile.role === "affiliated" || profile.role === "non_affiliated") &&
+    !profile.phoneNumber;
 
-  console.log("Metrics:", metrics);
-  console.log("Welcome message:", welcomeMsg);
+  const handleSavePhone = async () => {
+    if (!phoneInput.trim() || savingPhone) return;
+    setSavingPhone(true);
+    try {
+      const apiClient = new ApiClient(getToken);
+      await apiClient.updateProfile({ phoneNumber: phoneInput.trim() });
+      await fetchUserProfile();
+      setPhoneInput("");
+    } catch (e) {
+      console.error("Failed to update phone:", e);
+    } finally {
+      setSavingPhone(false);
+    }
+  };
 
   return (
     <>
       <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
         {/* Blurred background element - shows in both dark and light mode */}
         <div className="blurred-background"></div>
+
+        {/* Add phone number prompt for affiliated/non_affiliated (needed for WhatsApp simulations) */}
+        {showPhonePrompt && (
+          <div className="dashboard-card rounded-lg p-4 relative z-10 border border-amber-500/30 bg-amber-500/5">
+            <p className="text-sm text-[var(--dashboard-text-primary)] mb-2">
+              {t("Add your phone number to receive WhatsApp phishing simulations and track your WhatsApp risk score.")}
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="tel"
+                value={phoneInput}
+                onChange={(e) => setPhoneInput(e.target.value)}
+                placeholder="+923001234567"
+                className="px-3 py-2 rounded-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] text-sm w-48"
+              />
+              <button
+                type="button"
+                onClick={handleSavePhone}
+                disabled={savingPhone || !phoneInput.trim()}
+                className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg text-sm font-medium disabled:opacity-50"
+              >
+                {savingPhone ? t("Saving...") : t("Save")}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Top Row Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">

@@ -73,6 +73,8 @@ export default function WhatsAppPhishingPage() {
   const [translationReady, setTranslationReady] = useState(false);
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [accessError, setAccessError] = useState<string | null>(null);
+  const [profile, setProfile] = useState<{ orgId?: string; role?: string } | null>(null);
+  const [orgs, setOrgs] = useState<Array<{ _id: string; name: string }>>([]);
   const [visibleTemplates, setVisibleTemplates] = useState(INITIAL_VISIBLE_TEMPLATES);
   const [showCustomTemplateModal, setShowCustomTemplateModal] = useState(false);
   const [savingCustomTemplate, setSavingCustomTemplate] = useState(false);
@@ -80,14 +82,19 @@ export default function WhatsAppPhishingPage() {
   const verifyAccess = useCallback(async () => {
     try {
       const apiClient = new ApiClient(getToken);
-      const profile = await apiClient.getUserProfile();
+      const profileData = await apiClient.getUserProfile();
       const allowed =
-        profile.role === "system_admin" || profile.role === "client_admin";
+        profileData.role === "system_admin" || profileData.role === "client_admin";
       setHasAccess(allowed);
+      setProfile(profileData);
       if (!allowed) {
         setAccessError(
           t("Access restricted to system and client administrators.")
         );
+      } else if (profileData.role === "system_admin") {
+        apiClient.getOrganizations().then((res: { organizations?: Array<{ _id: string; name: string }> }) => {
+          setOrgs(res.organizations || []);
+        }).catch(() => setOrgs([]));
       }
     } catch (err) {
       console.error("Failed to verify access:", err);
@@ -386,54 +393,27 @@ export default function WhatsAppPhishingPage() {
     messageTemplate: string;
     landingPageUrl: string;
     targetUserIds: string[];
-    manualUsers?: Array<{
-      _id: string;
-      firstName: string;
-      lastName: string;
-      phoneNumber: string;
-    }>;
     scheduleDate?: string;
   }) => {
-    console.log("handleCreateCampaign called with:", campaignData);
-
     try {
       const token = await getToken();
       if (!token) {
-        console.log("No token found");
         setError(t("Authentication required. Please log in again."));
         return;
       }
 
-      console.log("Token found, validating fields...");
-
-      // Validate required fields
-      if (
-        !campaignData.name ||
-        !campaignData.messageTemplate ||
-        !campaignData.landingPageUrl
-      ) {
-        console.log("Missing required fields:", {
-          name: !!campaignData.name,
-          messageTemplate: !!campaignData.messageTemplate,
-          landingPageUrl: !!campaignData.landingPageUrl,
-        });
+      if (!campaignData.name || !campaignData.messageTemplate || !campaignData.landingPageUrl) {
         setError(t("Please fill in all required fields."));
         return;
       }
 
-      if (!campaignData.manualUsers || campaignData.manualUsers.length === 0) {
-        console.log("No manual users found:", campaignData.manualUsers);
-        setError(t("Please add at least one target user."));
+      if (!campaignData.targetUserIds || campaignData.targetUserIds.length === 0) {
+        setError(t("Please select at least one target user from your organization (users must have a phone number set)."));
         return;
       }
 
-      console.log("All validations passed, proceeding with API call...");
-
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
-
-      console.log("Creating campaign with data:", campaignData);
-      console.log("API URL:", `${API_BASE_URL}/whatsapp-campaigns`);
 
       const response = await fetch(`${API_BASE_URL}/whatsapp-campaigns`, {
         method: "POST",
@@ -442,7 +422,12 @@ export default function WhatsAppPhishingPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          ...campaignData,
+          name: campaignData.name,
+          description: campaignData.description || "",
+          messageTemplate: campaignData.messageTemplate,
+          landingPageUrl: campaignData.landingPageUrl,
+          targetUserIds: campaignData.targetUserIds,
+          scheduleDate: campaignData.scheduleDate || undefined,
         }),
       });
 
@@ -1087,7 +1072,7 @@ export default function WhatsAppPhishingPage() {
         </div>
       )}
 
-      {/* Create Campaign Modal */}
+      {/* Create Campaign Modal - only platform users with phone number (for WhatsApp risk scoring) */}
       <CreateCampaignModal
         isOpen={showCreateModal}
         onClose={() => {
@@ -1096,6 +1081,9 @@ export default function WhatsAppPhishingPage() {
         }}
         onSubmit={handleCreateCampaign}
         initialTemplate={selectedTemplateForModal}
+        orgId={profile?.orgId ?? null}
+        getToken={getToken}
+        orgs={profile?.role === "system_admin" ? orgs : undefined}
       />
 
       <CustomWhatsAppTemplateModal
