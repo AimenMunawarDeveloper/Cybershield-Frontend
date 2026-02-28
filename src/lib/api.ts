@@ -204,6 +204,20 @@ export class ApiClient {
     return parseJsonSafe();
   }
 
+  async updateProfile(data: { phoneNumber?: string }) {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error((err as any)?.error || (err as any)?.message || 'Failed to update profile');
+    }
+    return response.json();
+  }
+
   async getAllUsers(page = 1, limit = 1000, status?: string) {
     const headers = await this.getAuthHeaders();
     const params = new URLSearchParams({
@@ -376,18 +390,73 @@ export class ApiClient {
     return data;
   }
 
-  /** Send the WhatsApp Verification template to the given phone number (training activity) */
-  async sendActivityWhatsApp(courseId: string, to: string): Promise<{ success: boolean; message?: string }> {
+  /** Record final pass/fail for email activity when time is up. */
+  async recordActivityResult(
+    courseId: string,
+    submoduleId: string,
+    passed: boolean
+  ): Promise<{ success: boolean }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress/activity-result`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ submoduleId, passed }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((data as any).error || "Failed to record activity result");
+    return data;
+  }
+
+  /** Clear stored email/attempt for this submodule so user can try the activity again. */
+  async activityRetry(courseId: string, submoduleId: string): Promise<{ success: boolean }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/progress/activity-retry`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ submoduleId }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((data as any).error || "Failed to reset activity");
+    return data;
+  }
+
+  /** Send the WhatsApp Dropbox template (training activity). Returns timeLimitMinutes. */
+  async sendActivityWhatsApp(
+    courseId: string,
+    to: string,
+    submoduleId: string
+  ): Promise<{ success: boolean; message?: string; timeLimitMinutes?: number }> {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/courses/${courseId}/activity/send-whatsapp`, {
-      method: 'POST',
+      method: "POST",
       headers,
-      body: JSON.stringify({ to: to.trim() }),
+      body: JSON.stringify({ to: to.trim(), submoduleId }),
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-      throw new Error((data as any).error || 'Failed to send WhatsApp message');
+      throw new Error((data as any).error || "Failed to send WhatsApp message");
     }
+    return data;
+  }
+
+  /** Get WhatsApp activity status (clicked/reported) for Pass/Fail after 5 mins. */
+  async getActivityWhatsAppStatus(
+    courseId: string,
+    submoduleId: string
+  ): Promise<{
+    success: boolean;
+    hasCampaign?: boolean;
+    passed?: boolean | null;
+    clickedAt?: string | null;
+    reportedAt?: string | null;
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${API_BASE_URL}/courses/${courseId}/progress/activity-whatsapp-status?submoduleId=${encodeURIComponent(submoduleId)}`,
+      { method: "GET", headers }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((data as any).error || "Failed to fetch WhatsApp activity status");
     return data;
   }
 

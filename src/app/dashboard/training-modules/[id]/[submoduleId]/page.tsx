@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import {
@@ -362,6 +362,14 @@ export default function SubmodulePage() {
     clickedAt?: string | null;
     credentialsEnteredAt?: string | null;
   } | null>(null);
+  const [activityWhatsAppStatus, setActivityWhatsAppStatus] = useState<{
+    passed: boolean | null;
+    hasCampaign: boolean;
+    clickedAt?: string | null;
+    reportedAt?: string | null;
+  } | null>(null);
+  const activityResultRecordedRef = useRef(false);
+  const [activityRetryLoading, setActivityRetryLoading] = useState(false);
   const isRead = (submoduleIdParam: string) => completedIds.includes(submoduleIdParam);
 
   const startActivity = useCallback(async () => {
@@ -402,8 +410,11 @@ export default function SubmodulePage() {
       setActivitySendLoading(true);
       try {
         const api = new ApiClient(getToken);
-        await api.sendActivityWhatsApp(courseId, trimmed);
+        const res = await api.sendActivityWhatsApp(courseId, trimmed, submoduleId);
         setActivityStarted(true);
+        const limitMinutes = res?.timeLimitMinutes ?? 5;
+        setActivityTimeRemainingSec(limitMinutes * 60);
+        setActivityTimeExpired(false);
       } catch (err) {
         setActivityContactError(err instanceof Error ? err.message : t("Failed to send WhatsApp message. Please try again."));
       } finally {
@@ -412,7 +423,7 @@ export default function SubmodulePage() {
       return;
     }
     setActivityStarted(true);
-  }, [activityType, activityEmail, activityPhone, courseId, getToken, t]);
+  }, [activityType, activityEmail, activityPhone, courseId, submoduleId, getToken, t]);
 
   useEffect(() => {
     if (!isActivity || activityType !== "email" || !activityStarted || !getToken || !courseId) return;
@@ -441,9 +452,35 @@ export default function SubmodulePage() {
     };
   }, [isActivity, activityType, activityStarted, courseId, submoduleId, getToken]);
 
-  // Activity 5-minute countdown: when email is sent, count down; at 0, mark expired and stop
   useEffect(() => {
-    if (!isActivity || activityType !== "email" || !activityStarted || activityTimeRemainingSec <= 0) return;
+    if (!isActivity || activityType !== "whatsapp" || !activityStarted || !getToken || !courseId) return;
+    let cancelled = false;
+    const fetchStatus = async () => {
+      try {
+        const api = new ApiClient(getToken);
+        const res = await api.getActivityWhatsAppStatus(courseId, submoduleId);
+        if (cancelled) return;
+        setActivityWhatsAppStatus({
+          hasCampaign: res.hasCampaign ?? false,
+          passed: res.passed ?? null,
+          clickedAt: res.clickedAt ?? null,
+          reportedAt: res.reportedAt ?? null,
+        });
+      } catch {
+        if (!cancelled) setActivityWhatsAppStatus(null);
+      }
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 10000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [isActivity, activityType, activityStarted, courseId, submoduleId, getToken]);
+
+  // Activity 5-minute countdown: when email or WhatsApp is sent, count down; at 0, mark expired and stop
+  useEffect(() => {
+    if (!isActivity || (activityType !== "email" && activityType !== "whatsapp") || !activityStarted || activityTimeRemainingSec <= 0) return;
     const interval = setInterval(() => {
       setActivityTimeRemainingSec((prev) => {
         if (prev <= 1) {
@@ -455,6 +492,72 @@ export default function SubmodulePage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [isActivity, activityType, activityStarted, activityTimeRemainingSec]);
+
+  // When time is up: fetch final status from MongoDB and record pass/fail in course progress
+  useEffect(() => {
+    if (!isActivity || activityType !== "email" || !activityTimeExpired || !activityEmailStatus?.hasEmail || !getToken || !courseId || activityResultRecordedRef.current) return;
+    activityResultRecordedRef.current = true;
+    const run = async () => {
+      try {
+        const api = new ApiClient(getToken);
+        const res = await api.getActivityEmailStatus(courseId, submoduleId);
+        setActivityEmailStatus({
+          hasEmail: res.hasEmail ?? false,
+          passed: res.passed ?? null,
+          openedAt: res.openedAt ?? null,
+          clickedAt: res.clickedAt ?? null,
+          credentialsEnteredAt: res.credentialsEnteredAt ?? null,
+        });
+        await api.recordActivityResult(courseId, submoduleId, res.passed === true);
+      } catch {
+        activityResultRecordedRef.current = false;
+      }
+    };
+    run();
+  }, [isActivity, activityType, activityTimeExpired, activityEmailStatus?.hasEmail, courseId, submoduleId, getToken]);
+
+  useEffect(() => {
+    if (!isActivity || activityType !== "whatsapp" || !activityTimeExpired || !activityWhatsAppStatus?.hasCampaign || !getToken || !courseId || activityResultRecordedRef.current) return;
+    activityResultRecordedRef.current = true;
+    const run = async () => {
+      try {
+        const api = new ApiClient(getToken);
+        const res = await api.getActivityWhatsAppStatus(courseId, submoduleId);
+        setActivityWhatsAppStatus({
+          hasCampaign: res.hasCampaign ?? false,
+          passed: res.passed ?? null,
+          clickedAt: res.clickedAt ?? null,
+          reportedAt: res.reportedAt ?? null,
+        });
+        await api.recordActivityResult(courseId, submoduleId, res.passed === true);
+      } catch {
+        activityResultRecordedRef.current = false;
+      }
+    };
+    run();
+  }, [isActivity, activityType, activityTimeExpired, activityWhatsAppStatus?.hasCampaign, courseId, submoduleId, getToken]);
+
+  const handleActivityRetry = useCallback(async () => {
+    if (!getToken || activityRetryLoading) return;
+    setActivityRetryLoading(true);
+    try {
+      const api = new ApiClient(getToken);
+      await api.activityRetry(courseId, submoduleId);
+      activityResultRecordedRef.current = false;
+      setActivityStarted(false);
+      setActivityEmailStatus(null);
+      setActivityWhatsAppStatus(null);
+      setActivityTimeRemainingSec(0);
+      setActivityTimeExpired(false);
+      setActivityContactError(null);
+      const progressRes = await api.getCourseProgress(courseId).catch(() => ({ completed: [] }));
+      setCompletedIds(progressRes.completed ?? []);
+    } catch {
+      // ignore
+    } finally {
+      setActivityRetryLoading(false);
+    }
+  }, [courseId, submoduleId, getToken, activityRetryLoading]);
 
   const allQuizAttempted =
     quizQuestions.length > 0 &&
@@ -1620,14 +1723,17 @@ export default function SubmodulePage() {
                     </div>
 
                     {activityType === "email" && activityEmailStatus?.hasEmail && (() => {
-                      const passed = activityEmailStatus.passed === true;
-                      const failedAfterOpen = activityEmailStatus.passed === false && activityEmailStatus.openedAt != null;
+                      // Only show Pass/Fail AFTER the 5 min timer is up. Until then show Pending.
+                      const timeUp = activityTimeExpired;
+                      const passed = timeUp && activityEmailStatus.passed === true;
+                      const showFailed = timeUp && activityEmailStatus.passed === false;
+                      const pending = !timeUp;
                       return (
                       <div
                         className={`mb-6 rounded-xl border-2 p-4 ${
                           passed
                             ? "bg-green-50 border-green-500 text-green-800"
-                            : failedAfterOpen
+                            : showFailed
                               ? "bg-red-50 border-red-500 text-red-800"
                               : "bg-amber-50 border-amber-500 text-amber-800"
                         }`}
@@ -1635,7 +1741,7 @@ export default function SubmodulePage() {
                         <div className="flex items-start gap-3">
                           {passed ? (
                             <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
-                          ) : failedAfterOpen ? (
+                          ) : showFailed ? (
                             <X className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
                           ) : (
                             <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -1645,33 +1751,74 @@ export default function SubmodulePage() {
                               <>
                                 <p className="font-semibold">{t("Passed")}</p>
                                 <p className="text-sm mt-1">
-                                  {t("You opened the email without clicking links or entering credentials. You can mark as complete.")}
+                                  {t("You did not click links or enter credentials. You can mark as complete.")}
                                 </p>
                               </>
                             )}
-                            {failedAfterOpen && (
+                            {showFailed && (
                               <>
                                 <p className="font-semibold">{t("Failed")}</p>
                                 <p className="text-sm mt-1">
-                                  {t("You clicked a link or entered credentials. To pass this activity, open the email only—do not click links or enter credentials. This activity cannot be marked complete.")}
+                                  {t("You clicked a link or entered credentials. Do not click links or enter credentials to pass. Try again.")}
                                 </p>
                               </>
                             )}
-                            {!passed && !failedAfterOpen && (
+                            {pending && (
                               <>
                                 <p className="font-semibold">{t("Pending")}</p>
                                 <p className="text-sm mt-1">
-                                  {t("Open the email without clicking links or entering credentials to pass.")}
+                                  {t("Open the email after 2 minutes.")}
                                 </p>
-                                {activityTimeExpired ? (
-                                  <p className="text-sm mt-2 font-medium text-red-600">
-                                    {t("Time's up. You did not complete within 5 minutes.")}
-                                  </p>
-                                ) : activityTimeRemainingSec > 0 ? (
+                                {activityTimeRemainingSec > 0 ? (
                                   <p className="text-sm mt-2 font-medium text-amber-700">
-                                    {t("Complete within")} {Math.floor(activityTimeRemainingSec / 60)}:{String(activityTimeRemainingSec % 60).padStart(2, "0")}
+                                    {t("Time remaining")}: {Math.floor(activityTimeRemainingSec / 60)}:{String(activityTimeRemainingSec % 60).padStart(2, "0")}
                                   </p>
                                 ) : null}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ); })()}
+
+                    {activityType === "whatsapp" && activityWhatsAppStatus?.hasCampaign && (() => {
+                      const timeUp = activityTimeExpired;
+                      const passed = timeUp && activityWhatsAppStatus.passed === true;
+                      const showFailed = timeUp && activityWhatsAppStatus.passed === false;
+                      const pending = !timeUp;
+                      return (
+                      <div
+                        className={`mb-6 rounded-xl border-2 p-4 ${
+                          passed ? "bg-green-50 border-green-500 text-green-800"
+                            : showFailed ? "bg-red-50 border-red-500 text-red-800"
+                            : "bg-amber-50 border-amber-500 text-amber-800"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          {passed ? <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                            : showFailed ? <X className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                            : <AlertCircle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />}
+                          <div>
+                            {passed && (
+                              <>
+                                <p className="font-semibold">{t("Passed")}</p>
+                                <p className="text-sm mt-1">{t("You did not click links or enter credentials. You can mark as complete.")}</p>
+                              </>
+                            )}
+                            {showFailed && (
+                              <>
+                                <p className="font-semibold">{t("Failed")}</p>
+                                <p className="text-sm mt-1">{t("You clicked a link or entered credentials. Do not click links or enter credentials to pass. Try again.")}</p>
+                              </>
+                            )}
+                            {pending && (
+                              <>
+                                <p className="font-semibold">{t("Pending")}</p>
+                                {activityTimeRemainingSec > 0 && (
+                                  <p className="text-sm mt-2 font-medium text-amber-700">
+                                    {t("Time remaining")}: {Math.floor(activityTimeRemainingSec / 60)}:{String(activityTimeRemainingSec % 60).padStart(2, "0")}
+                                  </p>
+                                )}
                               </>
                             )}
                           </div>
@@ -1694,7 +1841,7 @@ export default function SubmodulePage() {
                         <button
                           type="button"
                           onClick={toggleComplete}
-                          disabled={markingRead || (activityType === "email" && activityTimeExpired) || (activityType === "email" && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false && activityEmailStatus.openedAt != null)}
+                          disabled={markingRead || (activityType === "email" && !activityTimeExpired) || (activityType === "email" && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false) || (activityType === "whatsapp" && !activityTimeExpired) || (activityType === "whatsapp" && activityWhatsAppStatus?.hasCampaign && activityWhatsAppStatus.passed === false)}
                           className="group inline-flex items-center justify-center gap-3 px-6 py-3 rounded-lg border-2 border-[var(--neon-blue)] bg-white hover:bg-[var(--neon-blue)] transition-colors text-base font-semibold disabled:opacity-60 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                         >
                           <Circle className="w-5 h-5 shrink-0 text-[var(--neon-blue)] group-hover:text-white transition-colors" />
@@ -1703,10 +1850,55 @@ export default function SubmodulePage() {
                           </span>
                         </button>
                       )}
-                      {activityType === "email" && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false && activityEmailStatus.openedAt != null && (
-                        <p className="mt-2 text-sm text-red-600">
-                          {t("You cannot complete this activity because you clicked a link or entered credentials in the email.")}
-                        </p>
+                      {activityType === "email" && activityTimeExpired && activityEmailStatus?.hasEmail && activityEmailStatus.passed === false && (
+                        <>
+                          <p className="mt-2 text-sm text-red-600">
+                            {t("You cannot complete this activity because you clicked a link or entered credentials in the email.")}
+                          </p>
+                          <p className="mt-2 text-sm text-gray-700">
+                            {t("Do not click the link or enter credentials. Try the activity again.")}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleActivityRetry}
+                            disabled={activityRetryLoading}
+                            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[var(--neon-blue)] bg-white text-[var(--neon-blue)] hover:bg-[var(--neon-blue)] hover:text-white transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {activityRetryLoading ? (
+                              <>
+                                <span className="w-4 h-4 border-2 border-[var(--neon-blue)] border-t-transparent rounded-full animate-spin" />
+                                {t("Resetting…")}
+                              </>
+                            ) : (
+                              t("Try again")
+                            )}
+                          </button>
+                        </>
+                      )}
+                      {activityType === "whatsapp" && activityTimeExpired && activityWhatsAppStatus?.hasCampaign && activityWhatsAppStatus.passed === false && (
+                        <>
+                          <p className="mt-2 text-sm text-red-600">
+                            {t("You cannot complete this activity because you clicked a link or entered credentials in the message.")}
+                          </p>
+                          <p className="mt-2 text-sm text-gray-700">
+                            {t("Do not click the link or enter credentials. Try the activity again.")}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={handleActivityRetry}
+                            disabled={activityRetryLoading}
+                            className="mt-4 inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border-2 border-[var(--neon-blue)] bg-white text-[var(--neon-blue)] hover:bg-[var(--neon-blue)] hover:text-white transition-colors text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
+                          >
+                            {activityRetryLoading ? (
+                              <>
+                                <span className="w-4 h-4 border-2 border-[var(--neon-blue)] border-t-transparent rounded-full animate-spin" />
+                                {t("Resetting…")}
+                              </>
+                            ) : (
+                              t("Try again")
+                            )}
+                          </button>
+                        </>
                       )}
                       {markReadError && (
                         <p className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg border border-red-200">
