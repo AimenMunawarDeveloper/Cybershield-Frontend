@@ -32,6 +32,7 @@ interface CampaignTarget {
   emailClickedAt?: string;
   emailReportedAt?: string;
   whatsappSentAt?: string;
+  whatsappReportedAt?: string;
 }
 
 interface Campaign {
@@ -183,6 +184,8 @@ export default function CampaignDetailModal({
         return "text-red-400";
       case "pending":
         return "text-yellow-400";
+      case "reported":
+        return "text-amber-400";
       case "not_applicable":
         return "text-gray-400";
       default:
@@ -412,7 +415,12 @@ export default function CampaignDetailModal({
                             </p>
                             {target.whatsappSentAt && (
                               <p className="text-xs text-[var(--medium-grey)] mt-1">
-                                {formatDate(target.whatsappSentAt)}
+                                {t("Sent")}: {formatDate(target.whatsappSentAt)}
+                              </p>
+                            )}
+                            {target.whatsappReportedAt && (
+                              <p className="text-xs text-amber-400 mt-1">
+                                {t("Credentials entered at")}: {formatDate(target.whatsappReportedAt)}
                               </p>
                             )}
                           </div>
@@ -545,6 +553,13 @@ export default function CampaignDetailModal({
                         </div>
                         <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalClicked}</p>
                       </div>
+                      
+                      <div className="bg-[var(--navy-blue-light)] rounded-lg p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs text-[var(--medium-grey)]">{t("Credentials entered")}</span>
+                        </div>
+                        <p className="text-2xl font-bold text-white">{analytics.whatsapp.totalReported ?? 0}</p>
+                      </div>
                     </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -559,6 +574,10 @@ export default function CampaignDetailModal({
                       <div>
                         <span className="text-sm text-[var(--medium-grey)]">{t("Click Rate")}</span>
                         <p className="text-xl font-bold text-white">{analytics.whatsapp.clickRate}%</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-[var(--medium-grey)]">{t("Report rate")}</span>
+                        <p className="text-xl font-bold text-amber-400">{analytics.whatsapp.reportRate ?? 0}%</p>
                       </div>
                       <div>
                         <span className="text-sm text-[var(--medium-grey)]">{t("Failed")}</span>

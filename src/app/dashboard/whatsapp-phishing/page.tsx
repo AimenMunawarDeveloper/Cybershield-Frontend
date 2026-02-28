@@ -981,7 +981,7 @@ export default function WhatsAppPhishingPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-xs mb-3">
                       <div>
                         <p className="text-[var(--medium-grey)]">{t("Targets")}</p>
                         <p className="text-white font-semibold">
@@ -1010,6 +1010,12 @@ export default function WhatsAppPhishingPage() {
                         <p className="text-[var(--medium-grey)]">{t("Clicked")}</p>
                         <p className="text-white font-semibold">
                           {campaign.stats.totalClicked ?? 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[var(--medium-grey)]">{t("Credentials entered")}</p>
+                        <p className="text-amber-400 font-semibold">
+                          {campaign.stats.totalReported ?? 0}
                         </p>
                       </div>
                     </div>
