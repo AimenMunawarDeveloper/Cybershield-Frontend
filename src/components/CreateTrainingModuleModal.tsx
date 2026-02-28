@@ -15,6 +15,8 @@ import {
   Video,
   Upload,
   Loader2,
+  Mail,
+  MessageCircle,
 } from "lucide-react";
 import { AVAILABLE_BADGES, getBadgeIcon } from "@/lib/courseBadges";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -46,14 +48,24 @@ export interface QuizQuestion {
   correctIndex: number;
 }
 
-// One module: title, sections (content), then quiz
+// Activity type: email or whatsapp (optional per module)
+export type ActivityType = "email" | "whatsapp";
+
+// One module: title, sections (content), quiz, then optional activity
 export interface CourseModule {
   title: string;
   sections: ModuleSection[];
   quiz: QuizQuestion[];
+  activityType?: ActivityType | null;
 }
 
 export type CourseLevel = "basic" | "advanced";
+
+/** Max counts per course level: modules (total), sections per module, MCQ questions per module */
+export const COURSE_LIMITS: Record<CourseLevel, { maxModules: number; maxSections: number; maxMcq: number }> = {
+  basic: { maxModules: 5, maxSections: 5, maxMcq: 10 },
+  advanced: { maxModules: 10, maxSections: 10, maxMcq: 15 },
+};
 
 export interface TrainingModuleData {
   courseTitle: string;
@@ -90,6 +102,7 @@ const emptyModule = (): CourseModule => ({
   title: "",
   sections: [emptySection()],
   quiz: [],
+  activityType: null,
 });
 
 export default function CreateTrainingModuleModal({
@@ -191,10 +204,24 @@ export default function CreateTrainingModuleModal({
         "Add choice",
         "Add question",
         
+        // Activity
+        "Activity",
+        "Select how learners complete this activity",
+        "Email",
+        "WhatsApp",
+        
         // Buttons
         "Cancel",
         "Save changes",
         "Add Course",
+        
+        // Limit messages
+        "max",
+        "per module",
+        "Basic course limit:",
+        "Advanced course limit:",
+        "Modules",
+        "Sections",
         
         // Error messages
         "Please enter a course title.",
@@ -451,6 +478,7 @@ export default function CreateTrainingModuleModal({
                   correctIndex: typeof q.correctIndex === "number" ? q.correctIndex : 0,
                 }))
               : [],
+            activityType: m.activityType === "email" || m.activityType === "whatsapp" ? m.activityType : null,
           }))
         : [emptyModule()];
       setModules(mods);
@@ -481,7 +509,10 @@ export default function CreateTrainingModuleModal({
     );
   };
 
+  const limits = COURSE_LIMITS[level];
+
   const addModule = () => {
+    if (modules.length >= limits.maxModules) return;
     const newIndex = modules.length;
     setModules((prev) => [...prev, emptyModule()]);
     setExpandedModules((prev) => new Set([...prev, newIndex]));
@@ -517,11 +548,13 @@ export default function CreateTrainingModuleModal({
   };
 
   const addSection = (moduleIndex: number) => {
+    const mod = modules[moduleIndex];
+    if (!mod || mod.sections.length >= limits.maxSections) return;
     setModules((prev) => {
-      const mod = prev[moduleIndex];
-      if (!mod) return prev;
+      const m = prev[moduleIndex];
+      if (!m) return prev;
       return prev.map((m, i) => 
-        i === moduleIndex ? { ...m, sections: [...mod.sections, emptySection()] } : m
+        i === moduleIndex ? { ...m, sections: [...m.sections, emptySection()] } : m
       );
     });
   };
@@ -717,6 +750,7 @@ export default function CreateTrainingModuleModal({
 
   const addQuizToModule = (moduleIndex: number) => {
     const mod = modules[moduleIndex];
+    if (!mod || mod.quiz.length >= limits.maxMcq) return;
     updateModule(moduleIndex, { quiz: [...mod.quiz, emptyQuizQuestion()] });
     setExpandedQuiz(moduleIndex);
   };
@@ -793,6 +827,22 @@ export default function CreateTrainingModuleModal({
       alert(t("Please add at least one module with a title and either sections or quiz questions."));
       return;
     }
+    const lim = COURSE_LIMITS[level];
+    const limitLabel = level === "advanced" ? t("Advanced course limit:") : t("Basic course limit:");
+    if (modules.length > lim.maxModules) {
+      alert(`${limitLabel} ${t("max")} ${lim.maxModules} ${t("Modules")}.`);
+      return;
+    }
+    for (const m of modules) {
+      if (m.sections.length > lim.maxSections) {
+        alert(`${limitLabel} ${t("max")} ${lim.maxSections} ${t("Sections")} ${t("per module")}.`);
+        return;
+      }
+      if (m.quiz.length > lim.maxMcq) {
+        alert(`${limitLabel} ${t("max")} ${lim.maxMcq} ${t("Module Quiz")} ${t("question(s)")} ${t("per module")}.`);
+        return;
+      }
+    }
     const data: TrainingModuleData = {
       courseTitle: courseTitle.trim(),
       description: description.trim(),
@@ -818,12 +868,13 @@ export default function CreateTrainingModuleModal({
             ),
           }))
           .filter((q) => q.question && q.choices.length > 0),
+        activityType: m.activityType === "email" || m.activityType === "whatsapp" ? m.activityType : null,
       })),
     };
     onSubmit(data);
     resetForm();
     onClose();
-  }, [courseTitle, modules, onSubmit, t]);
+  }, [courseTitle, description, level, modules, onClose, onSubmit, t]);
 
   const resetForm = () => {
     setCourseTitle("");
@@ -972,11 +1023,14 @@ export default function CreateTrainingModuleModal({
           {/* Modules (accordion style like the image) */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className={labelClass + " mb-0"}>{t("Modules")}</span>
+              <span className={labelClass + " mb-0"}>
+                {t("Modules")} ({modules.length}/{limits.maxModules})
+              </span>
               <button
                 type="button"
                 onClick={addModule}
-                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm"
+                disabled={modules.length >= limits.maxModules}
+                className="flex items-center gap-2 px-3 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--neon-blue-dark)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Plus className="w-4 h-4" />
                 {t("Add module")}
@@ -1265,10 +1319,11 @@ export default function CreateTrainingModuleModal({
                           <button
                             type="button"
                             onClick={() => addSection(moduleIndex)}
-                            className="ml-4 flex items-center gap-2 px-3 py-2 text-sm text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded-lg"
+                            disabled={mod.sections.length >= limits.maxSections}
+                            className="ml-4 flex items-center gap-2 px-3 py-2 text-sm text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <Plus className="w-4 h-4" />
-                            {t("Add section")}
+                            {t("Add section")} ({mod.sections.length}/{limits.maxSections})
                           </button>
                         </div>
 
@@ -1292,8 +1347,8 @@ export default function CreateTrainingModuleModal({
                               </span>
                             )}
                             {mod.quiz.length === 0 ? (
-                              <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] ml-auto">
-                                {t("Add quiz")}
+                              <span className="text-sm text-[var(--medium-grey)] ml-auto">
+                                {t("Add quiz")} (0/{limits.maxMcq})
                               </span>
                             ) : isQuizExpanded ? (
                               <ChevronDown className="w-4 h-4 ml-auto text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]" />
@@ -1407,13 +1462,51 @@ export default function CreateTrainingModuleModal({
                               <button
                                 type="button"
                                 onClick={() => addQuizToModule(moduleIndex)}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded-lg"
+                                disabled={mod.quiz.length >= limits.maxMcq}
+                                className="flex items-center gap-2 px-3 py-2 text-sm text-[var(--neon-blue)] hover:bg-[var(--neon-blue)]/20 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <Plus className="w-4 h-4" />
-                                {t("Add question")}
+                                {t("Add question")} ({mod.quiz.length}/{limits.maxMcq})
                               </button>
                             </div>
                           )}
+                        </div>
+
+                        {/* Activity - after quiz: Email or WhatsApp */}
+                        <div className="border-t border-[var(--medium-grey)]/50 pt-4 mt-4">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Mail className="w-5 h-5 text-[var(--neon-blue)]" />
+                            <span className="font-medium text-white">{t("Activity")}</span>
+                          </div>
+                          <p className="text-xs text-[var(--medium-grey)] ml-8 mb-3">
+                            {t("Select how learners complete this activity")}
+                          </p>
+                          <div className="ml-8 flex flex-wrap gap-3">
+                            <button
+                              type="button"
+                              onClick={() => updateModule(moduleIndex, { activityType: "email" })}
+                              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
+                                mod.activityType === "email"
+                                  ? "bg-[var(--neon-blue)]/20 border-[var(--neon-blue)] text-white"
+                                  : "border-[var(--medium-grey)]/50 text-[var(--medium-grey)] hover:border-[var(--neon-blue)]/50 hover:text-white"
+                              }`}
+                            >
+                              <Mail className="w-4 h-4" />
+                              {t("Email")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateModule(moduleIndex, { activityType: "whatsapp" })}
+                              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
+                                mod.activityType === "whatsapp"
+                                  ? "bg-[var(--neon-blue)]/20 border-[var(--neon-blue)] text-white"
+                                  : "border-[var(--medium-grey)]/50 text-[var(--medium-grey)] hover:border-[var(--neon-blue)]/50 hover:text-white"
+                              }`}
+                            >
+                              <MessageCircle className="w-4 h-4" />
+                              {t("WhatsApp")}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}

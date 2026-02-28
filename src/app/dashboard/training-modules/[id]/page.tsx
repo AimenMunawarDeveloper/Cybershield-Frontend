@@ -23,6 +23,7 @@ import {
   CheckCircle,
   Layers,
   GraduationCap,
+  MessageCircle,
 } from "lucide-react";
 import { ApiClient } from "@/lib/api";
 import type { Course, CourseModule } from "@/lib/coursesData";
@@ -178,6 +179,11 @@ export default function TrainingModuleDetailPage() {
         // Module Quiz
         "Module Quiz",
         
+        // Activity
+        "Activity",
+        "ACTIVITY",
+        "ACTIVITIES",
+        
         // Achievements
         "Achievements",
         "Badges you can earn in this course.",
@@ -328,7 +334,11 @@ export default function TrainingModuleDetailPage() {
     // Calculate progress
     const modules: CourseModule[] = displayCourse.modules || [];
     const totalItems = modules.reduce(
-      (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
+      (acc, m) =>
+        acc +
+        (m.sections?.length ?? 0) +
+        ((m.quiz?.length ?? 0) > 0 ? 1 : 0) +
+        (m.activityType ? 1 : 0),
       0
     );
     const completedCount = completedIds.length;
@@ -375,6 +385,10 @@ export default function TrainingModuleDetailPage() {
     router.push(`/dashboard/training-modules/${courseId}/${moduleIndex}-quiz`);
   }, [router, courseId]);
 
+  const goToActivity = useCallback((moduleIndex: number) => {
+    router.push(`/dashboard/training-modules/${courseId}/${moduleIndex}-activity`);
+  }, [router, courseId]);
+
   if (loading || !displayCourse) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -395,15 +409,21 @@ export default function TrainingModuleDetailPage() {
 
   const modules: CourseModule[] = displayCourse.modules || [];
   const totalItems = modules.reduce(
-    (acc, m) => acc + (m.sections?.length ?? 0) + ((m.quiz?.length ?? 0) > 0 ? 1 : 0),
+    (acc, m) =>
+      acc +
+      (m.sections?.length ?? 0) +
+      ((m.quiz?.length ?? 0) > 0 ? 1 : 0) +
+      (m.activityType ? 1 : 0),
     0
   );
   const completedCount = completedIds.length;
   const progressPercent = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
-  const isCompleted = (moduleIndex: number, sectionIndex: number | "quiz") =>
+  const isCompleted = (moduleIndex: number, sectionIndex: number | "quiz" | "activity") =>
     sectionIndex === "quiz"
       ? completedIds.includes(`${moduleIndex}-quiz`)
-      : completedIds.includes(`${moduleIndex}-${sectionIndex}`);
+      : sectionIndex === "activity"
+        ? completedIds.includes(`${moduleIndex}-activity`)
+        : completedIds.includes(`${moduleIndex}-${sectionIndex}`);
 
   return (
     <div className="min-h-screen bg-white">
@@ -502,6 +522,15 @@ export default function TrainingModuleDetailPage() {
                   {modules.filter((m) => (m.quiz?.length ?? 0) > 0).length === 1 ? t("QUIZ") : t("QUIZZES")}
                 </span>
               </div>
+              {modules.some((m) => m.activityType) && (
+                <div className="flex items-center gap-1.5 text-gray-700">
+                  <MessageCircle className="w-4 h-4 text-[var(--neon-blue)]" />
+                  <span className="text-sm font-medium">
+                    {modules.filter((m) => m.activityType).length}{" "}
+                    {modules.filter((m) => m.activityType).length === 1 ? t("ACTIVITY") : t("ACTIVITIES")}
+                  </span>
+                </div>
+              )}
               <div className="flex items-center gap-1.5 text-gray-700">
                 {displayCourse?.level === "advanced" ? (
                   <GraduationCap className="w-4 h-4 text-[var(--neon-blue)]" />
@@ -723,7 +752,7 @@ export default function TrainingModuleDetailPage() {
                             {hasQuiz && (
                               <button
                                 onClick={() => goToQuiz(moduleIndex)}
-                                className="w-full px-4 py-3 pl-14 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-[var(--neon-blue)] transition-colors flex items-center gap-2 border-b border-gray-100 last:border-b-0"
+                                className="w-full px-4 py-3 pl-14 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-[var(--neon-blue)] transition-colors flex items-center gap-2 border-b border-gray-100"
                               >
                                 {isCompleted(moduleIndex, "quiz") ? (
                                   <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
@@ -731,6 +760,19 @@ export default function TrainingModuleDetailPage() {
                                   <FileQuestion className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
                                 )}
                                 <span>{t("Module Quiz")}</span>
+                              </button>
+                            )}
+                            {module.activityType && (
+                              <button
+                                onClick={() => goToActivity(moduleIndex)}
+                                className="w-full px-4 py-3 pl-14 text-left text-sm text-gray-700 hover:bg-gray-100 hover:text-[var(--neon-blue)] transition-colors flex items-center gap-2 border-b border-gray-100 last:border-b-0"
+                              >
+                                {isCompleted(moduleIndex, "activity") ? (
+                                  <CheckCircle2 className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                                ) : (
+                                  <MessageCircle className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
+                                )}
+                                <span>{t("Activity")}</span>
                               </button>
                             )}
                           </div>
