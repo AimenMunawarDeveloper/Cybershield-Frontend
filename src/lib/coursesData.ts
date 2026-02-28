@@ -28,11 +28,14 @@ export interface QuizQuestion {
   correctIndex: number;
 }
 
+export type ActivityType = "email" | "whatsapp";
+
 export interface CourseModule {
   _id?: string;
   title: string;
   sections: ModuleSection[];
   quiz: QuizQuestion[];
+  activityType?: ActivityType | null;
 }
 
 export interface CourseCreatedBy {

@@ -338,6 +338,59 @@ export class ApiClient {
     return response.json();
   }
 
+  /** Get activity email telemetry status (opened, clicked, credentials) for Pass/Fail display. */
+  async getActivityEmailStatus(courseId: string, submoduleId: string): Promise<{
+    success: boolean;
+    hasEmail?: boolean;
+    passed?: boolean | null;
+    openedAt?: string | null;
+    clickedAt?: string | null;
+    credentialsEnteredAt?: string | null;
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(
+      `${API_BASE_URL}/courses/${courseId}/progress/activity-email-status?submoduleId=${encodeURIComponent(submoduleId)}`,
+      { method: "GET", headers }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error((data as any).error || "Failed to fetch activity status");
+    return data;
+  }
+
+  /** Send the Dropbox training activity email to the given address. submoduleId (e.g. "0-activity") links the email for pass/fail check. */
+  async sendActivityEmail(
+    courseId: string,
+    to: string,
+    submoduleId: string
+  ): Promise<{ success: boolean; message?: string; emailSentAt?: string; timeLimitMinutes?: number }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/activity/send-email`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ to: to.trim(), submoduleId }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error((data as any).error || 'Failed to send activity email');
+    }
+    return data;
+  }
+
+  /** Send the WhatsApp Verification template to the given phone number (training activity) */
+  async sendActivityWhatsApp(courseId: string, to: string): Promise<{ success: boolean; message?: string }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/activity/send-whatsapp`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ to: to.trim() }),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error((data as any).error || 'Failed to send WhatsApp message');
+    }
+    return data;
+  }
+
   // Certificate methods
   async getUserCertificates(): Promise<{ certificates: any[] }> {
     const headers = await this.getAuthHeaders();
