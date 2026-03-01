@@ -188,8 +188,8 @@ export default function LearningScoreBreakdown({
                 border: "1px solid var(--neon-blue)",
                 borderRadius: "8px",
               }}
-              formatter={(value: number) => [
-                `${(value * 100).toFixed(1)}%`,
+              formatter={(value: number | undefined) => [
+                `${((value ?? 0) * 100).toFixed(1)}%`,
                 t("Score"),
               ]}
             />
