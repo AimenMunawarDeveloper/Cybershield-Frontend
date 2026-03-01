@@ -527,6 +527,133 @@ export class ApiClient {
     const data = await response.json();
     return { certificate: data.certificate };
   }
+
+  // Voice Phishing Analytics
+  async getVoicePhishingAnalytics(): Promise<{
+    success: boolean;
+    data: {
+      totalConversations: number;
+      completedConversations: number;
+      averageScore: number;
+      phishingScenarios: { total: number; fellForPhishing: number };
+      normalScenarios: { total: number };
+      resistanceLevels: { high: number; medium: number; low: number };
+    };
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/voice-phishing/analytics/overview`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || (error as any).message || 'Failed to fetch voice phishing analytics');
+    }
+    return response.json();
+  }
+
+  // Campaign endpoints
+  async getCampaigns(page = 1, limit = 10): Promise<{
+    success: boolean;
+    data: {
+      campaigns: Array<{
+        _id: string;
+        name: string;
+        description: string;
+        status: string;
+        startDate?: string;
+        endDate?: string;
+        stats: any;
+      }>;
+      pagination?: {
+        current: number;
+        pages: number;
+        total: number;
+      };
+    };
+  }> {
+    const headers = await this.getAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    const response = await fetch(`${API_BASE_URL}/campaigns?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch campaigns');
+    }
+    return response.json();
+  }
+
+  async getWhatsAppCampaigns(page = 1, limit = 10): Promise<{
+    success: boolean;
+    data: {
+      campaigns: Array<{
+        _id: string;
+        name: string;
+        description: string;
+        status: string;
+        startDate?: string;
+        endDate?: string;
+        stats: any;
+      }>;
+      pagination?: {
+        current: number;
+        pages: number;
+        total: number;
+      };
+    };
+  }> {
+    const headers = await this.getAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    const response = await fetch(`${API_BASE_URL}/whatsapp-campaigns?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch WhatsApp campaigns');
+    }
+    return response.json();
+  }
+
+  async getCampaignAnalytics(campaignId: string): Promise<{
+    success: boolean;
+    data: any;
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/analytics`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch campaign analytics');
+    }
+    return response.json();
+  }
+
+  async getWhatsAppCampaignAnalytics(campaignId: string): Promise<{
+    success: boolean;
+    data: any;
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/whatsapp-campaigns/${campaignId}/analytics`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch WhatsApp campaign analytics');
+    }
+    return response.json();
+  }
 }
 
 // Hook to create API client with Clerk token

@@ -12,6 +12,10 @@ import ActivityFeed from "@/components/ActivityFeed";
 import FloatingChat from "@/components/FloatingChat";
 import UserLearningScoresSection from "@/components/UserLearningScoresSection";
 import RemedialAssignmentsCard from "@/components/RemedialAssignmentsCard";
+import LearningScoreDistribution from "@/components/LearningScoreDistribution";
+import LearningScoreBreakdown from "@/components/LearningScoreBreakdown";
+import VoicePhishingOverview from "@/components/VoicePhishingOverview";
+import CampaignPerformance from "@/components/CampaignPerformance";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface RemedialAssignmentItem {
@@ -40,6 +44,16 @@ interface OrgSummary {
   userCount: number;
   activeCount: number;
   avgLearningScore: number; // cumulative 0–100
+  avgTrainingCompletion: number; // 0-100 percentage
+}
+
+interface CampaignData {
+  _id: string;
+  name: string;
+  status: string;
+  startDate?: string;
+  endDate?: string;
+  managedByParentCampaign?: boolean;
 }
 
 export default function DashboardPage() {
@@ -53,6 +67,19 @@ export default function DashboardPage() {
   const { t, preTranslate, language } = useTranslation();
   const [translationReady, setTranslationReady] = useState(false);
   const [orgSummary, setOrgSummary] = useState<OrgSummary | null>(null);
+  const [activeCampaignsCount, setActiveCampaignsCount] = useState<number>(0);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+  const [trainingCompletion, setTrainingCompletion] = useState<number | null>(null);
+  const [securityAwareness, setSecurityAwareness] = useState<{
+    avgBadges: number;
+    avgCertificates: number;
+    usersAtRisk: number; // Percentage of users with learning score < 50
+  } | null>(null);
+  const [loadingSecurityAwareness, setLoadingSecurityAwareness] = useState(false);
+  
+  // Tab state for dashboard sections (client admin and system admin only)
+  type DashboardTab = "all" | "learning-scores" | "learning-analytics" | "voice-phishing" | "campaign-performance";
+  const [activeTab, setActiveTab] = useState<DashboardTab>("all");
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -79,30 +106,190 @@ export default function DashboardPage() {
     }
   }, [getToken, language, preTranslate]);
 
-  // Fetch org summary for client_admin (user count, active count, avg cumulative learning score)
+  // Fetch org summary for client_admin and system_admin
+  // Client admin: their organization's users (affiliated)
+  // System admin: all non-affiliated users
   useEffect(() => {
-    if (!profile || profile.role !== "client_admin" || !profile.orgId) {
+    if (!profile || (profile.role !== "client_admin" && profile.role !== "system_admin")) {
       setOrgSummary(null);
+      setTrainingCompletion(null);
       return;
     }
+    
+    // Client admin needs orgId
+    if (profile.role === "client_admin" && !profile.orgId) {
+      setOrgSummary(null);
+      setTrainingCompletion(null);
+      return;
+    }
+    
     const apiClient = new ApiClient(getToken);
-    apiClient
-      .getOrgUsers(profile.orgId, 1, 500)
-      .then((data: { users?: { status?: string; learningScore?: number }[]; pagination?: { total: number } }) => {
-        const users = data.users || [];
-        const total = data.pagination?.total ?? users.length;
+    
+    // Fetch users based on role
+    const fetchUsers = profile.role === "system_admin"
+      ? apiClient.getAllUsers(1, 500).then((data: { users?: any[] }) => {
+          // Filter for non-affiliated users only
+          const nonAffiliatedUsers = (data.users || []).filter(
+            (u: any) => u.role === "non_affiliated"
+          );
+          return { users: nonAffiliatedUsers, pagination: { total: nonAffiliatedUsers.length } };
+        })
+      : apiClient.getOrgUsers(profile.orgId!, 1, 500);
+    
+    fetchUsers
+      .then(async (data: { 
+        users?: { 
+          _id?: string;
+          role?: string;
+          status?: string; 
+          learningScore?: number;
+          learningScores?: {
+            lms?: number;
+          };
+          badges?: string[];
+        }[]; 
+        pagination?: { total: number } 
+      }) => {
+        const allUsers = data.users || [];
+        // Exclude client_admin and system_admin from all calculations
+        const users = allUsers.filter(
+          (u) => u.role !== "client_admin" && u.role !== "system_admin"
+        );
+        const total = users.length;
         const activeCount = users.filter((u) => u.status === "active").length;
-        const withScore = users.filter((u) => typeof u.learningScore === "number");
-        const sumScore = withScore.reduce((a, u) => a + (u.learningScore ?? 0), 0);
-        const avgLearningScore = withScore.length > 0 ? sumScore / withScore.length : 0;
+        
+        // Include all users in average calculation (treat null/undefined as 0)
+        const sumScore = users.reduce((a, u) => {
+          const score = typeof u.learningScore === "number" ? u.learningScore : 0;
+          return a + score;
+        }, 0);
+        const avgLearningScore = users.length > 0 ? sumScore / users.length : 0;
+        
+        // Calculate average training completion from LMS scores
+        const usersWithLms = users.filter((u) => typeof u.learningScores?.lms === "number");
+        const sumLms = usersWithLms.reduce((a, u) => a + (u.learningScores?.lms ?? 0), 0);
+        const avgLms = usersWithLms.length > 0 ? sumLms / usersWithLms.length : 0;
+        // Convert from 0-1 scale to 0-100 percentage
+        const avgTrainingCompletion = Math.round(avgLms * 100);
+        
+        // Calculate average badges
+        const totalBadges = users.reduce((sum, u) => {
+          const badgeCount = Array.isArray(u.badges) ? u.badges.length : 0;
+          return sum + badgeCount;
+        }, 0);
+        const avgBadges = users.length > 0 ? Math.round((totalBadges / users.length) * 10) / 10 : 0;
+        
+        // Calculate average certificates
+        // Note: This requires fetching certificates for all users
+        // For now, we'll fetch from a backend endpoint if available, otherwise use 0
+        let totalCertificates = 0;
+        let avgCertificates = 0;
+        
+        try {
+          // Try to fetch certificate count from backend
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+          const token = await getToken();
+          
+          if (profile.role === "client_admin" && token && profile.orgId) {
+            // Client admin: fetch for their organization
+            const response = await fetch(`${API_BASE_URL}/orgs/${profile.orgId}/certificates/count`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              totalCertificates = data.totalCertificates || 0;
+              avgCertificates = users.length > 0 ? Math.round((totalCertificates / users.length) * 10) / 10 : 0;
+            }
+          } else if (profile.role === "system_admin" && token) {
+            // System admin: fetch certificate count for non-affiliated users
+            const response = await fetch(`${API_BASE_URL}/certificates/count/non-affiliated`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            if (response.ok) {
+              const data = await response.json();
+              totalCertificates = data.totalCertificates || 0;
+              avgCertificates = users.length > 0 ? Math.round((totalCertificates / users.length) * 10) / 10 : 0;
+            }
+          }
+        } catch (error) {
+          console.error("Failed to fetch certificate count:", error);
+          // If endpoint doesn't exist, calculate based on users who completed courses
+          // Estimate: users with LMS score > 0.8 likely have certificates
+          const usersWithHighLms = users.filter((u) => (u.learningScores?.lms || 0) > 0.8).length;
+          avgCertificates = users.length > 0 ? Math.round((usersWithHighLms / users.length) * 10) / 10 : 0;
+        }
+        
         setOrgSummary({
           userCount: total,
           activeCount,
           avgLearningScore: Math.round(avgLearningScore * 10) / 10,
+          avgTrainingCompletion,
         });
+        setTrainingCompletion(avgTrainingCompletion);
+        
+        // Calculate users at risk (learning score < 50)
+        const usersAtRisk = users.filter((u) => {
+          const score = typeof u.learningScore === "number" ? u.learningScore : 0;
+          return score < 50;
+        }).length;
+        const usersAtRiskPercentage = users.length > 0 
+          ? Math.round((usersAtRisk / users.length) * 100)
+          : 0;
+        
+        // Store avg badges, avg certificates, and users at risk for Security Awareness card
+        setSecurityAwareness((prev) => ({
+          avgBadges,
+          avgCertificates,
+          usersAtRisk: usersAtRiskPercentage,
+        }));
       })
-      .catch(() => setOrgSummary(null));
+      .catch(() => {
+        setOrgSummary(null);
+        setTrainingCompletion(null);
+      });
   }, [profile?.role, profile?.orgId, getToken]);
+
+  // Fetch active campaigns count for client_admin and system_admin
+  useEffect(() => {
+    if (!profile || (profile.role !== "client_admin" && profile.role !== "system_admin")) {
+      setActiveCampaignsCount(0);
+      return;
+    }
+    
+    setLoadingCampaigns(true);
+    const apiClient = new ApiClient(getToken);
+    
+    Promise.all([
+      apiClient.getCampaigns(1, 1000).catch(() => ({ success: false, data: { campaigns: [] } })),
+      apiClient.getWhatsAppCampaigns(1, 1000).catch(() => ({ success: false, data: { campaigns: [] } })),
+    ])
+      .then(([emailCampaigns, whatsappCampaigns]) => {
+        const email = emailCampaigns.success && emailCampaigns.data?.campaigns ? emailCampaigns.data.campaigns : [];
+        const whatsapp = whatsappCampaigns.success && whatsappCampaigns.data?.campaigns ? whatsappCampaigns.data.campaigns : [];
+        
+        // Filter out WhatsApp campaigns that are managed by a parent Campaign (to avoid double-counting)
+        // Only include standalone WhatsApp campaigns (managedByParentCampaign !== true)
+        const standaloneWhatsapp = whatsapp.filter(
+          (c: CampaignData) => !c.managedByParentCampaign
+        );
+        
+        const allCampaigns = [...email, ...standaloneWhatsapp];
+        
+        // Count ALL campaigns regardless of status (draft, scheduled, running, paused, completed, cancelled)
+        // This gives the total number of campaigns created
+        const total = allCampaigns.length;
+        
+        setActiveCampaignsCount(total);
+      })
+      .catch(() => setActiveCampaignsCount(0))
+      .finally(() => setLoadingCampaigns(false));
+  }, [profile?.role, getToken]);
+
+  // Users at risk is calculated in the org summary fetch above
 
   // Pre-translate static strings
   useEffect(() => {
@@ -162,6 +349,49 @@ export default function DashboardPage() {
         "1 day left",
         "days left",
         "Due by",
+        
+        // Client Admin Dashboard
+        "Learning Score Distribution",
+        "Distribution of users across score ranges",
+        "users",
+        "No data available",
+        "Learning Score Breakdown by Category",
+        "Average scores across different training categories",
+        "Score",
+        "Email",
+        "WhatsApp",
+        "LMS",
+        "Voice",
+        "Voice Phishing Overview",
+        "Analytics for voice phishing simulations",
+        "Total Conversations",
+        "Completed",
+        "completion rate",
+        "Average Score",
+        "Fell for Phishing",
+        "of phishing attempts",
+        "Scenario Type Distribution",
+        "Resistance Levels",
+        "High",
+        "Medium",
+        "Low",
+        "No voice phishing data available",
+        "Campaign Performance",
+        "Email and WhatsApp phishing campaign analytics",
+        "Email Campaigns",
+        "WhatsApp Campaigns",
+        "Total Sent",
+        "Delivered",
+        "Opened",
+        "Read",
+        "Clicked",
+        "Reported",
+        "No email campaign data available",
+        "No WhatsApp campaign data available",
+        "Performance Comparison",
+        "Delivery Rate",
+        "Click Rate",
+        "Report Rate",
       ];
 
       await preTranslate(staticStrings);
@@ -192,27 +422,27 @@ export default function DashboardPage() {
       case "system_admin":
         return {
           metric1: {
-            label: t("Total Organizations"),
-            value: "24",
-            change: "+12%",
-            icon: "building",
-          },
-          metric2: {
-            label: t("Total Users"),
-            value: "8,430",
-            change: "+18%",
+            label: t("Non-Affiliated Users"),
+            value: orgSummary != null ? String(orgSummary.userCount) : "—",
+            change: "+8%",
             icon: "users",
           },
+          metric2: {
+            label: t("Active Users"),
+            value: orgSummary != null ? String(orgSummary.activeCount) : "—",
+            change: "+3%",
+            icon: "user-check",
+          },
           metric3: {
-            label: t("Active Campaigns"),
-            value: "47",
-            change: "+5%",
+            label: t("Total Campaigns"),
+            value: loadingCampaigns ? "—" : String(activeCampaignsCount),
+            change: loadingCampaigns ? "" : "",
             icon: "shield",
           },
           metric4: {
             label: t("Avg Learning Score"),
-            value: "6.8/10",
-            change: "-0.5",
+            value: orgSummary != null ? `${orgSummary.avgLearningScore.toFixed(1)}/100` : "—",
+            change: "0–100",
             icon: "chart",
           },
         };
@@ -231,9 +461,9 @@ export default function DashboardPage() {
             icon: "user-check",
           },
           metric3: {
-            label: t("Active Campaigns"),
-            value: "5",
-            change: "+2",
+            label: t("Total Campaigns"),
+            value: loadingCampaigns ? "—" : String(activeCampaignsCount),
+            change: loadingCampaigns ? "" : "",
             icon: "shield",
           },
           metric4: {
@@ -405,6 +635,74 @@ export default function DashboardPage() {
               >
                 {savingPhone ? t("Saving...") : t("Save")}
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* View Selector Dropdown for Client Admin and System Admin - At the top */}
+        {((profile?.role === "client_admin" && profile.orgId) || profile?.role === "system_admin") && (
+          <div className="relative z-10">
+            <div className="dashboard-card rounded-lg p-4 border border-[var(--sidebar-border)]">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-[var(--neon-blue)]/15 rounded-lg flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-[var(--neon-blue)]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
+                      {t("Dashboard View")}
+                    </h3>
+                    <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                      {t("Select which analytics to display")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="text-xs text-[var(--dashboard-text-secondary)] hidden sm:block whitespace-nowrap">
+                    {t("View")}:
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={activeTab}
+                      onChange={(e) => setActiveTab(e.target.value as DashboardTab)}
+                      className="appearance-none bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 cursor-pointer transition-all min-w-[180px] hover:border-[var(--neon-blue)]/40"
+                    >
+                      <option value="all">{t("All Sections")}</option>
+                      <option value="learning-scores">{t("Learning Scores")}</option>
+                      <option value="learning-analytics">{t("Learning Analytics")}</option>
+                      <option value="voice-phishing">{t("Voice Phishing")}</option>
+                      <option value="campaign-performance">{t("Campaign Performance")}</option>
+                    </select>
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-[var(--dashboard-text-secondary)]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -628,7 +926,9 @@ export default function DashboardPage() {
                 {/* Progress Radial Chart */}
                 <ProgressRadialChart
                   value={
-                    profile?.role === "affiliated"
+                    profile?.role === "client_admin" || profile?.role === "system_admin"
+                      ? trainingCompletion ?? 0
+                      : profile?.role === "affiliated"
                       ? 73
                       : profile?.role === "non_affiliated"
                       ? 45
@@ -642,7 +942,11 @@ export default function DashboardPage() {
               <div className="bg-[var(--navy-blue)] rounded-lg p-4 transition-colors">
                 <div className="text-center">
                   <p className="text-3xl font-bold text-[var(--dashboard-text-primary)]">
-                    {profile?.role === "affiliated"
+                    {profile?.role === "client_admin" || profile?.role === "system_admin"
+                      ? trainingCompletion !== null
+                        ? `${trainingCompletion}%`
+                        : "—"
+                      : profile?.role === "affiliated"
                       ? "73%"
                       : profile?.role === "non_affiliated"
                       ? "45%"
@@ -683,20 +987,22 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Left Side - Stats Cards */}
                 <div className="space-y-3">
-                  {/* Phishing Tests Card */}
+                  {/* Average Certificates Card */}
                   <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
                     <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
                       {profile?.role === "system_admin" ||
                       profile?.role === "client_admin"
-                        ? t("Total Tests")
+                        ? t("Avg Certificates")
                         : t("Tests Passed")}
                     </p>
                     <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
-                      {profile?.role === "system_admin"
-                        ? "1,247"
-                        : profile?.role === "client_admin"
-                        ? "89"
-                        : "12/15"}
+                      {profile?.role === "client_admin" || profile?.role === "system_admin"
+                        ? securityAwareness?.avgCertificates !== undefined
+                          ? securityAwareness.avgCertificates.toFixed(1)
+                          : "0.0"
+                        : profile?.role === "affiliated"
+                        ? "12/15"
+                        : "8/10"}
                     </p>
                   </div>
 
@@ -709,7 +1015,11 @@ export default function DashboardPage() {
                         : t("Your Badges")}
                     </p>
                     <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
-                      {profile?.role === "affiliated"
+                      {profile?.role === "client_admin" || profile?.role === "system_admin"
+                        ? securityAwareness?.avgBadges !== undefined
+                          ? securityAwareness.avgBadges.toFixed(1)
+                          : "0.0"
+                        : profile?.role === "affiliated"
                         ? "8"
                         : profile?.role === "non_affiliated"
                         ? "4"
@@ -718,26 +1028,32 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Right Side - Awareness Score */}
+                {/* Right Side - Users at Risk */}
                 <div className="flex items-center justify-center">
                   <ProgressRadialChart
                     value={
-                      profile?.role === "affiliated"
-                        ? 82
+                      profile?.role === "client_admin" || profile?.role === "system_admin"
+                        ? securityAwareness?.usersAtRisk || 0
+                        : profile?.role === "affiliated"
+                        ? 18
                         : profile?.role === "non_affiliated"
-                        ? 65
-                        : 78
+                        ? 35
+                        : 22
                     }
                     size={128}
                     showIcon={false}
                     showScore={true}
                     scoreValue={
-                      profile?.role === "affiliated"
-                        ? 8.2
+                      profile?.role === "client_admin" || profile?.role === "system_admin"
+                        ? securityAwareness?.usersAtRisk || 0
+                        : profile?.role === "affiliated"
+                        ? 18
                         : profile?.role === "non_affiliated"
-                        ? 6.5
-                        : 7.8
+                        ? 35
+                        : 22
                     }
+                    label={t("Users at Risk")}
+                    sublabel={t("Score < 50")}
                   />
                 </div>
               </div>
@@ -760,41 +1076,88 @@ export default function DashboardPage() {
             </div>
           )}
 
+
         {/* Learning scores (admins only) */}
-        <UserLearningScoresSection getToken={getToken} profile={profile} />
+        {((profile?.role === "client_admin" && profile.orgId) || profile?.role === "system_admin") && 
+         (activeTab === "all" || activeTab === "learning-scores") && (
+          <UserLearningScoresSection getToken={getToken} profile={profile} />
+        )}
 
-        {/* Area Chart Section */}
-        <div className="mt-8 relative z-10">
-          <div className="dashboard-card rounded-lg p-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
-                {profile?.role === "system_admin" ||
-                profile?.role === "client_admin"
-                  ? t("User Activity Overview")
-                  : t("Your Learning Progress")}
-              </h3>
-              <p className="text-xs text-[var(--success-green)]">
-                {profile?.role === "system_admin" ||
-                profile?.role === "client_admin"
-                  ? t("(+15%) increase this month")
-                  : t("(+3) courses this month")}
-              </p>
+        {/* Client Admin and System Admin Specific Analytics Sections */}
+        {((profile?.role === "client_admin" && profile.orgId) || profile?.role === "system_admin") && (
+          <>
+            {/* Learning Analytics Section */}
+            {(activeTab === "all" || activeTab === "learning-analytics") && (
+              <div className="mt-8 relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="dashboard-card rounded-lg p-6">
+                    <LearningScoreDistribution 
+                      orgId={profile?.role === "client_admin" ? profile.orgId : undefined}
+                      userRole={profile?.role as "system_admin" | "client_admin"}
+                    />
+                  </div>
+                  <div className="dashboard-card rounded-lg p-6">
+                    <LearningScoreBreakdown 
+                      orgId={profile?.role === "client_admin" ? profile.orgId : undefined}
+                      userRole={profile?.role as "system_admin" | "client_admin"}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Voice Phishing Overview Section */}
+            {(activeTab === "all" || activeTab === "voice-phishing") && (
+              <div className="mt-8 relative z-10">
+                <div className="dashboard-card rounded-lg p-6">
+                  <VoicePhishingOverview />
+                </div>
+              </div>
+            )}
+
+            {/* Campaign Performance Section */}
+            {(activeTab === "all" || activeTab === "campaign-performance") && (
+              <div className="mt-8 relative z-10">
+                <div className="dashboard-card rounded-lg p-6">
+                  <CampaignPerformance />
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Area Chart Section - Hidden for client_admin and system_admin */}
+        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && (
+          <div className="mt-8 relative z-10">
+            <div className="dashboard-card rounded-lg p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+                  {t("Your Learning Progress")}
+                </h3>
+                <p className="text-xs text-[var(--success-green)]">
+                  {t("(+3) courses this month")}
+                </p>
+              </div>
+              <AreaChart userRole={profile?.role} />
             </div>
-            <AreaChart userRole={profile?.role} />
           </div>
-        </div>
-        {/* Bar Chart Card Section */}
-        <div className="mt-8 relative z-10">
-          <BarChartCard userRole={profile?.role} />
-        </div>
+        )}
+        {/* Bar Chart Card Section - Hidden for client_admin and system_admin */}
+        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && (
+          <div className="mt-8 relative z-10">
+            <BarChartCard userRole={profile?.role} />
+          </div>
+        )}
 
-        {/* Data Table and Activity Feed Section */}
-        <div className="mt-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DataTable userRole={profile?.role} />
-            <ActivityFeed userRole={profile?.role} />
+        {/* Data Table and Activity Feed Section - Hidden for client_admin and system_admin */}
+        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && (
+          <div className="mt-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DataTable userRole={profile?.role} />
+              <ActivityFeed userRole={profile?.role} />
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {/* Floating Chat */}
       <FloatingChat />

@@ -8,6 +8,8 @@ interface ProgressRadialChartProps {
   showIcon?: boolean;
   showScore?: boolean;
   scoreValue?: number;
+  label?: string;
+  sublabel?: string;
 }
 
 export default function ProgressRadialChart({
@@ -16,6 +18,8 @@ export default function ProgressRadialChart({
   showIcon = true,
   showScore = false,
   scoreValue = 0,
+  label = "Awareness",
+  sublabel = "Score",
 }: ProgressRadialChartProps) {
   // Calculate the end angle based on the percentage value
   // 0% = 90°, 100% = 450° (full circle)
@@ -81,11 +85,11 @@ export default function ProgressRadialChart({
           </div>
         ) : showScore ? (
           <div className="text-center">
-            <p className="text-xs text-[var(--medium-grey)] mb-1">Awareness</p>
-            <p className="text-lg font-bold text-white">
+            <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">{label}</p>
+            <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
               {scoreValue.toFixed(1)}
             </p>
-            <p className="text-xs text-[var(--medium-grey)]">Score</p>
+            <p className="text-xs text-[var(--dashboard-text-secondary)]">{sublabel}</p>
           </div>
         ) : null}
       </div>
