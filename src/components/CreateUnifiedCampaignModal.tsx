@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Users, Plus, Trash2, Mail, MessageSquare, Calendar, Zap, FileText } from "lucide-react";
+import { X, Users, Mail, MessageSquare, Calendar, Zap, FileText } from "lucide-react";
 import { useAuth, useUser } from "@clerk/nextjs";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ApiClient } from "@/lib/api";
@@ -13,18 +13,11 @@ interface CreateUnifiedCampaignModalProps {
   onSuccess: () => void;
 }
 
-interface ManualUser {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phoneNumber?: string;
-}
-
 interface User {
   _id: string;
   email: string;
   displayName: string;
+  phoneNumber?: string | null;
   role?: string;
 }
 
@@ -60,18 +53,16 @@ export default function CreateUnifiedCampaignModal({
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [emailEnabled, setEmailEnabled] = useState(false);
   
-  // Target users - UserSelector for Email, Manual for WhatsApp
+  // Organization (for system_admin: select org then load its users)
+  const [orgs, setOrgs] = useState<Array<{ _id: string; name: string }>>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  
+  // Target users - org users only; UserSelector for both Email and WhatsApp
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
+  const [selectedWhatsappUsers, setSelectedWhatsappUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  
-  // Manual users for WhatsApp
-  const [manualUsers, setManualUsers] = useState<ManualUser[]>([]);
-  const [showAddUserForm, setShowAddUserForm] = useState(false);
-  const [newUserFirstName, setNewUserFirstName] = useState("");
-  const [newUserLastName, setNewUserLastName] = useState("");
-  const [newUserEmail, setNewUserEmail] = useState("");
-  const [newUserPhone, setNewUserPhone] = useState("");
+  const [loadingOrgs, setLoadingOrgs] = useState(false);
   
   // WhatsApp config
   const [whatsappMessage, setWhatsappMessage] = useState("");
@@ -108,40 +99,56 @@ export default function CreateUnifiedCampaignModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, user, isOpen]);
 
-  // Fetch users from database based on role
+  // For system_admin: fetch organizations so they can select one (campaign page shows only org users)
   useEffect(() => {
-    if (isLoaded && user && isOpen && profile) {
-      const fetchUsers = async () => {
-        try {
-          setLoadingUsers(true);
-          const apiClient = new ApiClient(getToken);
-          
-          if (profile.role === "client_admin" && profile.orgId) {
-            // For client admins: fetch users from their organization
-            const data = await apiClient.getOrgUsers(profile.orgId, 1, 1000);
-            setAllUsers(data.users || []);
-          } else if (profile.role === "system_admin") {
-            // For system admins: fetch all users and filter for non_affiliated only
-            const data = await apiClient.getAllUsers(1, 1000);
-            const nonAffiliatedUsers = (data.users || []).filter(
-              (user: User) => user.role === "non_affiliated"
-            );
-            setAllUsers(nonAffiliatedUsers);
-          } else {
-            // Fallback: empty array for other roles
-            setAllUsers([]);
-          }
-        } catch (error) {
-          console.error("Error fetching users:", error);
-          setAllUsers([]);
-        } finally {
-          setLoadingUsers(false);
+    if (!isOpen || !profile || profile.role !== "system_admin") return;
+    const fetchOrgs = async () => {
+      try {
+        setLoadingOrgs(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getOrganizations();
+        setOrgs(data.organizations || data || []);
+        if ((data.organizations || data)?.length && !selectedOrgId) {
+          setSelectedOrgId((data.organizations || data)[0]._id);
         }
-      };
-      fetchUsers();
+      } catch (e) {
+        console.error("Error fetching organizations:", e);
+        setOrgs([]);
+      } finally {
+        setLoadingOrgs(false);
+      }
+    };
+    fetchOrgs();
+  }, [isOpen, profile?.role, getToken]);
+
+  // Effective org: client_admin uses their orgId; system_admin uses selected org
+  const effectiveOrgId =
+    profile?.role === "client_admin" && profile?.orgId
+      ? profile.orgId
+      : selectedOrgId;
+
+  // Fetch only users that belong to the selected organization
+  useEffect(() => {
+    if (!isLoaded || !user || !isOpen || !profile || !effectiveOrgId) {
+      if (profile?.role === "system_admin" && !effectiveOrgId) setAllUsers([]);
+      return;
     }
+    const fetchUsers = async () => {
+      try {
+        setLoadingUsers(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getOrgUsers(effectiveOrgId, 1, 1000);
+        setAllUsers(data.users || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setAllUsers([]);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, user, isOpen, profile]);
+  }, [isLoaded, user, isOpen, profile, effectiveOrgId]);
 
   // Fetch templates
   useEffect(() => {
@@ -249,6 +256,11 @@ export default function CreateUnifiedCampaignModal({
     setShowWhatsappTemplateSelector(false);
   };
 
+  // Org users with phone (for WhatsApp dropdown)
+  const orgUsersWithPhone = allUsers.filter(
+    (u) => u.phoneNumber && String(u.phoneNumber).trim()
+  );
+
   // Reset form
   const resetForm = () => {
     setStep(1);
@@ -258,12 +270,7 @@ export default function CreateUnifiedCampaignModal({
     setWhatsappEnabled(false);
     setEmailEnabled(false);
     setSelectedUsers([]);
-    setManualUsers([]);
-    setShowAddUserForm(false);
-    setNewUserFirstName("");
-    setNewUserLastName("");
-    setNewUserEmail("");
-    setNewUserPhone("");
+    setSelectedWhatsappUsers([]);
     setWhatsappMessage("");
     setWhatsappLandingPage("");
     setEmailSubject("");
@@ -274,29 +281,8 @@ export default function CreateUnifiedCampaignModal({
     setError(null);
     setProfile(null);
     setAllUsers([]);
-  };
-  
-  const handleAddUser = () => {
-    if (newUserFirstName.trim()) {
-      const newUser: ManualUser = {
-        id: `manual_${Date.now()}`,
-        firstName: newUserFirstName,
-        lastName: newUserLastName,
-        email: emailEnabled ? newUserEmail : undefined,
-        phoneNumber: whatsappEnabled ? newUserPhone : undefined,
-      };
-      
-      setManualUsers([...manualUsers, newUser]);
-      setNewUserFirstName("");
-      setNewUserLastName("");
-      setNewUserEmail("");
-      setNewUserPhone("");
-      setShowAddUserForm(false);
-    }
-  };
-  
-  const handleRemoveUser = (id: string) => {
-    setManualUsers(manualUsers.filter(user => user.id !== id));
+    setOrgs([]);
+    setSelectedOrgId(null);
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -313,14 +299,14 @@ export default function CreateUnifiedCampaignModal({
       return;
     }
     
-    // Validate users based on enabled channels
+    // Validate users based on enabled channels (org users only, from dropdowns)
     if (emailEnabled && selectedUsers.length === 0) {
       setError(t("Please select at least one user for email campaign"));
       return;
     }
     
-    if (whatsappEnabled && manualUsers.length === 0) {
-      setError(t("Please add at least one user for WhatsApp campaign"));
+    if (whatsappEnabled && selectedWhatsappUsers.length === 0) {
+      setError(t("Please select at least one user with a phone number for WhatsApp campaign"));
       return;
     }
     
@@ -346,6 +332,11 @@ export default function CreateUnifiedCampaignModal({
       
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
       
+      // Union of selected user IDs for both channels (backend resolves to org users with email/phone)
+      const emailIds = emailEnabled ? selectedUsers.map((u) => u._id) : [];
+      const whatsappIds = whatsappEnabled ? selectedWhatsappUsers.map((u) => u._id) : [];
+      const targetUserIds = [...new Set([...emailIds, ...whatsappIds])];
+
       const campaignData = {
         name,
         description,
@@ -362,13 +353,8 @@ export default function CreateUnifiedCampaignModal({
           senderEmail: HARDCODED_SENDER_EMAIL,
           landingPageUrl: emailLandingPage,
         } : { enabled: false },
-        targetUserIds: emailEnabled ? selectedUsers.map(user => user._id) : [],
-        manualUsers: whatsappEnabled ? manualUsers.map(user => ({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email || "",
-          phoneNumber: user.phoneNumber || "",
-        })) : [],
+        targetUserIds,
+        manualUsers: [],
       };
       
       const response = await fetch(`${API_BASE_URL}/campaigns`, {
@@ -413,8 +399,8 @@ export default function CreateUnifiedCampaignModal({
         setError(t("Please select at least one user for email campaign"));
         return;
       }
-      if (whatsappEnabled && manualUsers.length === 0) {
-        setError(t("Please add at least one user for WhatsApp campaign"));
+      if (whatsappEnabled && selectedWhatsappUsers.length === 0) {
+        setError(t("Please select at least one user with a phone number for WhatsApp campaign"));
         return;
       }
     }
@@ -564,9 +550,28 @@ export default function CreateUnifiedCampaignModal({
             </div>
           )}
           
-          {/* Step 2: Target Users */}
+          {/* Step 2: Target Users (org users only) */}
           {step === 2 && (
             <div className="space-y-6">
+              {profile?.role === "system_admin" && orgs.length > 1 && (
+                <div>
+                  <label className="block text-[var(--dashboard-text-primary)] dark:text-white mb-2 font-medium">
+                    {t("Organization")}
+                  </label>
+                  <select
+                    value={selectedOrgId || ""}
+                    onChange={(e) => setSelectedOrgId(e.target.value || null)}
+                    className="w-full px-4 py-3 bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue)] border border-[var(--dashboard-card-border)] dark:border-[var(--medium-grey)]/30 rounded-lg text-[var(--dashboard-text-primary)] dark:text-white"
+                  >
+                    {orgs.map((org) => (
+                      <option key={org._id} value={org._id}>
+                        {org.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
               {/* Email User Selection */}
               {emailEnabled && (
                 <div className="space-y-4">
@@ -576,7 +581,6 @@ export default function CreateUnifiedCampaignModal({
                       {t("Email Users")} ({selectedUsers.length} {t("selected")})
                     </h3>
                   </div>
-                  
                   <div>
                     <label className="block text-[var(--dashboard-text-primary)] dark:text-white mb-2 font-medium">
                       {t("Select Users for Email")} *
@@ -589,7 +593,6 @@ export default function CreateUnifiedCampaignModal({
                       disabled={loading}
                     />
                   </div>
-                  
                   {selectedUsers.length > 0 && (
                     <div className="mt-4">
                       <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-2">
@@ -616,126 +619,66 @@ export default function CreateUnifiedCampaignModal({
                   )}
                 </div>
               )}
-              
-              {/* WhatsApp User Selection */}
+
+              {/* WhatsApp User Selection (org users with phone number stored) */}
               {whatsappEnabled && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MessageSquare className="w-5 h-5 text-green-400" />
-                      <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
-                        {t("WhatsApp Users")} ({manualUsers.length})
-                      </h3>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddUserForm(!showAddUserForm)}
-                      className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors"
-                    >
-                      <Plus className="w-4 h-4" />
-                      {t("Add User")}
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-green-400" />
+                    <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
+                      {t("WhatsApp Users")} ({selectedWhatsappUsers.length} {t("selected")})
+                    </h3>
                   </div>
-                  
-                  {showAddUserForm && (
-                    <div className="p-4 bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg border border-gray-200 dark:border-[var(--medium-grey)]/30 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <input
-                          type="text"
-                          value={newUserFirstName}
-                          onChange={(e) => setNewUserFirstName(e.target.value)}
-                          className="px-3 py-2 bg-white dark:bg-[var(--navy-blue-light)] border border-gray-300 dark:border-[var(--medium-grey)]/30 rounded text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                          placeholder={t("First Name")}
-                        />
-                        <input
-                          type="text"
-                          value={newUserLastName}
-                          onChange={(e) => setNewUserLastName(e.target.value)}
-                          className="px-3 py-2 bg-white dark:bg-[var(--navy-blue-light)] border border-gray-300 dark:border-[var(--medium-grey)]/30 rounded text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                          placeholder={t("Last Name")}
-                        />
-                      </div>
-                      
-                      {emailEnabled && (
-                        <input
-                          type="email"
-                          value={newUserEmail}
-                          onChange={(e) => setNewUserEmail(e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-light)] border border-gray-300 dark:border-[var(--medium-grey)]/30 rounded text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                          placeholder={t("Email Address")}
-                        />
-                      )}
-                      
-                      {whatsappEnabled && (
-                        <input
-                          type="tel"
-                          value={newUserPhone}
-                          onChange={(e) => setNewUserPhone(e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-[var(--navy-blue-light)] border border-gray-300 dark:border-[var(--medium-grey)]/30 rounded text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:border-[var(--neon-blue)]"
-                          placeholder={t("Phone Number")}
-                        />
-                      )}
-                      
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={handleAddUser}
-                          className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                        >
-                          {t("Add")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowAddUserForm(false);
-                            setNewUserFirstName("");
-                            setNewUserLastName("");
-                            setNewUserEmail("");
-                            setNewUserPhone("");
-                          }}
-                          className="px-4 py-2 bg-gray-200 dark:bg-[var(--navy-blue-light)] text-[var(--dashboard-text-primary)] dark:text-white rounded hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)] transition-colors"
-                        >
-                          {t("Cancel")}
-                        </button>
+                  <div>
+                    <label className="block text-[var(--dashboard-text-primary)] dark:text-white mb-2 font-medium">
+                      {t("Select Users for WhatsApp")} *
+                    </label>
+                    <UserSelector
+                      selectedUsers={selectedWhatsappUsers}
+                      onUsersChange={setSelectedWhatsappUsers}
+                      allUsers={orgUsersWithPhone}
+                      isLoading={loadingUsers}
+                      disabled={loading}
+                    />
+                    <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
+                      {t("Only organization users with a phone number set are shown. Ask others to add their phone in Profile.")}
+                    </p>
+                  </div>
+                  {selectedWhatsappUsers.length > 0 && (
+                    <div className="mt-4">
+                      <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-2">
+                        {t("Selected users for WhatsApp campaign")}:
+                      </p>
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {selectedWhatsappUsers.map((user) => (
+                          <div
+                            key={user._id}
+                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg border border-gray-200 dark:border-[var(--medium-grey)]/20"
+                          >
+                            <div>
+                              <p className="text-[var(--dashboard-text-primary)] dark:text-white font-medium">
+                                {user.displayName || user.email}
+                              </p>
+                              <div className="flex gap-3 text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
+                                {user.email && (
+                                  <span className="flex items-center gap-1">
+                                    <Mail className="w-3 h-3" />
+                                    {user.email}
+                                  </span>
+                                )}
+                                {user.phoneNumber && (
+                                  <span className="flex items-center gap-1">
+                                    <MessageSquare className="w-3 h-3" />
+                                    {user.phoneNumber}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   )}
-                  
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {manualUsers.map((user) => (
-                      <div
-                        key={user.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-[var(--navy-blue)] rounded-lg border border-gray-200 dark:border-[var(--medium-grey)]/20"
-                      >
-                        <div>
-                          <p className="text-[var(--dashboard-text-primary)] dark:text-white font-medium">
-                            {user.firstName} {user.lastName}
-                          </p>
-                          <div className="flex gap-3 text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
-                            {user.email && (
-                              <span className="flex items-center gap-1">
-                                <Mail className="w-3 h-3" />
-                                {user.email}
-                              </span>
-                            )}
-                            {user.phoneNumber && (
-                              <span className="flex items-center gap-1">
-                                <MessageSquare className="w-3 h-3" />
-                                {user.phoneNumber}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveUser(user.id)}
-                          className="text-red-400 hover:text-red-300 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               )}
             </div>
