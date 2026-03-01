@@ -17,6 +17,8 @@ import LearningScoreBreakdown from "@/components/LearningScoreBreakdown";
 import VoicePhishingOverview from "@/components/VoicePhishingOverview";
 import CampaignPerformance from "@/components/CampaignPerformance";
 import { useTranslation } from "@/hooks/useTranslation";
+import { generateAnalyticsReport } from "@/utils/reportGenerator";
+import { Download } from "lucide-react";
 
 interface RemedialAssignmentItem {
   _id: string;
@@ -76,6 +78,7 @@ export default function DashboardPage() {
     usersAtRisk: number; // Percentage of users with learning score < 50
   } | null>(null);
   const [loadingSecurityAwareness, setLoadingSecurityAwareness] = useState(false);
+  const [generatingReport, setGeneratingReport] = useState(false);
   
   // Tab state for dashboard sections (client admin and system admin only)
   type DashboardTab = "all" | "learning-scores" | "learning-analytics" | "voice-phishing" | "campaign-performance";
@@ -701,6 +704,25 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                   </div>
+                  <button
+                    onClick={async () => {
+                      if (!profile) return;
+                      try {
+                        setGeneratingReport(true);
+                        await generateAnalyticsReport(getToken, profile);
+                      } catch (error) {
+                        console.error("Failed to generate report:", error);
+                        alert(t("Failed to generate report. Please try again."));
+                      } finally {
+                        setGeneratingReport(false);
+                      }
+                    }}
+                    disabled={generatingReport || !profile}
+                    className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="w-4 h-4" />
+                    {generatingReport ? t("Generating...") : t("Download Report")}
+                  </button>
                 </div>
               </div>
             </div>
