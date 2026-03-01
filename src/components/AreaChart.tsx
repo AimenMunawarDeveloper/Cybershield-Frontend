@@ -12,6 +12,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 
 interface AreaChartProps {
   userRole?: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
+  data?: Array<{ week: string; completions: number; cumulative: number }>;
+  loading?: boolean;
 }
 
 const getRoleBasedData = (role: string, t: any) => {
@@ -126,10 +128,45 @@ const getRoleBasedData = (role: string, t: any) => {
 
 export default function AreaChart({
   userRole = "non_affiliated",
+  data: propData,
+  loading = false,
 }: AreaChartProps) {
   const { t } = useTranslation();
-  const { data, currentLabel, previousLabel, yDomain, yTicks } =
-    getRoleBasedData(userRole, t);
+  
+  // Use provided data if available, otherwise fall back to static data
+  let chartData;
+  let currentLabel;
+  let previousLabel;
+  let yDomain;
+  let yTicks;
+  
+  if (propData && userRole === "affiliated") {
+    // Transform weekly data for affiliated users
+    const maxCompletions = Math.max(...propData.map(d => d.completions), 0);
+    const maxCumulative = Math.max(...propData.map(d => d.cumulative), 0);
+    const maxValue = Math.max(maxCompletions, maxCumulative, 1);
+    
+    chartData = propData.map((item) => ({
+      month: item.week,
+      current: item.completions, // Courses completed in this week
+      previous: item.cumulative, // Cumulative total up to this week
+    }));
+    
+    currentLabel = t("Courses Completed This Week");
+    previousLabel = t("Cumulative Total");
+    yDomain = [0, Math.max(maxValue + 2, 10)];
+    yTicks = Array.from({ length: Math.ceil((maxValue + 2) / 2) + 1 }, (_, i) => i * 2);
+  } else {
+    // Use static data for other roles
+    const staticData = getRoleBasedData(userRole, t);
+    chartData = staticData.data;
+    currentLabel = staticData.currentLabel;
+    previousLabel = staticData.previousLabel;
+    yDomain = staticData.yDomain;
+    yTicks = staticData.yTicks;
+  }
+  
+  const data = chartData;
   return (
     <div className="w-full h-80">
       <ResponsiveContainer width="100%" height="100%">

@@ -63,21 +63,13 @@ export default function LeaderboardsPage() {
         try {
           setLoading(true);
           const apiClient = new ApiClient(getToken);
-          const data = await apiClient.getAllUsers(1, 1000);
+          const data = await apiClient.getGlobalLeaderboard();
           
-          // Filter to only show non_affiliated users and sort by learningScore descending
-          const users = (data.users || [])
-            .filter((u: any) => u.role === "non_affiliated")
-            .map((u: any) => ({
-              position: 0, // Will be set after sorting
-              name: u.displayName || u.email,
-              email: u.email,
-              learningScore: u.learningScore || 0,
-            }))
-            .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.learningScore - a.learningScore)
-            .map((entry: LeaderboardEntry, index: number) => ({
-              ...entry,
-              position: index + 1,
+          const users = (data.leaderboard || []).map((entry: any) => ({
+            position: entry.position,
+            name: entry.name,
+            email: entry.email,
+            learningScore: entry.learningScore || 0,
             }));
           
           setGlobalLeaderboard(users);
@@ -95,39 +87,34 @@ export default function LeaderboardsPage() {
 
   // Fetch organization leaderboard
   useEffect(() => {
-    if (isLoaded && user && profile && profile.orgId) {
+    if (isLoaded && user && profile) {
+      // Only show org leaderboard for users with orgId (affiliated, client_admin)
+      // System admins and non-affiliated users don't have org leaderboards
+      if (!profile.orgId) {
+        setOrgLeaderboard([]);
+        return;
+      }
+
+      // Only fetch org leaderboard for affiliated users and client admins
+      if (profile.role !== "affiliated" && profile.role !== "client_admin") {
+        setOrgLeaderboard([]);
+        return;
+      }
+
       const fetchOrgLeaderboard = async () => {
         try {
           const apiClient = new ApiClient(getToken);
-          // Ensure orgId is a string
-          const orgIdString = typeof profile.orgId === 'string' ? profile.orgId : String(profile.orgId);
-          const data = await apiClient.getOrgUsers(orgIdString, 1, 1000);
+          const data = await apiClient.getOrganizationLeaderboard();
           
-          console.log("Org users data:", data); // Debug log
-          console.log("Total users fetched:", data.users?.length || 0); // Debug log
-          
-          // Filter out only system_admin (they don't belong to specific orgs)
-          // Show all users in the organization: affiliated users and client_admin (they belong to the org)
-          const allUsers = data.users || [];
-          const orgUsers = allUsers.filter((u: any) => u.role !== "system_admin");
-          
-          console.log("Org users (excluding system_admin):", orgUsers.length); // Debug log
-          console.log("User roles in org:", allUsers.map((u: any) => ({ email: u.email, role: u.role }))); // Debug log
-          
-          const users = orgUsers
-            .map((u: any) => ({
-              position: 0, // Will be set after sorting
-              name: u.displayName || u.email,
-              email: u.email,
-              learningScore: u.learningScore || 0,
-            }))
-            .sort((a: LeaderboardEntry, b: LeaderboardEntry) => b.learningScore - a.learningScore)
-            .map((entry: LeaderboardEntry, index: number) => ({
-              ...entry,
-              position: index + 1,
+          const users = (data.leaderboard || [])
+            .filter((u: any) => u.role !== "system_admin") // Exclude system_admin
+            .map((entry: any) => ({
+              position: entry.position,
+              name: entry.name,
+              email: entry.email,
+              learningScore: entry.learningScore || 0,
             }));
           
-          console.log("Filtered org leaderboard users:", users); // Debug log
           setOrgLeaderboard(users);
         } catch (error) {
           console.error("Error fetching organization leaderboard:", error);
@@ -136,10 +123,6 @@ export default function LeaderboardsPage() {
         }
       };
       fetchOrgLeaderboard();
-    } else if (profile && !profile.orgId) {
-      // User doesn't have an organization
-      console.log("User has no orgId, setting org leaderboard to empty");
-      setOrgLeaderboard([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, user, profile]);
@@ -276,7 +259,7 @@ export default function LeaderboardsPage() {
             </div>
           )}
 
-          {/* Tabs: Global | Organization */}
+          {/* Tabs: Global | Organization (only show org tab if user has access) */}
           <div className="flex justify-center mb-10">
             <div className="inline-flex gap-6 p-1.5 bg-gray-200 dark:bg-[var(--navy-blue)] rounded-xl border border-gray-300 dark:border-[var(--neon-blue)]/20">
             <button
@@ -291,6 +274,8 @@ export default function LeaderboardsPage() {
               <Globe className="w-5 h-5" />
               {t("Global")}
             </button>
+            {/* Only show organization tab for affiliated users and client admins */}
+            {(profile?.role === "affiliated" || profile?.role === "client_admin") && profile?.orgId && (
             <button
               type="button"
               onClick={() => setActiveTab("organization")}
@@ -303,6 +288,7 @@ export default function LeaderboardsPage() {
               <Building2 className="w-5 h-5" />
               {t("Organization")}
             </button>
+            )}
             </div>
           </div>
 
