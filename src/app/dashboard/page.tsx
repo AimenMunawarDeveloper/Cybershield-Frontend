@@ -18,7 +18,9 @@ import VoicePhishingOverview from "@/components/VoicePhishingOverview";
 import CampaignPerformance from "@/components/CampaignPerformance";
 import { useTranslation } from "@/hooks/useTranslation";
 import { generateAnalyticsReport } from "@/utils/reportGenerator";
-import { Download } from "lucide-react";
+import { Download, Award, Trophy, Medal, BookOpen, Shield, Mail, MessageSquare, Phone, GraduationCap } from "lucide-react";
+import { AVAILABLE_BADGES, getBadgeIcon } from "@/lib/courseBadges";
+import Link from "next/link";
 
 interface RemedialAssignmentItem {
   _id: string;
@@ -40,6 +42,7 @@ interface UserProfile {
   learningScore?: number;
   learningScores?: { email: number; whatsapp: number; lms: number; voice?: number };
   remedialAssignments?: RemedialAssignmentItem[];
+  badges?: Array<{ id: string; label: string }> | string[];
 }
 
 interface OrgSummary {
@@ -83,6 +86,30 @@ export default function DashboardPage() {
   // Tab state for dashboard sections (client admin and system admin only)
   type DashboardTab = "all" | "learning-scores" | "learning-analytics" | "voice-phishing" | "campaign-performance";
   const [activeTab, setActiveTab] = useState<DashboardTab>("all");
+  
+  // Graph filter state for affiliated users
+  type AffiliatedGraphTab = "all" | "badges-certificates" | "ranking" | "progress" | "courses-activity";
+  const [affiliatedGraphTab, setAffiliatedGraphTab] = useState<AffiliatedGraphTab>("all");
+  
+  // Graph filter state for non-affiliated users
+  type NonAffiliatedGraphTab = "all" | "badges-certificates" | "progress" | "courses-activity";
+  const [nonAffiliatedGraphTab, setNonAffiliatedGraphTab] = useState<NonAffiliatedGraphTab>("all");
+
+  // Affiliated user specific data
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [orgLeaderboard, setOrgLeaderboard] = useState<any[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [userLeaderboardPosition, setUserLeaderboardPosition] = useState<number | null>(null);
+  const [learningProgress, setLearningProgress] = useState<any[]>([]);
+  const [loadingLearningProgress, setLoadingLearningProgress] = useState(false);
+  const [coursesProgress, setCoursesProgress] = useState<any[]>([]);
+  const [loadingCoursesProgress, setLoadingCoursesProgress] = useState(false);
+  const [userActivity, setUserActivity] = useState<any[]>([]);
+  const [activityGrowthPercent, setActivityGrowthPercent] = useState<number>(0);
+  const [loadingUserActivity, setLoadingUserActivity] = useState(false);
 
   const fetchUserProfile = useCallback(async () => {
     try {
@@ -395,6 +422,58 @@ export default function DashboardPage() {
         "Delivery Rate",
         "Click Rate",
         "Report Rate",
+        
+        // Affiliated user dashboard
+        "Your Overall Security Awareness Score",
+        "Combined learning score across all categories",
+        "Overall Score",
+        "Category Scores",
+        "Your performance across different training categories",
+        "Email Security",
+        "WhatsApp Security",
+        "Training Completion",
+        "Voice Phishing",
+        "Complete courses to earn badges",
+        "Browse Courses",
+        "View All",
+        "Your Organization Ranking",
+        "View Full Leaderboard",
+        "out of",
+        "users",
+        "Top Performers",
+        "No leaderboard data available",
+        "more",
+        "st",
+        "nd",
+        "rd",
+        "th",
+        "courses this week",
+        "Courses Completed This Week",
+        "Cumulative Total",
+        "courses completed",
+        "score",
+        "Loading...",
+        "No courses available",
+        "Module completed",
+        "Module not completed",
+        "this month",
+        "No activity yet",
+        "badge earned",
+        "badges earned",
+        "certificate earned",
+        "certificates earned",
+        "No badges yet",
+        "No certificates yet",
+        "Top Performer!",
+        "Excellent!",
+        "Great Job!",
+        "Complete courses to see your ranking",
+        "All",
+        "Badges & Certificates",
+        "Ranking",
+        "Progress",
+        "Courses & Activity",
+        "Select which graphs to display",
       ];
 
       await preTranslate(staticStrings);
@@ -412,6 +491,164 @@ export default function DashboardPage() {
       fetchUserProfile();
     }
   }, [isLoaded, user, router, fetchUserProfile]);
+
+  // Fetch certificates for affiliated and non-affiliated users
+  useEffect(() => {
+    if (!profile || (profile.role !== "affiliated" && profile.role !== "non_affiliated") || !getToken) return;
+    
+    const fetchCertificates = async () => {
+      try {
+        setLoadingCertificates(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getUserCertificates();
+        setCertificates(data.certificates || []);
+      } catch (error) {
+        console.error("Failed to fetch certificates:", error);
+        setCertificates([]);
+      } finally {
+        setLoadingCertificates(false);
+      }
+    };
+
+    fetchCertificates();
+  }, [profile?.role, getToken]);
+
+  // Fetch courses for affiliated users (to calculate completion)
+  useEffect(() => {
+    if (!profile || profile.role !== "affiliated" || !getToken) return;
+    
+    const fetchCourses = async () => {
+      try {
+        setLoadingCourses(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getCourses({ page: 1, limit: 1000 });
+        setCourses(data.courses || []);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+        setCourses([]);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+
+    fetchCourses();
+  }, [profile?.role, getToken]);
+
+  // Fetch organization leaderboard for affiliated users
+  useEffect(() => {
+    if (!profile || profile.role !== "affiliated" || !profile.orgId || !getToken) {
+      setOrgLeaderboard([]);
+      setUserLeaderboardPosition(null);
+      return;
+    }
+    
+    const fetchLeaderboard = async () => {
+      try {
+        setLoadingLeaderboard(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getOrganizationLeaderboard();
+        
+        const leaderboard = (data.leaderboard || [])
+          .filter((u: any) => u.role !== "system_admin") // Exclude system_admin
+          .map((entry: any) => ({
+            _id: entry._id,
+            position: entry.position,
+            name: entry.name,
+            email: entry.email,
+            learningScore: entry.learningScore || 0,
+          }));
+        
+        setOrgLeaderboard(leaderboard);
+        
+        // Find user's position
+        const userPosition = leaderboard.findIndex((u: any) => u._id === profile._id);
+        setUserLeaderboardPosition(userPosition >= 0 ? leaderboard[userPosition].position : null);
+      } catch (error) {
+        console.error("Failed to fetch leaderboard:", error);
+        setOrgLeaderboard([]);
+        setUserLeaderboardPosition(null);
+      } finally {
+        setLoadingLeaderboard(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, [profile?.role, profile?.orgId, profile?._id, getToken]);
+
+  // Fetch learning progress for affiliated and non-affiliated users
+  useEffect(() => {
+    if (!profile || (profile.role !== "affiliated" && profile.role !== "non_affiliated") || !getToken) {
+      setLearningProgress([]);
+      return;
+    }
+    
+    const fetchLearningProgress = async () => {
+      try {
+        setLoadingLearningProgress(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getLearningProgress();
+        setLearningProgress(data.data || []);
+      } catch (error) {
+        console.error("Failed to fetch learning progress:", error);
+        setLearningProgress([]);
+      } finally {
+        setLoadingLearningProgress(false);
+      }
+    };
+
+    fetchLearningProgress();
+  }, [profile?.role, getToken]);
+
+  // Fetch courses progress for affiliated and non-affiliated users
+  useEffect(() => {
+    if (!profile || (profile.role !== "affiliated" && profile.role !== "non_affiliated") || !getToken) {
+      setCoursesProgress([]);
+      return;
+    }
+    
+    const fetchCoursesProgress = async () => {
+      try {
+        setLoadingCoursesProgress(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getCoursesProgress();
+        setCoursesProgress(data.courses || []);
+      } catch (error) {
+        console.error("Failed to fetch courses progress:", error);
+        setCoursesProgress([]);
+      } finally {
+        setLoadingCoursesProgress(false);
+      }
+    };
+
+    fetchCoursesProgress();
+  }, [profile?.role, getToken]);
+
+  // Fetch user activity for affiliated and non-affiliated users
+  useEffect(() => {
+    if (!profile || (profile.role !== "affiliated" && profile.role !== "non_affiliated") || !getToken) {
+      setUserActivity([]);
+      setActivityGrowthPercent(0);
+      return;
+    }
+    
+    const fetchUserActivity = async () => {
+      try {
+        setLoadingUserActivity(true);
+        const apiClient = new ApiClient(getToken);
+        const data = await apiClient.getUserActivity();
+        setUserActivity(data.activities || []);
+        setActivityGrowthPercent(data.growthPercent || 0);
+      } catch (error) {
+        console.error("Failed to fetch user activity:", error);
+        setUserActivity([]);
+        setActivityGrowthPercent(0);
+      } finally {
+        setLoadingUserActivity(false);
+      }
+    };
+
+    fetchUserActivity();
+  }, [profile?.role, getToken]);
 
   const getRoleBasedMetrics = () => {
     console.log("getRoleBasedMetrics called with profile:", profile);
@@ -477,30 +714,45 @@ export default function DashboardPage() {
           },
         };
       case "affiliated":
+        // Calculate courses completed from LMS score or course count
+        const totalCourses = courses.length;
+        const lmsScore = typeof profile.learningScores?.lms === "number" ? profile.learningScores.lms : 0;
+        const completedCourses = Math.round(lmsScore * totalCourses);
+        const coursesCompletedText = totalCourses > 0 ? `${completedCourses}/${totalCourses}` : "0/0";
+        
+        // Get certificate count
+        const certificateCount = certificates.length;
+        
+        // Get badge count
+        const badgeCount = Array.isArray(profile.badges) ? profile.badges.length : 0;
+        
+        // Calculate overall learning score
+        const overallScore = typeof profile.learningScore === "number" ? profile.learningScore.toFixed(1) : "0.0";
+        
         return {
           metric1: {
-            label: t("Courses Completed"),
-            value: "8/15",
-            change: "+2",
-            icon: "book",
-          },
-          metric2: {
-            label: t("Learning scores (Email / WhatsApp / Voice)"),
-            value: (profile.learningScores ? [profile.learningScores.email, profile.learningScores.whatsapp, profile.learningScores.voice ?? 0] : [0, 0, 0]).map((s) => (typeof s === "number" ? s.toFixed(2) : "0.00")).join(" / "),
-            change: "E / W / V",
+            label: t("Overall Learning Score"),
+            value: `${overallScore}/100`,
+            change: "0–100",
             icon: "shield-check",
           },
-          metric3: {
-            label: t("Learning score (LMS)"),
-            value: typeof profile.learningScores?.lms === "number" ? profile.learningScores.lms.toFixed(2) : "0.00",
-            change: "0–1",
+          metric2: {
+            label: t("Courses Completed"),
+            value: coursesCompletedText,
+            change: loadingCourses ? "" : `${totalCourses > 0 ? "+" : ""}${totalCourses}`,
             icon: "book",
           },
-          metric4: {
-            label: t("Certificates"),
-            value: "5",
-            change: "+1",
+          metric3: {
+            label: t("Certificates Earned"),
+            value: String(certificateCount),
+            change: loadingCertificates ? "" : certificateCount > 0 ? "+" : "",
             icon: "award",
+          },
+          metric4: {
+            label: t("Badges Earned"),
+            value: String(badgeCount),
+            change: badgeCount > 0 ? "+" : "",
+            icon: "medal",
           },
         };
       case "non_affiliated":
@@ -729,6 +981,87 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* View Selector Dropdown for Affiliated and Non-Affiliated Users - At the top */}
+        {(profile?.role === "affiliated" || profile?.role === "non_affiliated") && (
+          <div className="relative z-10">
+            <div className="dashboard-card rounded-lg p-4 border border-[var(--sidebar-border)]">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-[var(--neon-blue)]/15 rounded-lg flex items-center justify-center">
+                    <svg
+                      className="w-4 h-4 text-[var(--neon-blue)]"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
+                      {t("Dashboard View")}
+                    </h3>
+                    <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                      {t("Select which graphs to display")}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <label className="text-xs text-[var(--dashboard-text-secondary)] hidden sm:block whitespace-nowrap">
+                    {t("View")}:
+                  </label>
+                  <div className="relative">
+                    {profile?.role === "affiliated" ? (
+                      <select
+                        value={affiliatedGraphTab}
+                        onChange={(e) => setAffiliatedGraphTab(e.target.value as AffiliatedGraphTab)}
+                        className="appearance-none bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 cursor-pointer transition-all min-w-[180px] hover:border-[var(--neon-blue)]/40"
+                      >
+                        <option value="all">{t("All")}</option>
+                        <option value="badges-certificates">{t("Badges & Certificates")}</option>
+                        <option value="ranking">{t("Ranking")}</option>
+                        <option value="progress">{t("Progress")}</option>
+                        <option value="courses-activity">{t("Courses & Activity")}</option>
+                      </select>
+                    ) : (
+                      <select
+                        value={nonAffiliatedGraphTab}
+                        onChange={(e) => setNonAffiliatedGraphTab(e.target.value as NonAffiliatedGraphTab)}
+                        className="appearance-none bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 cursor-pointer transition-all min-w-[180px] hover:border-[var(--neon-blue)]/40"
+                      >
+                        <option value="all">{t("All")}</option>
+                        <option value="badges-certificates">{t("Badges & Certificates")}</option>
+                        <option value="progress">{t("Progress")}</option>
+                        <option value="courses-activity">{t("Courses & Activity")}</option>
+                      </select>
+                    )}
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-2.5 pointer-events-none">
+                      <svg
+                        className="w-4 h-4 text-[var(--dashboard-text-secondary)]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Top Row Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
           {/* Metric 1 Card */}
@@ -907,6 +1240,27 @@ export default function DashboardPage() {
                 <p className="text-sm text-[var(--dashboard-text-secondary)] mb-6">
                   {welcomeMsg?.subtitle}
                 </p>
+                {(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? (
+                  <Link
+                    href="/dashboard/training-modules"
+                    className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:opacity-80 transition-colors"
+                  >
+                    <span className="text-sm">{welcomeMsg?.action}</span>
+                    <svg
+                      className="w-4 h-4 ml-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5l7 7-7 7"
+                      />
+                    </svg>
+                  </Link>
+                ) : (
                 <div className="flex items-center text-[var(--neon-blue)] cursor-pointer hover:opacity-80 transition-colors">
                   <span className="text-sm">{welcomeMsg?.action}</span>
                   <svg
@@ -923,66 +1277,83 @@ export default function DashboardPage() {
                     />
                   </svg>
                 </div>
+                )}
               </div>
             </div>
           </div>
 
           {/* Training Completion Rate Component */}
-          <div className="lg:col-span-1">
-            <div className="dashboard-card rounded-lg p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
-                  {profile?.role === "system_admin" ||
-                  profile?.role === "client_admin"
-                    ? t("Training Completion")
-                    : t("Your Progress")}
-                </h3>
-                <p className="text-xs text-[var(--dashboard-text-secondary)]">
-                  {profile?.role === "system_admin" ||
-                  profile?.role === "client_admin"
-                    ? t("Average across users")
-                    : t("Overall completion rate")}
-                </p>
-              </div>
-              <div className="flex flex-col items-center mb-6">
-                {/* Progress Radial Chart */}
-                <ProgressRadialChart
-                  value={
-                    profile?.role === "client_admin" || profile?.role === "system_admin"
-                      ? trainingCompletion ?? 0
+          {/* Show for admins always, or for affiliated users always (should always be visible) */}
+          {((profile?.role === "client_admin" || profile?.role === "system_admin") ||
+            profile?.role === "affiliated" ||
+            profile?.role === "non_affiliated") && (
+            <div className="lg:col-span-1">
+              <div className="dashboard-card rounded-lg p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+                    {profile?.role === "system_admin" ||
+                    profile?.role === "client_admin"
+                      ? t("Training Completion")
                       : profile?.role === "affiliated"
-                      ? 73
-                      : profile?.role === "non_affiliated"
-                      ? 45
-                      : 85
-                  }
-                  size={160}
-                  showIcon={true}
-                />
-              </div>
-              {/* Darker background box for percentage */}
-              <div className="bg-[var(--navy-blue)] rounded-lg p-4 transition-colors">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-[var(--dashboard-text-primary)]">
-                    {profile?.role === "client_admin" || profile?.role === "system_admin"
-                      ? trainingCompletion !== null
-                        ? `${trainingCompletion}%`
-                        : "—"
-                      : profile?.role === "affiliated"
-                      ? "73%"
-                      : profile?.role === "non_affiliated"
-                      ? "45%"
-                      : "85%"}
-                  </p>
+                      ? t("Your Overall Security Awareness Score")
+                      : t("Your Progress")}
+                  </h3>
                   <p className="text-xs text-[var(--dashboard-text-secondary)]">
-                    {t("Courses completed")}
+                    {profile?.role === "system_admin" ||
+                    profile?.role === "client_admin"
+                      ? t("Average across users")
+                      : profile?.role === "affiliated"
+                      ? t("Combined learning score across all categories")
+                      : t("Overall completion rate")}
                   </p>
+                </div>
+                <div className="flex flex-col items-center mb-6">
+                  {/* Progress Radial Chart */}
+                  <ProgressRadialChart
+                    value={
+                      profile?.role === "client_admin" || profile?.role === "system_admin"
+                        ? trainingCompletion ?? 0
+                        : profile?.role === "affiliated"
+                        ? typeof profile?.learningScores?.lms === "number"
+                          ? Math.round(profile.learningScores.lms * 100)
+                          : 0
+                        : profile?.role === "non_affiliated"
+                        ? 45
+                        : 85
+                    }
+                    size={160}
+                    showIcon={true}
+                  />
+                </div>
+                {/* Darker background box for percentage */}
+                <div className="bg-[var(--navy-blue)] rounded-lg p-4 transition-colors">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold text-[var(--dashboard-text-primary)]">
+                      {profile?.role === "client_admin" || profile?.role === "system_admin"
+                        ? trainingCompletion !== null
+                          ? `${trainingCompletion}%`
+                          : "—"
+                        : profile?.role === "affiliated"
+                        ? typeof profile?.learningScores?.lms === "number"
+                          ? `${Math.round(profile.learningScores.lms * 100)}%`
+                          : "0%"
+                        : profile?.role === "non_affiliated"
+                        ? "45%"
+                        : "85%"}
+                    </p>
+                    <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                      {profile?.role === "affiliated"
+                        ? t("Training Completion")
+                        : t("Courses completed")}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Security Awareness Component */}
+          {/* Security Awareness Component - Only for admins */}
+          {profile?.role === "client_admin" || profile?.role === "system_admin" ? (
           <div className="lg:col-span-1">
             <div className="dashboard-card rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
@@ -1012,40 +1383,24 @@ export default function DashboardPage() {
                   {/* Average Certificates Card */}
                   <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
                     <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
-                      {profile?.role === "system_admin" ||
-                      profile?.role === "client_admin"
-                        ? t("Avg Certificates")
-                        : t("Tests Passed")}
+                        {t("Avg Certificates")}
                     </p>
                     <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
-                      {profile?.role === "client_admin" || profile?.role === "system_admin"
-                        ? securityAwareness?.avgCertificates !== undefined
+                        {securityAwareness?.avgCertificates !== undefined
                           ? securityAwareness.avgCertificates.toFixed(1)
-                          : "0.0"
-                        : profile?.role === "affiliated"
-                        ? "12/15"
-                        : "8/10"}
+                          : "0.0"}
                     </p>
                   </div>
 
                   {/* Badges Card */}
                   <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
                     <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
-                      {profile?.role === "system_admin" ||
-                      profile?.role === "client_admin"
-                        ? t("Avg Badges")
-                        : t("Your Badges")}
+                        {t("Avg Badges")}
                     </p>
                     <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
-                      {profile?.role === "client_admin" || profile?.role === "system_admin"
-                        ? securityAwareness?.avgBadges !== undefined
+                        {securityAwareness?.avgBadges !== undefined
                           ? securityAwareness.avgBadges.toFixed(1)
-                          : "0.0"
-                        : profile?.role === "affiliated"
-                        ? "8"
-                        : profile?.role === "non_affiliated"
-                        ? "4"
-                        : "6.4"}
+                          : "0.0"}
                     </p>
                   </div>
                 </div>
@@ -1053,27 +1408,11 @@ export default function DashboardPage() {
                 {/* Right Side - Users at Risk */}
                 <div className="flex items-center justify-center">
                   <ProgressRadialChart
-                    value={
-                      profile?.role === "client_admin" || profile?.role === "system_admin"
-                        ? securityAwareness?.usersAtRisk || 0
-                        : profile?.role === "affiliated"
-                        ? 18
-                        : profile?.role === "non_affiliated"
-                        ? 35
-                        : 22
-                    }
+                      value={securityAwareness?.usersAtRisk || 0}
                     size={128}
                     showIcon={false}
                     showScore={true}
-                    scoreValue={
-                      profile?.role === "client_admin" || profile?.role === "system_admin"
-                        ? securityAwareness?.usersAtRisk || 0
-                        : profile?.role === "affiliated"
-                        ? 18
-                        : profile?.role === "non_affiliated"
-                        ? 35
-                        : 22
-                    }
+                      scoreValue={securityAwareness?.usersAtRisk || 0}
                     label={t("Users at Risk")}
                     sublabel={t("Score < 50")}
                   />
@@ -1081,6 +1420,154 @@ export default function DashboardPage() {
               </div>
             </div>
           </div>
+          ) : (profile?.role === "affiliated" || profile?.role === "non_affiliated") ? (
+            /* Learning Scores Breakdown for Affiliated and Non-Affiliated Users - Always show (should always be visible) */
+            <div className="lg:col-span-1">
+              <div className="dashboard-card rounded-lg p-6">
+                <div className="mb-4">
+                  <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+                    {t("Category Scores")}
+                  </h3>
+                  <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                    {t("Your performance across different training categories")}
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Email Security Score */}
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Mail className="w-4 h-4 text-[var(--neon-blue)]" />
+                      <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                        {t("Email Security")}
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-[var(--dashboard-text-primary)]">
+                      {typeof profile?.learningScores?.email === "number"
+                        ? `${Math.round(profile.learningScores.email * 100)}%`
+                        : "0%"}
+                    </p>
+                    <div className="mt-2 h-2 bg-[var(--navy-blue)] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[var(--neon-blue)] transition-all"
+                        style={{
+                          width: `${typeof profile?.learningScores?.email === "number" ? profile.learningScores.email * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* WhatsApp Security Score */}
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageSquare className="w-4 h-4 text-[var(--neon-blue)]" />
+                      <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                        {t("WhatsApp Security")}
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-[var(--dashboard-text-primary)]">
+                      {typeof profile?.learningScores?.whatsapp === "number"
+                        ? `${Math.round(profile.learningScores.whatsapp * 100)}%`
+                        : "0%"}
+                    </p>
+                    <div className="mt-2 h-2 bg-[var(--navy-blue)] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[var(--neon-blue)] transition-all"
+                        style={{
+                          width: `${typeof profile?.learningScores?.whatsapp === "number" ? profile.learningScores.whatsapp * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Training Completion (LMS) */}
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <GraduationCap className="w-4 h-4 text-[var(--neon-blue)]" />
+                      <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                        {t("Training Completion")}
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-[var(--dashboard-text-primary)]">
+                      {typeof profile?.learningScores?.lms === "number"
+                        ? `${Math.round(profile.learningScores.lms * 100)}%`
+                        : "0%"}
+                    </p>
+                    <div className="mt-2 h-2 bg-[var(--navy-blue)] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[var(--neon-blue)] transition-all"
+                        style={{
+                          width: `${typeof profile?.learningScores?.lms === "number" ? profile.learningScores.lms * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Voice Phishing Score */}
+                  <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Phone className="w-4 h-4 text-[var(--neon-blue)]" />
+                      <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                        {t("Voice Phishing")}
+                      </p>
+                    </div>
+                    <p className="text-xl font-bold text-[var(--dashboard-text-primary)]">
+                      {typeof profile?.learningScores?.voice === "number"
+                        ? `${Math.round(profile.learningScores.voice * 100)}%`
+                        : "0%"}
+                    </p>
+                    <div className="mt-2 h-2 bg-[var(--navy-blue)] rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[var(--neon-blue)] transition-all"
+                        style={{
+                          width: `${typeof profile?.learningScores?.voice === "number" ? profile.learningScores.voice * 100 : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Non-affiliated users keep the old Security Awareness component */
+            <div className="lg:col-span-1">
+              <div className="dashboard-card rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+                    {t("Security Awareness")}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
+                      <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
+                        {t("Tests Passed")}
+                      </p>
+                      <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">
+                        8/10
+                      </p>
+                    </div>
+                    <div className="bg-[var(--navy-blue-lighter)] rounded-lg p-4 transition-colors">
+                      <p className="text-xs text-[var(--dashboard-text-secondary)] mb-1">
+                        {t("Your Badges")}
+                      </p>
+                      <p className="text-lg font-bold text-[var(--dashboard-text-primary)]">4</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <ProgressRadialChart
+                      value={35}
+                      size={128}
+                      showIcon={false}
+                      showScore={true}
+                      scoreValue={35}
+                      label={t("Users at Risk")}
+                      sublabel={t("Score < 50")}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Remedial / Assigned courses (below progress radial; learners only) */}
@@ -1096,6 +1583,332 @@ export default function DashboardPage() {
                 maxDisplay={5}
               />
             </div>
+          )}
+
+        {/* Affiliated and Non-Affiliated User Specific Sections */}
+        {(profile?.role === "affiliated" || profile?.role === "non_affiliated") && (
+          <>
+            {/* Badges and Certificates Section */}
+            {((profile?.role === "affiliated" && (affiliatedGraphTab === "all" || affiliatedGraphTab === "badges-certificates")) ||
+              (profile?.role === "non_affiliated" && (nonAffiliatedGraphTab === "all" || nonAffiliatedGraphTab === "badges-certificates"))) && (
+            <div className="mt-8 relative z-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Badges Section */}
+                <div className="dashboard-card rounded-lg p-6 border border-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)]/30 transition-all">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] mb-1">
+                        {t("Your Badges")}
+                      </h3>
+                      {Array.isArray(profile.badges) && profile.badges.length > 0 && (
+                        <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                          {profile.badges.length} {profile.badges.length === 1 ? t("badge earned") : t("badges earned")}
+                        </p>
+                      )}
+                    </div>
+                    {Array.isArray(profile.badges) && profile.badges.length > 0 && (
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 flex items-center justify-center">
+                        <Medal className="w-5 h-5 text-[var(--neon-blue)]" />
+                      </div>
+                    )}
+                  </div>
+                  {Array.isArray(profile.badges) && profile.badges.length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                      {profile.badges.map((badge, index) => {
+                        // Handle both badge objects and badge IDs
+                        const badgeId = typeof badge === "string" ? badge : badge.id;
+                        const badgeLabel = typeof badge === "string" 
+                          ? AVAILABLE_BADGES.find(b => b.id === badgeId)?.label || badgeId
+                          : badge.label;
+                        const BadgeIcon = getBadgeIcon(badgeId);
+                        
+                        if (!BadgeIcon) return null;
+                        
+                        return (
+                          <div
+                            key={index}
+                            className="group flex flex-col items-center gap-2 p-4 bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)]/50 rounded-xl border border-[var(--navy-blue)] hover:border-[var(--neon-blue)]/50 hover:shadow-lg hover:shadow-[var(--neon-blue)]/10 transition-all cursor-pointer"
+                            title={badgeLabel}
+                          >
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                              <BadgeIcon className="w-6 h-6 text-[var(--neon-blue)] group-hover:text-[var(--electric-blue)] transition-colors" />
+                            </div>
+                            <p className="text-xs font-medium text-[var(--dashboard-text-primary)] text-center line-clamp-2 group-hover:text-[var(--neon-blue)] transition-colors">
+                              {badgeLabel}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] mx-auto mb-4 flex items-center justify-center">
+                        <Medal className="w-8 h-8 text-[var(--dashboard-text-secondary)] opacity-50" />
+                      </div>
+                      <p className="text-sm font-medium text-[var(--dashboard-text-primary)] mb-2">
+                        {t("No badges yet")}
+                      </p>
+                      <p className="text-xs text-[var(--dashboard-text-secondary)] mb-4">
+                        {t("Complete courses to earn badges")}
+                      </p>
+                      <Link
+                        href="/dashboard/training-modules"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--neon-blue)] bg-[var(--neon-blue)]/10 rounded-lg hover:bg-[var(--neon-blue)]/20 transition-colors"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        {t("Browse Courses")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Certificates Section */}
+                <div className="dashboard-card rounded-lg p-6 border border-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)]/30 transition-all">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] mb-1">
+                        {t("Your Certificates")}
+                      </h3>
+                      {certificates.length > 0 && (
+                        <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                          {certificates.length} {certificates.length === 1 ? t("certificate earned") : t("certificates earned")}
+                        </p>
+                      )}
+                    </div>
+                    {certificates.length > 0 && (
+                      <Link
+                        href="/dashboard/certificates"
+                        className="text-sm font-medium text-[var(--neon-blue)] hover:text-[var(--electric-blue)] transition-colors flex items-center gap-1"
+                      >
+                        {t("View All")}
+                        <span>→</span>
+                      </Link>
+                    )}
+                  </div>
+                  {loadingCertificates ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+                    </div>
+                  ) : certificates.length > 0 ? (
+                    <div className="space-y-3">
+                      {certificates.slice(0, 3).map((cert) => (
+                        <Link
+                          key={cert._id}
+                          href="/dashboard/certificates"
+                          className="group flex items-center gap-4 p-4 bg-gradient-to-r from-[var(--navy-blue-lighter)] to-[var(--navy-blue)]/30 rounded-xl border border-[var(--navy-blue)] hover:border-[var(--neon-blue)]/50 hover:shadow-lg hover:shadow-[var(--neon-blue)]/10 transition-all"
+                        >
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                            <Award className="w-7 h-7 text-[var(--neon-blue)] group-hover:text-[var(--electric-blue)] transition-colors" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[var(--dashboard-text-primary)] truncate group-hover:text-[var(--neon-blue)] transition-colors">
+                              {cert.courseTitle || cert.course?.courseTitle || t("Certificate")}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                                {new Date(cert.issuedDate).toLocaleDateString('en-US', { 
+                                  month: 'short', 
+                                  day: 'numeric', 
+                                  year: 'numeric' 
+                                })}
+                              </p>
+                              {cert.certificateNumber && (
+                                <>
+                                  <span className="text-[var(--dashboard-text-secondary)]">•</span>
+                                  <p className="text-xs text-[var(--dashboard-text-secondary)] font-mono">
+                                    {cert.certificateNumber.slice(-8)}
+                                  </p>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span className="text-[var(--neon-blue)]">→</span>
+                          </div>
+                        </Link>
+                      ))}
+                      {certificates.length > 3 && (
+                        <Link
+                          href="/dashboard/certificates"
+                          className="block text-center py-3 text-sm font-medium text-[var(--neon-blue)] bg-[var(--neon-blue)]/10 rounded-lg hover:bg-[var(--neon-blue)]/20 transition-colors"
+                        >
+                          {t("View")} {certificates.length - 3} {t("more")} {certificates.length - 3 === 1 ? t("certificate") : t("certificates")}
+                        </Link>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] mx-auto mb-4 flex items-center justify-center">
+                        <Trophy className="w-8 h-8 text-[var(--dashboard-text-secondary)] opacity-50" />
+                      </div>
+                      <p className="text-sm font-medium text-[var(--dashboard-text-primary)] mb-2">
+                        {t("No certificates yet")}
+                      </p>
+                      <p className="text-xs text-[var(--dashboard-text-secondary)] mb-4">
+                        {t("Complete courses to earn certificates")}
+                      </p>
+                      <Link
+                        href="/dashboard/training-modules"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--neon-blue)] bg-[var(--neon-blue)]/10 rounded-lg hover:bg-[var(--neon-blue)]/20 transition-colors"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        {t("Browse Courses")}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* Organization Leaderboard Position */}
+            {profile.orgId && (affiliatedGraphTab === "all" || affiliatedGraphTab === "ranking") && (
+              <div className="mt-8 relative z-10">
+                <div className="dashboard-card rounded-lg p-6 border border-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)]/30 transition-all">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+                      {t("Your Organization Ranking")}
+                    </h3>
+                    <Link
+                      href="/dashboard/leaderboards"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--neon-blue)] bg-[var(--neon-blue)]/10 rounded-lg hover:bg-[var(--neon-blue)]/20 transition-colors"
+                    >
+                      {t("View Full Leaderboard")}
+                      <span>→</span>
+                    </Link>
+                  </div>
+                  {loadingLeaderboard ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
+                    </div>
+                  ) : userLeaderboardPosition !== null && orgLeaderboard.length > 0 ? (
+                    <div className="space-y-6">
+                      {/* Your Rank Display */}
+                      <div className="text-center py-6 bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)]/30 rounded-xl border border-[var(--navy-blue)]">
+                        <div className="flex items-center justify-center gap-3 mb-3">
+                          {userLeaderboardPosition <= 3 && (
+                            <Medal className={`w-8 h-8 ${
+                              userLeaderboardPosition === 1 
+                                ? "text-yellow-500" 
+                                : userLeaderboardPosition === 2 
+                                ? "text-gray-400" 
+                                : "text-amber-600"
+                            }`} />
+                          )}
+                          <p className="text-5xl font-bold bg-gradient-to-r from-[var(--neon-blue)] to-[var(--electric-blue)] bg-clip-text text-transparent">
+                            {userLeaderboardPosition}
+                            <span className="text-2xl text-[var(--dashboard-text-secondary)] font-normal ml-1">
+                              {userLeaderboardPosition === 1
+                                ? t("st")
+                                : userLeaderboardPosition === 2
+                                ? t("nd")
+                                : userLeaderboardPosition === 3
+                                ? t("rd")
+                                : t("th")}
+                            </span>
+                          </p>
+                        </div>
+                        <p className="text-sm text-[var(--dashboard-text-secondary)]">
+                          {t("out of")} <span className="font-semibold text-[var(--dashboard-text-primary)]">{orgLeaderboard.length}</span> {t("users")}
+                        </p>
+                        {userLeaderboardPosition <= 3 && (
+                          <p className="text-xs text-[var(--success-green)] mt-2 font-medium">
+                            {userLeaderboardPosition === 1 
+                              ? "🏆 " + t("Top Performer!")
+                              : userLeaderboardPosition === 2
+                              ? "🥈 " + t("Excellent!")
+                              : "🥉 " + t("Great Job!")}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Top Performers */}
+                      {orgLeaderboard.length > 1 && (
+                        <div className="pt-4 border-t border-[var(--sidebar-border)]">
+                          <div className="flex items-center justify-between mb-4">
+                            <p className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
+                              {t("Top Performers")}
+                            </p>
+                            <span className="text-xs text-[var(--dashboard-text-secondary)]">
+                              {orgLeaderboard.length > 3 && `+${orgLeaderboard.length - 3} ${t("more")}`}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            {orgLeaderboard.slice(0, 3).map((entry: any) => {
+                              const isCurrentUser = entry._id === profile._id;
+                              const getRankIcon = (position: number) => {
+                                if (position === 1) return "🥇";
+                                if (position === 2) return "🥈";
+                                if (position === 3) return "🥉";
+                                return null;
+                              };
+                              
+                              return (
+                                <div
+                                  key={entry._id}
+                                  className={`flex items-center justify-between p-3 rounded-xl border transition-all ${
+                                    isCurrentUser
+                                      ? "bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 border-[var(--neon-blue)]/50 shadow-lg shadow-[var(--neon-blue)]/10"
+                                      : "bg-[var(--navy-blue-lighter)] border-[var(--navy-blue)] hover:border-[var(--neon-blue)]/30"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--neon-blue)]/20 to-[var(--electric-blue)]/20 flex items-center justify-center flex-shrink-0">
+                                      {getRankIcon(entry.position) ? (
+                                        <span className="text-lg">{getRankIcon(entry.position)}</span>
+                                      ) : (
+                                        <span className="text-xs font-bold text-[var(--neon-blue)]">
+                                          {entry.position}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div>
+                                      <span className={`text-sm font-medium ${
+                                        isCurrentUser 
+                                          ? "text-[var(--neon-blue)]" 
+                                          : "text-[var(--dashboard-text-primary)]"
+                                      }`}>
+                                        {entry.name}
+                                        {isCurrentUser && (
+                                          <span className="ml-2 text-xs text-[var(--success-green)]">(You)</span>
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-sm font-bold ${
+                                      isCurrentUser 
+                                        ? "text-[var(--electric-blue)]" 
+                                        : "text-[var(--neon-blue)]"
+                                    }`}>
+                                      {entry.learningScore.toFixed(1)}
+                                    </span>
+                                    <span className="text-xs text-[var(--dashboard-text-secondary)]">pts</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] mx-auto mb-4 flex items-center justify-center">
+                        <Trophy className="w-8 h-8 text-[var(--dashboard-text-secondary)] opacity-50" />
+                      </div>
+                      <p className="text-sm font-medium text-[var(--dashboard-text-primary)] mb-2">
+                        {t("No leaderboard data available")}
+                      </p>
+                      <p className="text-xs text-[var(--dashboard-text-secondary)]">
+                        {t("Complete courses to see your ranking")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </>
           )}
 
 
@@ -1149,7 +1962,10 @@ export default function DashboardPage() {
         )}
 
         {/* Area Chart Section - Hidden for client_admin and system_admin */}
-        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && (
+        {/* Show for affiliated and non-affiliated users when filter is "all" or "progress" */}
+        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && 
+         ((profile?.role === "affiliated" && (affiliatedGraphTab === "all" || affiliatedGraphTab === "progress")) ||
+          (profile?.role === "non_affiliated" && (nonAffiliatedGraphTab === "all" || nonAffiliatedGraphTab === "progress"))) && (
           <div className="mt-8 relative z-10">
             <div className="dashboard-card rounded-lg p-6">
               <div className="mb-6">
@@ -1157,26 +1973,62 @@ export default function DashboardPage() {
                   {t("Your Learning Progress")}
                 </h3>
                 <p className="text-xs text-[var(--success-green)]">
-                  {t("(+3) courses this month")}
+                  {(profile?.role === "affiliated" || profile?.role === "non_affiliated") && learningProgress.length > 0
+                    ? (() => {
+                        const lastWeek = learningProgress[learningProgress.length - 1];
+                        const previousWeek = learningProgress[learningProgress.length - 2];
+                        const thisWeekCompletions = lastWeek?.completions || 0;
+                        const lastWeekCompletions = previousWeek?.completions || 0;
+                        const change = thisWeekCompletions - lastWeekCompletions;
+                        if (change > 0) {
+                          return `(+${change}) ${t("courses this week")}`;
+                        } else if (change < 0) {
+                          return `(${change}) ${t("courses this week")}`;
+                        } else {
+                          return `${thisWeekCompletions} ${t("courses this week")}`;
+                        }
+                      })()
+                    : t("(+3) courses this month")}
                 </p>
               </div>
-              <AreaChart userRole={profile?.role} />
+              {loadingLearningProgress ? (
+                <div className="flex items-center justify-center h-80">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--neon-blue)]"></div>
+                </div>
+              ) : (
+                <AreaChart 
+                  userRole={profile?.role} 
+                  data={(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? learningProgress : undefined}
+                  loading={loadingLearningProgress}
+                />
+              )}
             </div>
           </div>
         )}
-        {/* Bar Chart Card Section - Hidden for client_admin and system_admin */}
-        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && (
+        {/* Bar Chart Card Section - Hidden for client_admin, system_admin, affiliated, and non-affiliated users */}
+        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && profile?.role !== "affiliated" && profile?.role !== "non_affiliated" && (
           <div className="mt-8 relative z-10">
             <BarChartCard userRole={profile?.role} />
           </div>
         )}
 
         {/* Data Table and Activity Feed Section - Hidden for client_admin and system_admin */}
-        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && (
+        {profile?.role !== "client_admin" && profile?.role !== "system_admin" && 
+         ((profile?.role === "affiliated" && (affiliatedGraphTab === "all" || affiliatedGraphTab === "courses-activity")) ||
+          (profile?.role === "non_affiliated" && (nonAffiliatedGraphTab === "all" || nonAffiliatedGraphTab === "courses-activity"))) && (
           <div className="mt-8 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <DataTable userRole={profile?.role} />
-              <ActivityFeed userRole={profile?.role} />
+              <DataTable 
+                userRole={profile?.role} 
+                coursesData={(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? coursesProgress : undefined}
+                loading={(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? loadingCoursesProgress : false}
+              />
+              <ActivityFeed 
+                userRole={profile?.role}
+                activitiesData={(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? userActivity : undefined}
+                growthPercent={(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? activityGrowthPercent : undefined}
+                loading={(profile?.role === "affiliated" || profile?.role === "non_affiliated") ? loadingUserActivity : false}
+              />
             </div>
           </div>
         )}

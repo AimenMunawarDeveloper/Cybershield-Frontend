@@ -12,6 +12,15 @@ import { useTranslation } from "@/hooks/useTranslation";
 
 interface DataTableProps {
   userRole?: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
+  coursesData?: Array<{
+    _id: string;
+    courseTitle: string;
+    totalModules: number;
+    modulesCompleted: number;
+    progressPercent: number;
+    isCompleted: boolean;
+  }>;
+  loading?: boolean;
 }
 
 const getRoleBasedData = (role: string, t: any) => {
@@ -196,9 +205,55 @@ const getRoleBasedData = (role: string, t: any) => {
 
 export default function DataTable({
   userRole = "non_affiliated",
+  coursesData,
+  loading = false,
 }: DataTableProps) {
   const { t } = useTranslation();
-  const { title, subtitle, data } = getRoleBasedData(userRole, t);
+  
+  // Use real data for affiliated users if provided, otherwise use static data
+  let title, subtitle, data;
+  
+  if (userRole === "affiliated" && coursesData) {
+    title = t("Your Courses");
+    subtitle = `${coursesData.filter(c => c.isCompleted).length} ${t("courses completed")}`;
+    
+    // Transform course data to match table format
+    data = coursesData.map((course, index) => {
+      // Create checkmarks for completed modules
+      const moduleIndicators = Array.from({ length: course.totalModules }, (_, i) => ({
+        name: i < course.modulesCompleted ? "✓" : "",
+        color: i < course.modulesCompleted ? "bg-green-500" : "bg-gray-400",
+      }));
+      
+      // Use emoji based on course title or default
+      const getIcon = (courseTitle: string) => {
+        const title = courseTitle.toLowerCase();
+        if (title.includes("email")) return "📧";
+        if (title.includes("whatsapp")) return "📱";
+        if (title.includes("voice") || title.includes("phishing")) return "🎤";
+        if (title.includes("security") || title.includes("cyber")) return "🛡️";
+        return "📚";
+      };
+      
+      return {
+        id: course._id,
+        item: {
+          icon: getIcon(course.courseTitle),
+          name: course.courseTitle,
+          iconColor: course.isCompleted ? "bg-green-500" : "bg-blue-500",
+        },
+        members: moduleIndicators,
+        metric: `${course.progressPercent}% ${t("score")}`,
+        completion: course.progressPercent,
+      };
+    });
+  } else {
+    // Use static data for other roles
+    const staticData = getRoleBasedData(userRole, t);
+    title = staticData.title;
+    subtitle = staticData.subtitle;
+    data = staticData.data;
+  }
   return (
     <div className="dashboard-card rounded-lg p-6">
       {/* Header */}
@@ -250,7 +305,23 @@ export default function DataTable({
 
           {/* Table Body */}
           <tbody>
-            {data.map((item) => (
+            {loading ? (
+              <tr>
+                <td colSpan={4} className="py-8 text-center">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--neon-blue)]"></div>
+                    <span className="ml-2 text-[var(--dashboard-text-secondary)]">{t("Loading...")}</span>
+                  </div>
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="py-8 text-center text-[var(--dashboard-text-secondary)]">
+                  {t("No courses available")}
+                </td>
+              </tr>
+            ) : (
+              data.map((item) => (
               <tr
                 key={item.id}
                 className="border-b border-[var(--navy-blue-lighter)] last:border-b-0"
@@ -276,9 +347,10 @@ export default function DataTable({
                       <div
                         key={index}
                         className={`w-8 h-8 ${member.color} rounded-full flex items-center justify-center border-2 border-[var(--navy-blue-light)]`}
+                        title={member.name ? t("Module completed") : t("Module not completed")}
                       >
-                        <span className="text-[var(--dashboard-text-primary)] text-xs font-medium">
-                          {member.name}
+                        <span className={`text-xs font-medium ${member.name ? "text-white" : "text-[var(--dashboard-text-secondary)]"}`}>
+                          {member.name || ""}
                         </span>
                       </div>
                     ))}
@@ -305,7 +377,8 @@ export default function DataTable({
                   </div>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -486,6 +486,74 @@ export class ApiClient {
     return { certificates: data.certificates ?? [] };
   }
 
+  // Leaderboard methods
+  async getGlobalLeaderboard(): Promise<{ success: boolean; leaderboard: any[]; total: number }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/leaderboard/global`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch global leaderboard');
+    }
+    return response.json();
+  }
+
+  async getOrganizationLeaderboard(orgId?: string): Promise<{ success: boolean; leaderboard: any[]; total: number; orgId?: string }> {
+    const headers = await this.getAuthHeaders();
+    const params = orgId ? `?orgId=${encodeURIComponent(orgId)}` : '';
+    const response = await fetch(`${API_BASE_URL}/leaderboard/organization${params}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch organization leaderboard');
+    }
+    return response.json();
+  }
+
+  // Learning progress methods
+  async getLearningProgress(): Promise<{ success: boolean; data: any[]; totalCompletions: number }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me/learning-progress`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch learning progress');
+    }
+    return response.json();
+  }
+
+  async getCoursesProgress(): Promise<{ success: boolean; courses: any[]; totalCompleted: number; totalCourses: number }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me/courses-progress`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch courses progress');
+    }
+    return response.json();
+  }
+
+  async getUserActivity(): Promise<{ success: boolean; activities: any[]; growthPercent: number; thisMonthCount: number; lastMonthCount: number }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me/activity`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch user activity');
+    }
+    return response.json();
+  }
+
   async getCertificateById(certificateId: string): Promise<{ certificate: any }> {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/certificates/${certificateId}`, {

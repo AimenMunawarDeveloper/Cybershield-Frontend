@@ -14,6 +14,15 @@ import { useTranslation } from "@/hooks/useTranslation";
 
 interface ActivityFeedProps {
   userRole?: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
+  activitiesData?: Array<{
+    type: string;
+    title: string;
+    date: string;
+    icon: string;
+    iconColor: string;
+  }>;
+  growthPercent?: number;
+  loading?: boolean;
 }
 
 const getRoleBasedActivities = (role: string, t: any) => {
@@ -231,11 +240,69 @@ const getRoleBasedActivities = (role: string, t: any) => {
   }
 };
 
+// Helper function to format date
+function formatActivityDate(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, '0');
+    return `${day} ${month} ${displayHours}:${displayMinutes} ${ampm}`;
+  } catch (error) {
+    return dateString;
+  }
+}
+
 export default function ActivityFeed({
   userRole = "non_affiliated",
+  activitiesData,
+  growthPercent,
+  loading = false,
 }: ActivityFeedProps) {
   const { t } = useTranslation();
-  const { title, subtitle, activities } = getRoleBasedActivities(userRole, t);
+  
+  // Use real data for affiliated users if provided, otherwise use static data
+  let title, subtitle, activities;
+  
+  if (userRole === "affiliated" && activitiesData) {
+    title = t("Your Activity");
+    subtitle = growthPercent !== undefined 
+      ? `${growthPercent >= 0 ? '+' : ''}${growthPercent}% ${t("this month")}`
+      : t("+12% this month");
+    
+    // Map icon strings to icon components
+    const iconMap: Record<string, any> = {
+      'Award': Award,
+      'Shield': Shield,
+      'BookOpen': BookOpen,
+      'Bell': Bell,
+      'Users': Users,
+      'Target': Target,
+      'AlertTriangle': AlertTriangle,
+    };
+    
+    // Transform activities data to match component format
+    activities = activitiesData.map((activity, index) => {
+      const IconComponent = iconMap[activity.icon] || Award;
+      return {
+        id: index + 1,
+        icon: IconComponent,
+        iconColor: activity.iconColor || 'text-[var(--neon-blue)]',
+        title: activity.title,
+        date: formatActivityDate(activity.date),
+      };
+    });
+  } else {
+    // Use static data for other roles
+    const staticData = getRoleBasedActivities(userRole, t);
+    title = staticData.title;
+    subtitle = staticData.subtitle;
+    activities = staticData.activities;
+  }
   return (
     <div className="dashboard-card rounded-lg p-6">
       {/* Header */}
@@ -249,7 +316,17 @@ export default function ActivityFeed({
 
       {/* Activities List */}
       <div className="space-y-4 max-h-80 overflow-y-auto">
-        {activities.map((activity) => {
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--neon-blue)]"></div>
+            <span className="ml-2 text-[var(--dashboard-text-secondary)]">{t("Loading...")}</span>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center py-8 text-[var(--dashboard-text-secondary)]">
+            {t("No activity yet")}
+          </div>
+        ) : (
+          activities.map((activity) => {
           const IconComponent = activity.icon;
           return (
             <div key={activity.id} className="flex items-start space-x-3 py-2">
@@ -269,7 +346,8 @@ export default function ActivityFeed({
               </div>
             </div>
           );
-        })}
+          })
+        )}
       </div>
     </div>
   );
