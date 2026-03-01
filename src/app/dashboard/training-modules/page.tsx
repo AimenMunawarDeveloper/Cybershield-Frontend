@@ -42,6 +42,23 @@ function courseToInitialData(course: Course): TrainingModuleData {
   };
 }
 
+export type RemedialReason =
+  | "email_low"
+  | "whatsapp_low"
+  | "overall_mid"
+  | "overall_low_email"
+  | "overall_low_whatsapp"
+  | "overall_low_basic";
+
+interface RemedialAssignmentItem {
+  _id: string;
+  user: string;
+  course: { _id: string; courseTitle: string; description?: string; level?: string; modules?: unknown[] };
+  reason: RemedialReason;
+  assignedAt: string;
+  dueAt?: string;
+}
+
 interface UserProfile {
   _id: string;
   email: string;
@@ -49,6 +66,7 @@ interface UserProfile {
   role: "system_admin" | "client_admin" | "affiliated" | "non_affiliated";
   orgId?: string;
   orgName?: string;
+  remedialAssignments?: RemedialAssignmentItem[];
 }
 
 export default function TrainingModulesPage() {
@@ -164,6 +182,17 @@ export default function TrainingModulesPage() {
         "Failed to load courses",
         "Failed to delete course",
         "Edit",
+        // Remedial
+        "Assigned to you",
+        "Complete by the deadline to improve your security awareness.",
+        "Go to Training",
+        "Assigned",
+        "more",
+        "Overdue",
+        "Due today",
+        "1 day left",
+        "days left",
+        "Due by",
       ];
 
       await preTranslate(staticStrings);

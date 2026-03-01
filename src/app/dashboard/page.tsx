@@ -11,7 +11,17 @@ import DataTable from "@/components/DataTable";
 import ActivityFeed from "@/components/ActivityFeed";
 import FloatingChat from "@/components/FloatingChat";
 import UserLearningScoresSection from "@/components/UserLearningScoresSection";
+import RemedialAssignmentsCard from "@/components/RemedialAssignmentsCard";
 import { useTranslation } from "@/hooks/useTranslation";
+
+interface RemedialAssignmentItem {
+  _id: string;
+  user: string;
+  course: { _id: string; courseTitle: string; description?: string };
+  reason: string;
+  assignedAt: string;
+  dueAt?: string;
+}
 
 interface UserProfile {
   _id: string;
@@ -23,6 +33,7 @@ interface UserProfile {
   phoneNumber?: string | null;
   learningScore?: number;
   learningScores?: { email: number; whatsapp: number; lms: number; voice?: number };
+  remedialAssignments?: RemedialAssignmentItem[];
 }
 
 interface OrgSummary {
@@ -140,6 +151,17 @@ export default function DashboardPage() {
         
         // Loading/error states
         "Loading...",
+        // Remedial
+        "Assigned to you",
+        "Go to Training",
+        "Complete by the deadline to improve your security awareness.",
+        "Assigned",
+        "more",
+        "Overdue",
+        "Due today",
+        "1 day left",
+        "days left",
+        "Due by",
       ];
 
       await preTranslate(staticStrings);
@@ -722,6 +744,21 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Remedial / Assigned courses (below progress radial; learners only) */}
+        {(profile?.role === "affiliated" || profile?.role === "non_affiliated") &&
+          Array.isArray(profile?.remedialAssignments) &&
+          profile.remedialAssignments.length > 0 && (
+            <div className="mt-8 relative z-10">
+              <RemedialAssignmentsCard
+                assignments={profile.remedialAssignments}
+                t={t}
+                variant="dashboard"
+                showViewAll
+                maxDisplay={5}
+              />
+            </div>
+          )}
 
         {/* Learning scores (admins only) */}
         <UserLearningScoresSection getToken={getToken} profile={profile} />
