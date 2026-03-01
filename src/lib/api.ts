@@ -564,6 +564,9 @@ export class ApiClient {
         startDate?: string;
         endDate?: string;
         stats: any;
+        whatsappConfig?: {
+          enabled: boolean;
+        };
       }>;
       pagination?: {
         current: number;

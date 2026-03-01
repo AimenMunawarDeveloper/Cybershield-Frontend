@@ -243,7 +243,7 @@ export async function generateAnalyticsReport(
       for (const campaign of emailCampaigns) {
         campaigns.push({
           name: campaign.name,
-          type: campaign.whatsappEnabled ? "unified" : "email",
+          type: campaign.whatsappConfig?.enabled ? "unified" : "email",
           status: campaign.status,
           startDate: campaign.startDate,
           endDate: campaign.endDate,
