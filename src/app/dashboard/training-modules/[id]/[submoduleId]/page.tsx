@@ -1476,18 +1476,17 @@ export default function SubmodulePage() {
                                   {String.fromCharCode(65 + ci)}
                                 </span>
                                         <span 
-                                          className="flex-1 text-base leading-relaxed font-medium"
-                                          style={{
-                                            color: isSelected
+                                          className={`flex-1 text-base leading-relaxed font-medium ${
+                                            isSelected
                                               ? showCorrect
-                                                ? "#166534" // green-800
+                                                ? "text-green-800"
                                                 : isIncorrect
-                                                ? "#991b1b" // red-800
-                                                : "var(--neon-blue)"
+                                                ? "text-red-800"
+                                                : "text-[var(--neon-blue)]"
                                               : showCorrect
-                                              ? "#166534" // green-800
-                                              : "#374151" // gray-700
-                                          }}
+                                              ? "text-green-800"
+                                              : "text-gray-700 dark:text-white"
+                                          }`}
                                         >{c}</span>
                                         {showCorrect && (
                                           <CheckCircle2 className="w-6 h-6 text-green-600 flex-shrink-0" />

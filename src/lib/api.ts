@@ -527,6 +527,201 @@ export class ApiClient {
     const data = await response.json();
     return { certificate: data.certificate };
   }
+
+  // Voice Phishing Analytics
+  async getVoicePhishingAnalytics(): Promise<{
+    success: boolean;
+    data: {
+      totalConversations: number;
+      completedConversations: number;
+      averageScore: number;
+      phishingScenarios: { total: number; fellForPhishing: number };
+      normalScenarios: { total: number };
+      resistanceLevels: { high: number; medium: number; low: number };
+    };
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/voice-phishing/analytics/overview`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || (error as any).message || 'Failed to fetch voice phishing analytics');
+    }
+    return response.json();
+  }
+
+  // Campaign endpoints
+  async getCampaigns(page = 1, limit = 10): Promise<{
+    success: boolean;
+    data: {
+      campaigns: Array<{
+        _id: string;
+        name: string;
+        description: string;
+        status: string;
+        startDate?: string;
+        endDate?: string;
+        stats: any;
+        whatsappConfig?: {
+          enabled: boolean;
+        };
+      }>;
+      pagination?: {
+        current: number;
+        pages: number;
+        total: number;
+      };
+    };
+  }> {
+    const headers = await this.getAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    const response = await fetch(`${API_BASE_URL}/campaigns?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch campaigns');
+    }
+    return response.json();
+  }
+
+  async getWhatsAppCampaigns(page = 1, limit = 10): Promise<{
+    success: boolean;
+    data: {
+      campaigns: Array<{
+        _id: string;
+        name: string;
+        description: string;
+        status: string;
+        startDate?: string;
+        endDate?: string;
+        stats: any;
+      }>;
+      pagination?: {
+        current: number;
+        pages: number;
+        total: number;
+      };
+    };
+  }> {
+    const headers = await this.getAuthHeaders();
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    const response = await fetch(`${API_BASE_URL}/whatsapp-campaigns?${params}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch WhatsApp campaigns');
+    }
+    return response.json();
+  }
+
+  async getCampaignAnalytics(campaignId: string): Promise<{
+    success: boolean;
+    data: any;
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/campaigns/${campaignId}/analytics`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch campaign analytics');
+    }
+    return response.json();
+  }
+
+  async getWhatsAppCampaignAnalytics(campaignId: string): Promise<{
+    success: boolean;
+    data: any;
+  }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/whatsapp-campaigns/${campaignId}/analytics`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch WhatsApp campaign analytics');
+    }
+    return response.json();
+  }
+
+  // Report methods
+  async getUserReports(): Promise<{ reports: any[] }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/reports`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch reports');
+    }
+    const data = await response.json();
+    return { reports: data.reports ?? [] };
+  }
+
+  async downloadReport(reportId: string): Promise<Blob> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/download`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to download report');
+    }
+    return response.blob();
+  }
+
+  async saveReport(reportData: {
+    reportName: string;
+    organizationName?: string;
+    reportDate: string;
+    fileName: string;
+    pdfBlob: Blob;
+    reportData: any;
+  }): Promise<{ success: boolean; reportId?: string }> {
+    const headers = await this.getAuthHeaders();
+    
+    // Create FormData to send file
+    const formData = new FormData();
+    formData.append('reportName', reportData.reportName);
+    if (reportData.organizationName) {
+      formData.append('organizationName', reportData.organizationName);
+    }
+    formData.append('reportDate', reportData.reportDate);
+    formData.append('fileName', reportData.fileName);
+    formData.append('pdf', reportData.pdfBlob, reportData.fileName);
+    formData.append('reportData', JSON.stringify(reportData.reportData));
+
+    // Remove Content-Type header to let browser set it with boundary for FormData
+    const { 'Content-Type': _, ...headersWithoutContentType } = headers as Record<string, string>;
+    
+    const response = await fetch(`${API_BASE_URL}/reports`, {
+      method: 'POST',
+      headers: headersWithoutContentType,
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to save report');
+    }
+    return response.json();
+  }
 }
 
 // Hook to create API client with Clerk token

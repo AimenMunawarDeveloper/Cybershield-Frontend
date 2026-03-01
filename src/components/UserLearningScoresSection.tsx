@@ -11,16 +11,18 @@ interface OrgUser {
   displayName: string;
   role: string;
   status?: string;
+  learningScore?: number;
   learningScores?: { email: number; whatsapp: number; lms: number; voice?: number };
 }
 
-type LearningScoreTab = "email" | "whatsapp" | "lms" | "voice";
+type LearningScoreTab = "email" | "whatsapp" | "lms" | "voice" | "total";
 
-const TAB_CONFIG: { id: LearningScoreTab; label: string; description: string }[] = [
+const TAB_CONFIG: { id: LearningScoreTab; label: string; description: string; isTotal?: boolean }[] = [
   { id: "email", label: "Email", description: "Learning score – Email (0–1): based on simulated phishing (open, click, credentials). Higher is better." },
   { id: "whatsapp", label: "WhatsApp", description: "Learning score – WhatsApp (0–1): based on simulated phishing (read, click, credentials). Higher is better." },
   { id: "lms", label: "LMS", description: "Learning score – LMS (0–1): based on training completion. 0 = no progress, 1 = all assigned courses done. Higher is better." },
   { id: "voice", label: "Voice", description: "Learning score – Voice (0–1): based on voice phishing simulation. Higher is better." },
+  { id: "total", label: "Total", description: "Learning score – Total (0–100): combined weighted average of Email, WhatsApp, LMS, and Voice scores. Higher is better.", isTotal: true },
 ];
 
 interface UserLearningScoresSectionProps {
@@ -46,6 +48,11 @@ export default function UserLearningScoresSection({ getToken, profile }: UserLea
       setSelectedOrgId(profile.orgId);
       return;
     }
+    // For system admin, we don't need organizations - we'll fetch non-affiliated users directly
+    if (profile.role === "system_admin") {
+      setSelectedOrgId(null); // No org selection for system admin
+      return;
+    }
     const apiClient = new ApiClient(getToken);
     apiClient.getOrganizations().then((res: { organizations?: { _id: string; name: string }[] }) => {
       const list = res.organizations || [];
@@ -55,7 +62,28 @@ export default function UserLearningScoresSection({ getToken, profile }: UserLea
   }, [isAdmin, isClientAdmin, profile?.orgId, profile?.role]);
 
   useEffect(() => {
-    if (!selectedOrgId || !isAdmin) return;
+    if (!isAdmin || !profile) return;
+    
+    // For system admin: fetch non-affiliated users directly (no org selection)
+    if (profile.role === "system_admin") {
+      setLoading(true);
+      const apiClient = new ApiClient(getToken);
+      apiClient.getAllUsers(1, 100)
+        .then((res: { users?: OrgUser[]; pagination?: { current: number; pages: number; total: number } }) => {
+          // Filter for non-affiliated users only
+          const nonAffiliatedUsers = (res.users || []).filter(
+            (u: OrgUser) => u.role === "non_affiliated"
+          );
+          setUsers(nonAffiliatedUsers);
+          setPagination(res.pagination || { current: 1, pages: 1, total: nonAffiliatedUsers.length });
+        })
+        .catch(() => setUsers([]))
+        .finally(() => setLoading(false));
+      return;
+    }
+    
+    // For client admin: fetch users from selected organization
+    if (!selectedOrgId || !isClientAdmin) return;
     setLoading(true);
     const apiClient = new ApiClient(getToken);
     apiClient.getOrgUsers(selectedOrgId, 1, 100)
@@ -65,31 +93,37 @@ export default function UserLearningScoresSection({ getToken, profile }: UserLea
       })
       .catch(() => setUsers([]))
       .finally(() => setLoading(false));
-  }, [selectedOrgId, isAdmin, getToken]);
+  }, [selectedOrgId, isAdmin, isClientAdmin, profile?.role, getToken]);
 
   if (!isAdmin) return null;
 
-  // Client admin should not see their own row in the learning scores table
-  const displayUsers =
-    isClientAdmin && profile?._id
-      ? users.filter((u) => u._id !== profile._id)
-      : users;
+  // Exclude client_admin and system_admin users from the learning scores table
+  // (admins are not regular users and shouldn't be included in user analytics)
+  const displayUsers = users.filter(
+    (u) => u.role !== "client_admin" && u.role !== "system_admin"
+  );
 
   // All learning scores 0–1: higher = better. Lower score → Low, higher → High.
-  const getLearningScoreLevelLabel = (score: number | undefined) => {
+  // For "total" tab, score is 0–100, so we normalize it to 0–1 for level calculation
+  const getLearningScoreLevelLabel = (score: number | undefined, isTotal: boolean = false) => {
     const s = score ?? 0;
-    if (s <= 0.33) return { text: t("Low"), className: "text-[var(--dashboard-text-secondary)]" };   // low score = Low
-    if (s <= 0.66) return { text: t("Medium"), className: "text-amber-400" };                         // medium score = Medium
+    const normalizedScore = isTotal ? s / 100 : s; // Normalize 0-100 to 0-1 for total
+    if (normalizedScore <= 0.33) return { text: t("Low"), className: "text-[var(--dashboard-text-secondary)]" };   // low score = Low
+    if (normalizedScore <= 0.66) return { text: t("Medium"), className: "text-amber-400" };                         // medium score = Medium
     return { text: t("High"), className: "text-[var(--success-green)]" };                              // high score = High
   };
 
   const getScoreForTab = (u: OrgUser): number => {
+    if (learningTab === "total") {
+      return u.learningScore ?? 0;
+    }
     const ls = u.learningScores;
     switch (learningTab) {
       case "email": return ls?.email ?? 0;
       case "whatsapp": return ls?.whatsapp ?? 0;
       case "lms": return ls?.lms ?? 0;
       case "voice": return ls?.voice ?? 0;
+      default: return 0;
     }
   };
 
@@ -125,27 +159,16 @@ export default function UserLearningScoresSection({ getToken, profile }: UserLea
                 ))}
               </div>
             </div>
-            {profile?.role === "system_admin" && orgs.length > 1 && (
-              <div className="flex items-center gap-2">
-                <label className="text-xs text-[var(--dashboard-text-secondary)]">{t("Organization")}</label>
-                <select
-                  value={selectedOrgId || ""}
-                  onChange={(e) => setSelectedOrgId(e.target.value || null)}
-                  className="bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3 py-2 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] outline-none"
-                >
-                  {orgs.map((org) => (
-                    <option key={org._id} value={org._id}>{org.name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+            {/* Organization selector removed for system admin - they see non-affiliated users only */}
           </div>
         </div>
         <p className="text-xs text-[var(--dashboard-text-secondary)] mb-4">
           {t(currentTabConfig.description)}
         </p>
         <p className="text-xs text-[var(--dashboard-text-secondary)] mb-4">
-          {t("Level: Low (score ≤ 0.33), Medium (0.34–0.66), High (0.67–1). Lower score = Low, higher score = High.")}
+          {currentTabConfig.isTotal
+            ? t("Level: Low (score ≤ 33), Medium (34–66), High (67–100). Lower score = Low, higher score = High.")
+            : t("Level: Low (score ≤ 0.33), Medium (0.34–0.66), High (0.67–1). Lower score = Low, higher score = High.")}
         </p>
         {loading ? (
           <div className="flex items-center justify-center py-12">
@@ -173,8 +196,11 @@ export default function UserLearningScoresSection({ getToken, profile }: UserLea
               <tbody>
                 {displayUsers.map((u) => {
                   const scoreValue = getScoreForTab(u);
-                  const score = (typeof scoreValue === "number" ? scoreValue.toFixed(2) : "0.00");
-                  const levelLabel = getLearningScoreLevelLabel(scoreValue);
+                  const isTotal = currentTabConfig.isTotal || false;
+                  const score = isTotal 
+                    ? (typeof scoreValue === "number" ? scoreValue.toFixed(1) : "0.0")
+                    : (typeof scoreValue === "number" ? scoreValue.toFixed(2) : "0.00");
+                  const levelLabel = getLearningScoreLevelLabel(scoreValue, isTotal);
                   return (
                     <tr key={u._id} className="border-b border-[var(--sidebar-border)]/50 hover:bg-[var(--navy-blue-lighter)]/50">
                       <td className="py-3 px-2 text-[var(--dashboard-text-primary)]">{u.displayName || "—"}</td>

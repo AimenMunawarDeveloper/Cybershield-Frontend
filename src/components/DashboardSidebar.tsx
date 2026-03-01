@@ -160,7 +160,10 @@ export function DashboardSidebar({
                   item.url === "/dashboard/whatsapp-phishing" ||
                   item.url === "/dashboard/email-phishing";
 
-                if (isCampaignNav && !isAdminRole) {
+                // Hide Reports for non-admin roles
+                const isReportsNav = item.url === "/dashboard/reports";
+
+                if ((isCampaignNav || isReportsNav) && !isAdminRole) {
                   return null;
                 }
 
