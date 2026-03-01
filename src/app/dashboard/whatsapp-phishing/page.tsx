@@ -603,56 +603,6 @@ export default function WhatsAppPhishingPage() {
           </div>
         </div>
 
-        {/* How WhatsApp Phishing Works Section */}
-        <div className="relative z-10 mb-8">
-          <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
-            {t("How WhatsApp Phishing Simulation Works")}
-          </h2>
-          <div className="dashboard-card rounded-lg p-6 md:p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div className="relative h-64 md:h-80 rounded-lg overflow-hidden">
-                <Image
-                  src="/Images/2.jpg"
-                  alt="WhatsApp Phishing Simulation"
-                  fill
-                  className="object-cover rounded-lg"
-                />
-              </div>
-              <div className="space-y-4">
-                <p className="text-[var(--dashboard-text-primary)] dark:text-white text-lg">
-                  {t("Our WhatsApp phishing simulation sends realistic phishing messages directly to your employees' WhatsApp accounts to test their security awareness.")}
-                </p>
-                <ul className="space-y-3 text-[var(--dashboard-text-primary)] dark:text-white">
-                  <li className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
-                    <span>
-                      {t("Select a phishing template (banking scam, prize notification, job offer) or customize your own message.")}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
-                    <span>
-                      {t("Add target employees with their phone numbers. Messages are sent via WhatsApp with a tracking link.")}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
-                    <span>
-                      {t("When users click the link, they land on a simulated phishing page that captures their interaction.")}
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">4</div>
-                    <span>
-                      {t("Track who clicked, who submitted data, and who reported. Use results to identify training needs.")}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Phishing Templates Section */}
         <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
