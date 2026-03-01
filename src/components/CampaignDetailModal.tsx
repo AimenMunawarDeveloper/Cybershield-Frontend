@@ -576,10 +576,6 @@ export default function CampaignDetailModal({
                         <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.clickRate}%</p>
                       </div>
                       <div>
-                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Report rate")}</span>
-                        <p className="text-xl font-bold text-amber-400">{analytics.whatsapp.reportRate ?? 0}%</p>
-                      </div>
-                      <div>
                         <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Failed")}</span>
                         <p className="text-xl font-bold text-red-400">{analytics.whatsapp.totalFailed}</p>
                       </div>
