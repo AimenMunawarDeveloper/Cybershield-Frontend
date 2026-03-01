@@ -654,6 +654,71 @@ export class ApiClient {
     }
     return response.json();
   }
+
+  // Report methods
+  async getUserReports(): Promise<{ reports: any[] }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/reports`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to fetch reports');
+    }
+    const data = await response.json();
+    return { reports: data.reports ?? [] };
+  }
+
+  async downloadReport(reportId: string): Promise<Blob> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/reports/${reportId}/download`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to download report');
+    }
+    return response.blob();
+  }
+
+  async saveReport(reportData: {
+    reportName: string;
+    organizationName?: string;
+    reportDate: string;
+    fileName: string;
+    pdfBlob: Blob;
+    reportData: any;
+  }): Promise<{ success: boolean; reportId?: string }> {
+    const headers = await this.getAuthHeaders();
+    
+    // Create FormData to send file
+    const formData = new FormData();
+    formData.append('reportName', reportData.reportName);
+    if (reportData.organizationName) {
+      formData.append('organizationName', reportData.organizationName);
+    }
+    formData.append('reportDate', reportData.reportDate);
+    formData.append('fileName', reportData.fileName);
+    formData.append('pdf', reportData.pdfBlob, reportData.fileName);
+    formData.append('reportData', JSON.stringify(reportData.reportData));
+
+    // Remove Content-Type header to let browser set it with boundary for FormData
+    const { 'Content-Type': _, ...headersWithoutContentType } = headers as Record<string, string>;
+    
+    const response = await fetch(`${API_BASE_URL}/reports`, {
+      method: 'POST',
+      headers: headersWithoutContentType,
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as any).error || 'Failed to save report');
+    }
+    return response.json();
+  }
 }
 
 // Hook to create API client with Clerk token

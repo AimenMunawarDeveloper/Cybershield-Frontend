@@ -328,15 +328,15 @@ export async function generateAnalyticsReport(
 
     reportData.campaigns = campaigns;
 
-    // Generate PDF
-    generatePDF(reportData as ReportData);
+    // Generate PDF and save to backend
+    await generatePDF(reportData as ReportData, apiClient);
   } catch (error) {
     console.error("Failed to generate report:", error);
     throw error;
   }
 }
 
-function generatePDF(data: ReportData) {
+async function generatePDF(data: ReportData, apiClient: ApiClient) {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -691,7 +691,31 @@ function generatePDF(data: ReportData) {
     );
   }
 
-  // Save the PDF
+  // Generate PDF blob
   const fileName = `Analytics_Report_${data.organizationName?.replace(/\s+/g, "_") || "Report"}_${new Date().toISOString().split("T")[0]}.pdf`;
+  const pdfBlob = doc.output("blob");
+
+  // Save report to backend
+  try {
+    await apiClient.saveReport({
+      reportName: `Analytics Report - ${data.organizationName || "Organization"}`,
+      organizationName: data.organizationName,
+      reportDate: data.reportDate,
+      fileName: fileName,
+      pdfBlob: pdfBlob,
+      reportData: {
+        userSummary: data.userSummary,
+        learningScores: data.learningScores,
+        voicePhishing: data.voicePhishing,
+        campaignPerformance: data.campaignPerformance,
+        campaignsCount: data.campaigns.length,
+      },
+    });
+  } catch (saveError) {
+    console.error("Failed to save report:", saveError);
+    // Don't throw - report was generated successfully, saving is optional
+  }
+
+  // Download the PDF
   doc.save(fileName);
 }
