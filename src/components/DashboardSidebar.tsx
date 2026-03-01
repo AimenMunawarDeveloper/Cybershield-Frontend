@@ -7,12 +7,9 @@ import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect, useState, Fragment } from "react";
 import {
   BookOpen,
-  BarChart3,
-  Settings,
   HelpCircle,
   Home,
   AlertTriangle,
-  Users,
   FileText,
   Trophy,
   MessageSquare,
@@ -76,11 +73,6 @@ const data = {
       icon: Phone,
     },
     {
-      title: "Learning Analysis",
-      url: "/dashboard/analysis",
-      icon: BarChart3,
-    },
-    {
       title: "Certificates",
       url: "/dashboard/certificates",
       icon: Trophy,
@@ -91,11 +83,6 @@ const data = {
       icon: Medal,
     },
     {
-      title: "Team Management",
-      url: "/dashboard/team",
-      icon: Users,
-    },
-    {
       title: "Reports",
       url: "/dashboard/reports",
       icon: FileText,
@@ -104,11 +91,6 @@ const data = {
       title: "Incident Reporting",
       url: "/dashboard/incident-reporting",
       icon: ShieldAlert,
-    },
-    {
-      title: "Settings",
-      url: "/dashboard/settings",
-      icon: Settings,
     },
   ],
   support: [

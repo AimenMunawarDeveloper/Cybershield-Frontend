@@ -463,58 +463,6 @@ export default function EmailPhishingPage() {
           </div>
         </div>
 
-        {/* How Email Phishing Works Section */}
-        <div className="relative z-10 mb-8 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white text-center mb-8 underline decoration-[var(--neon-blue)]">
-              {t("How Email Phishing Simulation Works")}
-            </h2>
-            <div className="dashboard-card rounded-lg p-6 md:p-8 bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="relative h-64 md:h-80 rounded-lg overflow-hidden">
-                  <Image
-                    src="/Images/3.jpg"
-                    alt="Email Phishing Simulation"
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                </div>
-                <div className="space-y-4">
-                  <p className="text-[var(--dashboard-text-primary)] dark:text-white text-lg">
-                    {t("Our email phishing simulation sends realistic phishing emails directly to your employees' inboxes to test their security awareness and response.")}
-                  </p>
-                  <ul className="space-y-3 text-[var(--dashboard-text-primary)] dark:text-white">
-                    <li className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">1</div>
-                      <span>
-                        {t("Select a phishing template (banking alert, password reset, delivery notice) or create your own custom email.")}
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">2</div>
-                      <span>
-                        {t("Enter target employee email addresses. The system sends professional looking phishing emails with embedded tracking.")}
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">3</div>
-                      <span>
-                        {t("When users click links or submit credentials, the system captures their interaction for analysis.")}
-                      </span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-[var(--neon-blue)] rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold">4</div>
-                      <span>
-                        {t("Review detailed reports showing who clicked, who submitted data, and who reported the email to identify training needs.")}
-                      </span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Phishing Templates Section */}
         <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
