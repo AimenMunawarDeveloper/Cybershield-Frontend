@@ -204,6 +204,17 @@ export class ApiClient {
     return parseJsonSafe();
   }
 
+  /** GET /api/users/me/remedial-assignments – courses assigned due to low/mid learning scores */
+  async getRemedialAssignments(): Promise<{ success: boolean; remedialAssignments: Array<{ _id: string; course: { _id: string; courseTitle: string }; reason: string; assignedAt: string }> }> {
+    const headers = await this.getAuthHeaders();
+    const response = await fetch(`${API_BASE_URL}/users/me/remedial-assignments`, { method: "GET", headers });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error((err as any)?.error || "Failed to fetch remedial assignments");
+    }
+    return response.json();
+  }
+
   async updateProfile(data: { phoneNumber?: string }) {
     const headers = await this.getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/users/me`, {
