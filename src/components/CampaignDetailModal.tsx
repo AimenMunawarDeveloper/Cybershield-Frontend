@@ -517,14 +517,6 @@ export default function CampaignDetailModal({
                       
                       <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
                         <div className="flex items-center gap-2 mb-2">
-                          <CheckCircle2 className="w-4 h-4 text-green-400" />
-                          <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivered")}</span>
-                        </div>
-                        <p className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.totalDelivered}</p>
-                      </div>
-                      
-                      <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg p-4 border border-gray-200 dark:border-transparent">
-                        <div className="flex items-center gap-2 mb-2">
                           <Eye className="w-4 h-4 text-purple-400" />
                           <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Read")}</span>
                         </div>
@@ -547,11 +539,7 @@ export default function CampaignDetailModal({
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div>
-                        <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivery Rate")}</span>
-                        <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.deliveryRate}%</p>
-                      </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                       <div>
                         <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Read Rate")}</span>
                         <p className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{analytics.whatsapp.readRate}%</p>

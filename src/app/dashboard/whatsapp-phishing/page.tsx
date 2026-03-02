@@ -255,7 +255,6 @@ export default function WhatsAppPhishingPage() {
         "Start Campaign",
         "Targets",
         "Sent",
-        "Delivered",
         "Read",
         "draft",
         "scheduled",
@@ -916,7 +915,7 @@ export default function WhatsAppPhishingPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-xs mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-xs mb-3">
                       <div>
                         <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Targets")}</p>
                         <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
@@ -927,12 +926,6 @@ export default function WhatsAppPhishingPage() {
                         <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Sent")}</p>
                         <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
                           {campaign.stats.totalSent}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Delivered")}</p>
-                        <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold">
-                          {campaign.stats.totalDelivered}
                         </p>
                       </div>
                       <div>
