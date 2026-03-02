@@ -287,14 +287,6 @@ export default function CampaignPerformance() {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-[var(--dashboard-text-secondary)]">
-                  {t("Delivered")}
-                </span>
-                <span className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
-                  {whatsappAnalytics.totalDelivered} ({whatsappAnalytics.deliveryRate}%)
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-[var(--dashboard-text-secondary)]">
                   {t("Read")}
                 </span>
                 <span className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
