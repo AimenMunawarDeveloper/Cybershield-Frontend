@@ -7,7 +7,6 @@ import { useUser, useAuth } from "@clerk/nextjs";
 import { useEffect, useState, Fragment } from "react";
 import {
   BookOpen,
-  HelpCircle,
   Home,
   AlertTriangle,
   FileText,
@@ -36,7 +35,7 @@ import {
 import { ApiClient } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
 
-// This is sample data.
+// Nav items; badge for Training Modules and Campaigns is filled from API counts.
 const data = {
   navMain: [
     {
@@ -49,13 +48,11 @@ const data = {
       title: "Training Modules",
       url: "/dashboard/training-modules",
       icon: BookOpen,
-      badge: "12",
     },
     {
       title: "Campaigns",
       url: "/dashboard/simulations",
       icon: AlertTriangle,
-      badge: "3",
     },
     {
       title: "WhatsApp Phishing",
@@ -93,13 +90,6 @@ const data = {
       icon: ShieldAlert,
     },
   ],
-  support: [
-    {
-      title: "Help & Support",
-      url: "/dashboard/help",
-      icon: HelpCircle,
-    },
-  ],
 };
 
 export function DashboardSidebar({
@@ -109,6 +99,8 @@ export function DashboardSidebar({
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [trainingModulesCount, setTrainingModulesCount] = useState<number | null>(null);
+  const [campaignsCount, setCampaignsCount] = useState<number | null>(null);
   const { t } = useTranslation();
   const isAdminRole =
     userRole === "system_admin" || userRole === "client_admin";
@@ -128,6 +120,41 @@ export function DashboardSidebar({
 
     fetchUserProfile();
   }, [isLoaded, user, getToken]);
+
+  // Fetch training modules (courses) count for the current user
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    const apiClient = new ApiClient(getToken);
+    apiClient
+      .getCourses({ limit: 1000 })
+      .then((res) => {
+        const count = res.success && Array.isArray(res.courses) ? res.courses.length : 0;
+        setTrainingModulesCount(count);
+      })
+      .catch(() => setTrainingModulesCount(0));
+  }, [isLoaded, user, getToken]);
+
+  // Fetch campaigns count for admins only (same logic as dashboard)
+  useEffect(() => {
+    if (!isLoaded || !user || !isAdminRole) {
+      if (!isAdminRole) setCampaignsCount(0);
+      return;
+    }
+    const apiClient = new ApiClient(getToken);
+    Promise.all([
+      apiClient.getCampaigns(1, 1000).catch(() => ({ success: false, data: { campaigns: [] } })),
+      apiClient.getWhatsAppCampaigns(1, 1000).catch(() => ({ success: false, data: { campaigns: [] } })),
+    ])
+      .then(([emailRes, whatsappRes]) => {
+        const email = emailRes.success && emailRes.data?.campaigns ? emailRes.data.campaigns : [];
+        const whatsapp = whatsappRes.success && whatsappRes.data?.campaigns ? whatsappRes.data.campaigns : [];
+        const standaloneWhatsapp = whatsapp.filter(
+          (c: Record<string, unknown>) => !(c as { managedByParentCampaign?: boolean }).managedByParentCampaign
+        );
+        setCampaignsCount(email.length + standaloneWhatsapp.length);
+      })
+      .catch(() => setCampaignsCount(0));
+  }, [isLoaded, user, getToken, isAdminRole]);
 
   return (
     <Sidebar
@@ -167,6 +194,16 @@ export function DashboardSidebar({
                   return null;
                 }
 
+                // Dynamic badge: Training Modules and Campaigns use API counts; others use item.badge
+                const badgeValue =
+                  item.url === "/dashboard/training-modules"
+                    ? trainingModulesCount
+                    : item.url === "/dashboard/simulations"
+                      ? campaignsCount
+                      : (item as { badge?: string }).badge;
+                const showBadge =
+                  badgeValue !== undefined && badgeValue !== null;
+
                 return (
                   <Fragment key={item.title}>
                     <SidebarMenuItem className="mb-2">
@@ -180,8 +217,12 @@ export function DashboardSidebar({
                             <item.icon className="w-4 h-4 text-white" />
                           </div>
                           <span>{t(item.title)}</span>
-                          {item.badge && (
-                            <SidebarMenuBadge>{item.badge}</SidebarMenuBadge>
+                          {showBadge && (
+                            <SidebarMenuBadge>
+                              {typeof badgeValue === "number"
+                                ? String(badgeValue)
+                                : badgeValue}
+                            </SidebarMenuBadge>
                           )}
                         </Link>
                       </SidebarMenuButton>
@@ -240,29 +281,6 @@ export function DashboardSidebar({
                 </Fragment>
                 );
               })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>{t("Support")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {data.support.map((item) => (
-                <SidebarMenuItem key={item.title} className="mb-2">
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname === item.url}
-                    tooltip={t(item.title)}
-                  >
-                    <Link href={item.url}>
-                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
-                        <item.icon className="w-4 h-4 text-white" />
-                      </div>
-                      <span>{t(item.title)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
