@@ -530,7 +530,19 @@ export default function WhatsAppPhishingPage() {
     );
   }
 
-  // Show loading state while translating or fetching data
+  if (hasAccess === false) {
+    return (
+      <div className="p-8 text-center text-[var(--dashboard-text-primary)] dark:text-white">
+        <h1 className="text-2xl font-semibold">{t("Access Restricted")}</h1>
+        <p className="mt-2 text-sm text-[var(--dashboard-text-secondary)] dark:text-gray-300">
+          {accessError ||
+            t("This page is available to system and client administrators only.")}
+        </p>
+      </div>
+    );
+  }
+
+  // Show loading state while translating or fetching data (admins only)
   if (!translationReady || loading || templatesLoading) {
     return (
       <div className="flex flex-1 items-center justify-center min-h-screen">
@@ -540,18 +552,6 @@ export default function WhatsAppPhishingPage() {
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
           </p>
         </div>
-      </div>
-    );
-  }
-
-  if (hasAccess === false) {
-    return (
-      <div className="p-8 text-center text-[var(--dashboard-text-primary)] dark:text-white">
-        <h1 className="text-2xl font-semibold">{t("Access Restricted")}</h1>
-        <p className="mt-2 text-sm text-[var(--dashboard-text-secondary)] dark:text-gray-300">
-          {accessError ||
-            t("This page is available to system and client administrators only.")}
-        </p>
       </div>
     );
   }

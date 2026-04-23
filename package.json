@@ -9,7 +9,13 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "e2e": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test",
+    "e2e:ui": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test --ui",
+    "e2e:headed": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test --headed",
+    "e2e:debug": "PLAYWRIGHT_BROWSERS_PATH=0 playwright test --debug",
+    "e2e:report": "playwright show-report",
+    "e2e:install": "PLAYWRIGHT_BROWSERS_PATH=0 playwright install --with-deps"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.32.0",
@@ -36,6 +42,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.8.0",
