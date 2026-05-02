@@ -365,27 +365,27 @@ export default function ClientAdminPanel() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
+    <div className="relative flex min-h-screen w-full min-w-0 flex-1 flex-col gap-6 overflow-x-hidden px-3 py-4 sm:px-4 sm:py-6 md:px-6">
       
       <NetworkBackground />
       
       {/* Blurred background element */}
       <div className="blurred-background"></div>
 
-      <div className="max-w-7xl mx-auto w-full relative z-10">
+      <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl">
         {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mb-6 sm:mb-10">
+          <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)]">
+              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-[var(--dashboard-text-primary)]">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] sm:text-3xl md:text-4xl">
             {t("Organization Management")}
           </h1>
-              <p className="text-[var(--dashboard-text-secondary)] text-lg">
+              <p className="mt-1 text-sm text-[var(--dashboard-text-secondary)] sm:text-base md:text-lg">
             {t("Manage users and send invitations for your organization")}
           </p>
             </div>
@@ -393,7 +393,7 @@ export default function ClientAdminPanel() {
         </div>
 
         {/* Single User Invite */}
-        <div className="dashboard-card rounded-xl mb-8 p-8 shadow-2xl border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(81,176,236,0.3)] group">
+        <div className="dashboard-card group mb-8 rounded-xl border border-[var(--neon-blue)]/20 p-4 shadow-2xl transition-all duration-500 hover:border-[var(--neon-blue)]/40 hover:shadow-[0_0_30px_rgba(81,176,236,0.3)] sm:p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -503,7 +503,7 @@ export default function ClientAdminPanel() {
         </div>
 
         {/* Bulk Invite */}
-        <div className="dashboard-card rounded-xl mb-8 p-8 shadow-2xl border border-[var(--electric-blue)]/20 hover:border-[var(--electric-blue)]/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(79,195,247,0.3)] group">
+        <div className="dashboard-card group mb-8 rounded-xl border border-[var(--electric-blue)]/20 p-4 shadow-2xl transition-all duration-500 hover:border-[var(--electric-blue)]/40 hover:shadow-[0_0_30px_rgba(79,195,247,0.3)] sm:p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 bg-gradient-to-br from-[var(--electric-blue)] to-[var(--neon-blue)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -621,7 +621,7 @@ student4@university.edu, student5@university.edu`}
                   <p className="text-[var(--success-green)] font-semibold mb-2">
                     {t("Bulk invitation completed!")}
                   </p>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-[var(--success-green)] rounded-full animate-pulse"></div>
                       <span className="text-[var(--success-green)]/80">
@@ -662,10 +662,10 @@ student4@university.edu, student5@university.edu`}
         {/* Users and Invites Tabs */}
         <div className="dashboard-card rounded-xl shadow-2xl border border-[var(--border)]/20 hover:border-[var(--neon-blue)]/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(81,176,236,0.2)]">
           <div className="border-b border-[var(--border)]">
-            <nav className="-mb-px flex">
+            <nav className="-mb-px flex w-full min-w-0 overflow-x-auto sm:overflow-visible">
               <button
                 onClick={() => setActiveTab("users")}
-                className={`py-4 px-6 border-b-2 font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                className={`flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 py-3 px-3 text-xs font-semibold transition-all duration-200 sm:flex-initial sm:justify-start sm:px-6 sm:py-4 sm:text-sm ${
                   activeTab === "users"
                     ? "border-[var(--neon-blue)] text-[var(--neon-blue)] bg-[var(--neon-blue)]/5"
                     : "border-transparent text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:border-[var(--border)] hover:bg-[var(--navy-blue-lighter)]/30"
@@ -685,7 +685,7 @@ student4@university.edu, student5@university.edu`}
               </button>
               <button
                 onClick={() => setActiveTab("invites")}
-                className={`py-4 px-6 border-b-2 font-semibold text-sm transition-all duration-200 flex items-center gap-2 ${
+                className={`flex min-w-0 flex-1 items-center justify-center gap-2 border-b-2 py-3 px-3 text-xs font-semibold transition-all duration-200 sm:flex-initial sm:justify-start sm:px-6 sm:py-4 sm:text-sm ${
                   activeTab === "invites"
                     ? "border-[var(--neon-blue)] text-[var(--neon-blue)] bg-[var(--neon-blue)]/5"
                     : "border-transparent text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:border-[var(--border)] hover:bg-[var(--navy-blue-lighter)]/30"
@@ -706,7 +706,7 @@ student4@university.edu, student5@university.edu`}
             </nav>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 sm:p-6 md:p-8">
             {loading && (
               <div className="text-center py-12">
                 <div className="inline-flex items-center gap-3 text-[var(--dashboard-text-secondary)]">
@@ -733,11 +733,11 @@ student4@university.edu, student5@university.edu`}
             )}
 
             {!loading && !error && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-[var(--border)]">
+              <div className="-mx-4 overflow-x-auto rounded-lg px-4 sm:mx-0 sm:px-0">
+                <table className="min-w-[640px] w-full divide-y divide-[var(--border)] sm:min-w-full">
                   <thead className="bg-gradient-to-r from-[var(--navy-blue-lighter)] to-[var(--navy-blue-lighter)]/80">
                     <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider sm:px-6 sm:py-4">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -745,7 +745,7 @@ student4@university.edu, student5@university.edu`}
                           {t("User")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider sm:px-6 sm:py-4">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -753,7 +753,7 @@ student4@university.edu, student5@university.edu`}
                         {t("Status")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider sm:px-6 sm:py-4">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -761,7 +761,7 @@ student4@university.edu, student5@university.edu`}
                         {t("Groups")}
                         </div>
                       </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider">
+                      <th className="px-3 py-3 text-left text-xs font-semibold text-[var(--dashboard-text-secondary)] uppercase tracking-wider sm:px-6 sm:py-4">
                         <div className="flex items-center gap-2">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -777,24 +777,24 @@ student4@university.edu, student5@university.edu`}
                         key={user._id}
                         className="hover:bg-gradient-to-r hover:from-[var(--navy-blue-lighter)]/30 hover:to-[var(--navy-blue-lighter)]/10 transition-all duration-200"
                       >
-                        <td className="px-6 py-5 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] rounded-full flex items-center justify-center">
-                              <span className="text-white font-semibold text-sm">
+                        <td className="max-w-[220px] px-3 py-4 sm:max-w-none sm:px-6 sm:py-5">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)]">
+                              <span className="text-sm font-semibold text-white">
                                 {user.displayName.charAt(0).toUpperCase()}
                               </span>
                             </div>
-                            <div>
-                              <div className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-semibold text-[var(--dashboard-text-primary)]">
                             {t(user.displayName)}
                           </div>
-                          <div className="text-sm text-[var(--dashboard-text-secondary)]">
+                          <div className="truncate text-sm text-[var(--dashboard-text-secondary)]">
                             {user.email}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap">
+                        <td className="whitespace-nowrap px-3 py-4 sm:px-6 sm:py-5">
                           <span
                             className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                               user.status === "active"
@@ -807,7 +807,7 @@ student4@university.edu, student5@university.edu`}
                             {t(user.status)}
                           </span>
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--dashboard-text-primary)]">
+                        <td className="px-3 py-4 text-sm text-[var(--dashboard-text-primary)] sm:px-6 sm:py-5">
                           {user.groups.length > 0 ? (
                             <div className="flex flex-wrap gap-1">
                               {user.groups.map((group, index) => (
@@ -823,7 +823,7 @@ student4@university.edu, student5@university.edu`}
                             <span className="text-[var(--dashboard-text-secondary)]">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-5 whitespace-nowrap text-sm text-[var(--dashboard-text-secondary)]">
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-[var(--dashboard-text-secondary)] sm:px-6 sm:py-5">
                           {new Date(user.createdAt).toLocaleDateString()}
                         </td>
                       </tr>

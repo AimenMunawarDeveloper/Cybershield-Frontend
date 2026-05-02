@@ -99,13 +99,13 @@ const ModuleTable = ({ courses = [], loading = false, error = null, onEdit, onDe
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900">
+    <div className="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="border-b border-gray-200 bg-gray-50 px-3 py-3 sm:px-6 sm:py-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <h3 className="text-base font-semibold text-gray-900 sm:text-lg">
             Manage Training Modules
           </h3>
-          <div className="flex items-center gap-4">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Show</span>
               <select
@@ -123,7 +123,7 @@ const ModuleTable = ({ courses = [], loading = false, error = null, onEdit, onDe
               </select>
               <span className="text-sm text-gray-600">entries</span>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="hidden text-sm text-gray-600 sm:block">
               See our training modules{" "}
               <a href="#" className="text-[var(--neon-blue)] hover:underline">
                 support article
@@ -134,7 +134,7 @@ const ModuleTable = ({ courses = [], loading = false, error = null, onEdit, onDe
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="min-w-[720px] w-full">
           <thead className="bg-gray-50 border-b border-gray-200">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
@@ -271,9 +271,9 @@ const ModuleTable = ({ courses = [], loading = false, error = null, onEdit, onDe
       </div>
 
       {currentData.length > 0 && (
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
+        <div className="border-t border-gray-200 bg-gray-50 px-3 py-4 sm:px-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-center text-sm text-gray-700 sm:text-left">
               Showing {startIndex + 1} to {Math.min(endIndex, sorted.length)} of{" "}
               {sorted.length} entries
             </div>
@@ -285,7 +285,7 @@ const ModuleTable = ({ courses = [], loading = false, error = null, onEdit, onDe
               pageCount={totalPages}
               previousLabel="Previous"
               renderOnZeroPageCount={null}
-              className="flex items-center gap-2"
+              className="flex flex-wrap items-center justify-center gap-2 sm:justify-end"
               pageClassName="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 cursor-pointer text-gray-700"
               pageLinkClassName="block text-gray-700"
               activeClassName="bg-[var(--neon-blue)] text-white border-[var(--neon-blue)]"

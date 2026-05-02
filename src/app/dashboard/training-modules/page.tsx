@@ -342,7 +342,7 @@ export default function TrainingModulesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
       <HeroSection 
         courses={(() => {
           const coursesToPass = language === "en" ? courses : (translatedCourses.length > 0 ? translatedCourses : courses);
@@ -361,15 +361,15 @@ export default function TrainingModulesPage() {
 
       {/* Course Catalog Section */}
       {translationReady && (
-        <div className="bg-gradient-to-br from-[var(--navy-blue-light)] to-[var(--navy-blue-lighter)] py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="bg-gradient-to-br from-[var(--navy-blue-light)] to-[var(--navy-blue-lighter)] px-3 py-10 sm:px-6 sm:py-16 lg:px-8">
+        <div className="mx-auto max-w-7xl min-w-0">
           {/* Header with Controls */}
           <div className="mb-8">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-              <h2 className="text-4xl font-bold text-[var(--dashboard-text-primary)] mb-4 md:mb-0">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] sm:text-3xl md:mb-0 md:text-4xl">
                 {t("Explore Our Course Catalog")}
               </h2>
-              <div className="flex items-center gap-4">
+              <div className="flex shrink-0 items-center gap-4">
                 {canPerformCRUD && (
                   <button
                     onClick={() => setIsModalOpen(true)}
@@ -383,10 +383,10 @@ export default function TrainingModulesPage() {
             </div>
 
             {/* Controls Row */}
-            <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
-              <div className="flex flex-col sm:flex-row gap-3 flex-1">
+            <div className="mb-6 flex flex-col items-stretch justify-between gap-4 lg:flex-row lg:items-center">
+              <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap">
                 {/* Search Bar */}
-                <div className="flex-1 max-w-md">
+                <div className="min-w-0 flex-1 sm:max-w-md">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[var(--dashboard-text-primary)] z-10" />
                     <input
@@ -446,35 +446,35 @@ export default function TrainingModulesPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
+              <div className="flex w-full min-w-0 flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                 {/* View Mode Toggle */}
-                <div className="flex items-center bg-white dark:bg-white/10 backdrop-blur-sm rounded-lg p-1 border border-gray-300 dark:border-white/20 shadow-sm">
+                <div className="flex w-full items-center justify-center rounded-lg border border-gray-300 bg-white p-1 shadow-sm backdrop-blur-sm dark:border-white/20 dark:bg-white/10 sm:w-auto">
                   <button
                     onClick={() => setViewMode("grid")}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors sm:flex-initial ${
                       viewMode === "grid"
                         ? "bg-[var(--neon-blue)] text-white shadow-sm"
-                        : "text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:bg-gray-100 dark:hover:bg-white/10"
+                        : "text-[var(--dashboard-text-secondary)] hover:bg-gray-100 hover:text-[var(--dashboard-text-primary)] dark:hover:bg-white/10"
                     }`}
                   >
-                    <Grid className="w-4 h-4" />
+                    <Grid className="h-4 w-4 shrink-0" />
                     {t("Grid View")}
                   </button>
                   <button
                     onClick={() => setViewMode("table")}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors sm:flex-initial ${
                       viewMode === "table"
                         ? "bg-[var(--neon-blue)] text-white shadow-sm"
-                        : "text-[var(--dashboard-text-secondary)] hover:text-[var(--dashboard-text-primary)] hover:bg-gray-100 dark:hover:bg-white/10"
+                        : "text-[var(--dashboard-text-secondary)] hover:bg-gray-100 hover:text-[var(--dashboard-text-primary)] dark:hover:bg-white/10"
                     }`}
                   >
-                    <List className="w-4 h-4" />
+                    <List className="h-4 w-4 shrink-0" />
                     {t("Table View")}
                   </button>
                 </div>
 
                 {/* Training Language Dropdown */}
-                <select className="px-4 py-2 rounded-lg text-sm bg-white dark:bg-white/10 backdrop-blur-sm text-[var(--dashboard-text-primary)] border border-gray-300 dark:border-white/20 focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] shadow-sm">
+                <select className="w-full min-w-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-[var(--dashboard-text-primary)] shadow-sm backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] dark:border-white/20 dark:bg-white/10 sm:w-auto">
                   <option
                     value="en"
                     className="bg-[var(--navy-blue)] dark:bg-[var(--navy-blue)] text-[var(--dashboard-text-primary)] dark:text-white"
@@ -615,7 +615,7 @@ export default function TrainingModulesPage() {
             </>
           ) : (
             translationReady && (
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6">
+              <div className="min-w-0 overflow-x-auto rounded-lg bg-white/10 p-3 backdrop-blur-sm sm:p-6">
                 <ModuleTable
                   courses={translatedCourses}
                   loading={loading}

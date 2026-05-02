@@ -898,9 +898,9 @@ export default function DashboardPage() {
         {((profile?.role === "client_admin" && profile.orgId) || profile?.role === "system_admin") && (
           <div className="relative z-10">
             <div className="dashboard-card rounded-lg p-4 border border-[var(--sidebar-border)]">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-[var(--neon-blue)]/15 rounded-lg flex items-center justify-center">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="w-8 h-8 bg-[var(--neon-blue)]/15 rounded-lg flex items-center justify-center shrink-0">
                     <svg
                       className="w-4 h-4 text-[var(--neon-blue)]"
                       fill="none"
@@ -915,7 +915,7 @@ export default function DashboardPage() {
                       />
                     </svg>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
                       {t("Dashboard View")}
                     </h3>
@@ -924,15 +924,15 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <label className="text-xs text-[var(--dashboard-text-secondary)] hidden sm:block whitespace-nowrap">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-3 sm:w-auto sm:max-w-full sm:justify-end">
+                  <label className="hidden whitespace-nowrap text-xs text-[var(--dashboard-text-secondary)] sm:block">
                     {t("View")}:
                   </label>
-                  <div className="relative">
+                  <div className="relative min-w-0 w-full flex-1 basis-[12rem] sm:w-auto sm:flex-initial sm:basis-auto">
                     <select
                       value={activeTab}
                       onChange={(e) => setActiveTab(e.target.value as DashboardTab)}
-                      className="appearance-none bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 cursor-pointer transition-all min-w-[180px] hover:border-[var(--neon-blue)]/40"
+                      className="w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-lighter)] px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] transition-all hover:border-[var(--neon-blue)]/40 focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 sm:min-w-[180px]"
                     >
                       <option value="all">{t("All Sections")}</option>
                       <option value="learning-scores">{t("Learning Scores")}</option>
@@ -970,10 +970,12 @@ export default function DashboardPage() {
                       }
                     }}
                     disabled={generatingReport || !profile}
-                    className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg text-sm font-medium hover:bg-[var(--medium-blue)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex w-full min-w-0 items-center justify-center gap-2 rounded-lg bg-[var(--neon-blue)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--medium-blue)] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:shrink-0"
                   >
-                    <Download className="w-4 h-4" />
-                    {generatingReport ? t("Generating...") : t("Download Report")}
+                    <Download className="h-4 w-4 shrink-0" />
+                    <span className="truncate">
+                      {generatingReport ? t("Generating...") : t("Download Report")}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -985,9 +987,9 @@ export default function DashboardPage() {
         {(profile?.role === "affiliated" || profile?.role === "non_affiliated") && (
           <div className="relative z-10">
             <div className="dashboard-card rounded-lg p-4 border border-[var(--sidebar-border)]">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 bg-[var(--neon-blue)]/15 rounded-lg flex items-center justify-center">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-blue)]/15">
                     <svg
                       className="w-4 h-4 text-[var(--neon-blue)]"
                       fill="none"
@@ -1002,7 +1004,7 @@ export default function DashboardPage() {
                       />
                     </svg>
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <h3 className="text-sm font-semibold text-[var(--dashboard-text-primary)]">
                       {t("Dashboard View")}
                     </h3>
@@ -1011,16 +1013,16 @@ export default function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <label className="text-xs text-[var(--dashboard-text-secondary)] hidden sm:block whitespace-nowrap">
+                <div className="flex w-full min-w-0 flex-wrap items-center gap-3 sm:w-auto sm:max-w-full sm:justify-end">
+                  <label className="hidden whitespace-nowrap text-xs text-[var(--dashboard-text-secondary)] sm:block">
                     {t("View")}:
                   </label>
-                  <div className="relative">
+                  <div className="relative min-w-0 w-full flex-1 basis-[12rem] sm:w-auto sm:flex-initial sm:basis-auto">
                     {profile?.role === "affiliated" ? (
                       <select
                         value={affiliatedGraphTab}
                         onChange={(e) => setAffiliatedGraphTab(e.target.value as AffiliatedGraphTab)}
-                        className="appearance-none bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 cursor-pointer transition-all min-w-[180px] hover:border-[var(--neon-blue)]/40"
+                        className="w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-lighter)] px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] transition-all hover:border-[var(--neon-blue)]/40 focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 sm:min-w-[180px]"
                       >
                         <option value="all">{t("All")}</option>
                         <option value="badges-certificates">{t("Badges & Certificates")}</option>
@@ -1032,7 +1034,7 @@ export default function DashboardPage() {
                       <select
                         value={nonAffiliatedGraphTab}
                         onChange={(e) => setNonAffiliatedGraphTab(e.target.value as NonAffiliatedGraphTab)}
-                        className="appearance-none bg-[var(--navy-blue-lighter)] border border-[var(--sidebar-border)] rounded-lg px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 cursor-pointer transition-all min-w-[180px] hover:border-[var(--neon-blue)]/40"
+                        className="w-full min-w-0 cursor-pointer appearance-none rounded-lg border border-[var(--sidebar-border)] bg-[var(--navy-blue-lighter)] px-3.5 py-2 pr-9 text-sm text-[var(--dashboard-text-primary)] transition-all hover:border-[var(--neon-blue)]/40 focus:border-[var(--neon-blue)] focus:outline-none focus:ring-1 focus:ring-[var(--neon-blue)]/20 sm:min-w-[180px]"
                       >
                         <option value="all">{t("All")}</option>
                         <option value="badges-certificates">{t("Badges & Certificates")}</option>

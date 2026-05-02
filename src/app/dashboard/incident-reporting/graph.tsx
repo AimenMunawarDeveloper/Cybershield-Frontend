@@ -252,29 +252,30 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
 
   if (error) {
     return (
-      <div className={`bg-red-900/20 border border-red-500/50 rounded-lg p-4 text-red-300 flex items-center gap-2 ${className}`}>
-        <AlertTriangle className="w-5 h-5" />
-        <span>{error}</span>
+      <div className={`flex items-start gap-2 rounded-lg border border-red-500/50 bg-red-900/20 p-4 text-red-300 ${className}`}>
+        <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+        <span className="break-words">{error}</span>
       </div>
     );
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className={`min-w-0 space-y-4 sm:space-y-6 ${className}`}>
       {/* Header with Time Range */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1">{t("Incident Reports")}</h2>
-          <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">{t("Visual analytics of your reported incidents")}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="mb-1 text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:text-2xl">{t("Incident Reports")}</h2>
+          <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Visual analytics of your reported incidents")}</p>
         </div>
 
         {/* Time Range Selector */}
-        <div className="flex gap-2 bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-gray-300 dark:border-[var(--medium-grey)]/20">
+        <div className="flex w-full max-w-full flex-wrap gap-1 rounded-xl border border-gray-300 bg-gray-200 p-1.5 backdrop-blur-md dark:border-[var(--medium-grey)]/20 dark:bg-[var(--navy-blue-lighter)]/50 sm:w-auto sm:gap-2 sm:p-2">
           {(["7d", "30d", "90d", "all"] as const).map((range) => (
             <button
               key={range}
+              type="button"
               onClick={() => setTimeRange(range)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-300 ${
+              className={`min-h-[40px] flex-1 rounded-lg px-2 py-2 text-xs font-semibold transition-all duration-300 sm:min-h-0 sm:flex-none sm:px-3 sm:py-1.5 ${
                 timeRange === range
                   ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
                   : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50"
@@ -287,7 +288,7 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
       </div>
 
       {/* Statistics Cards - Compact */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-lg p-4 border border-gray-300 dark:border-[var(--medium-grey)]/20">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-xs">{t("Total Incidents")}</span>
@@ -325,16 +326,16 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
       </div>
 
       {/* Main Chart - Full Width */}
-      <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-6 border border-gray-300 dark:border-[var(--medium-grey)]/20">
-        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4">{t("Incidents Over Time")}</h3>
-        <div className="w-full h-80">
+      <div className="rounded-xl border border-gray-300 bg-white p-3 backdrop-blur-md dark:border-[var(--medium-grey)]/20 dark:bg-[var(--navy-blue-lighter)]/50 sm:p-6">
+        <h3 className="mb-3 text-base font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:mb-4 sm:text-lg">{t("Incidents Over Time")}</h3>
+        <div className="h-64 w-full min-w-0 sm:h-80">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
               data={timeSeriesData}
               margin={{
-                top: 20,
-                right: 30,
-                left: 20,
+                top: 12,
+                right: 8,
+                left: 4,
                 bottom: 5,
               }}
             >
@@ -538,10 +539,10 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
         </div>
 
         {/* Donut Chart - Email Safe, Email Phishing, WhatsApp Safe, WhatsApp Phishing */}
-        <div className="bg-white dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md rounded-xl p-6 border border-gray-300 dark:border-[var(--medium-grey)]/20">
-          <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-4">{t("Incidents Breakdown")}</h3>
-          <div className="flex items-center justify-center h-[260px] relative w-full">
-            <div className="relative mx-auto" style={{ width: 220, height: 220 }}>
+        <div className="rounded-xl border border-gray-300 bg-white p-4 backdrop-blur-md dark:border-[var(--medium-grey)]/20 dark:bg-[var(--navy-blue-lighter)]/50 sm:p-6">
+          <h3 className="mb-3 text-base font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:mb-4 sm:text-lg">{t("Incidents Breakdown")}</h3>
+          <div className="relative flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px]">
+            <div className="relative mx-auto h-[200px] w-[min(100%,220px)] sm:h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <defs>
@@ -605,20 +606,20 @@ export default function IncidentGraph({ className = "" }: IncidentGraphProps) {
           </div>
           
           {/* Legend at the bottom */}
-          <div className="mt-6 pt-4 border-t border-gray-300 dark:border-[var(--medium-grey)]/20">
-            <div className="flex flex-wrap justify-center gap-6">
+          <div className="mt-4 border-t border-gray-300 pt-4 dark:border-[var(--medium-grey)]/20 sm:mt-6">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
               {donutChartData.map((entry, index) => {
                 const total = donutChartData.reduce((sum, item) => sum + item.value, 0);
                 const percentage = total > 0 ? ((entry.value / total) * 100).toFixed(0) : 0;
                 
                 return (
-                  <div key={index} className="flex flex-col items-center gap-1">
-                    <div className="flex items-center gap-2">
+                  <div key={index} className="flex max-w-[45%] flex-col items-center gap-1 sm:max-w-none">
+                    <div className="flex min-w-0 items-center gap-2">
                       <div
-                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        className="h-3 w-3 shrink-0 rounded-full"
                         style={{ backgroundColor: entry.gradient[0] }}
                       ></div>
-                      <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] whitespace-nowrap">
+                      <p className="max-w-[8rem] truncate text-center text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:max-w-none sm:whitespace-nowrap">
                         {entry.name}
                       </p>
                     </div>

@@ -66,6 +66,14 @@ export default function TrainingModuleDetailPage() {
   const [translationReady, setTranslationReady] = useState(false);
   const [translatedCourse, setTranslatedCourse] = useState<Course | null>(null);
   const [translatedBadgeLabels, setTranslatedBadgeLabels] = useState<Map<string, string>>(new Map());
+  const [progressChartSize, setProgressChartSize] = useState(140);
+
+  useEffect(() => {
+    const update = () => setProgressChartSize(window.innerWidth < 640 ? 112 : 140);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -426,8 +434,8 @@ export default function TrainingModuleDetailPage() {
         : completedIds.includes(`${moduleIndex}-${sectionIndex}`);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[var(--navy-blue)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-white dark:bg-[var(--navy-blue)]">
+      <div className="mx-auto max-w-7xl min-w-0 px-3 py-6 sm:px-6 sm:py-8 lg:px-8">
         <button
           onClick={() => router.push("/dashboard/training-modules")}
           className="mb-6 flex items-center gap-2 text-gray-600 dark:text-[var(--dashboard-text-secondary)] hover:text-[var(--neon-blue)] dark:hover:text-[var(--neon-blue)] transition-colors"
@@ -436,29 +444,29 @@ export default function TrainingModuleDetailPage() {
           <span>{t("Back to Training Modules")}</span>
         </button>
 
-        <div className="mb-6 text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
+        <div className="mb-6 min-w-0 text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
           <span
-            className="hover:text-[var(--neon-blue)] dark:hover:text-[var(--neon-blue)] cursor-pointer"
+            className="cursor-pointer hover:text-[var(--neon-blue)] dark:hover:text-[var(--neon-blue)]"
             onClick={() => router.push("/dashboard/training-modules")}
           >
             {t("Catalog")}
           </span>{" "}
           <span className="mx-2">/</span>{" "}
-          <span className="text-gray-900 dark:text-white">{displayCourse.courseTitle}</span>
+          <span className="text-gray-900 dark:text-white break-words">{displayCourse.courseTitle}</span>
         </div>
 
         <div className="mb-6">
           <div className="inline-block px-3 py-1 bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] rounded-md text-sm font-medium mb-4">
             {t("Course")}
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+          <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl md:text-4xl">
             {displayCourse.courseTitle}
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 items-start">
+        <div className="mb-8 grid grid-cols-1 items-start gap-6 lg:grid-cols-3 lg:gap-8">
           {/* Left (2/3): description + badges + added */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="min-w-0 space-y-6 lg:col-span-2">
             <div>
               {displayCourse.createdBy && (
                 <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-2">
@@ -556,7 +564,7 @@ export default function TrainingModuleDetailPage() {
           </div>
 
           {/* Right (1/3): image + certificate below, button on right */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="min-w-0 space-y-6 lg:col-span-1">
             <div className="relative w-full rounded-xl overflow-hidden shadow-md bg-gray-100 dark:bg-[var(--navy-blue-lighter)] aspect-video">
               <Image
                 src={DEFAULT_IMAGE}
@@ -666,10 +674,10 @@ export default function TrainingModuleDetailPage() {
 
         <div className="mb-8 pb-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30" />
 
-        <div className="flex gap-8 mb-8 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
+        <div className="-mx-1 mb-8 flex gap-4 overflow-x-auto border-b border-gray-200 pb-px dark:border-[var(--neon-blue)]/30 sm:gap-8">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`pb-4 px-1 font-medium transition-colors ${
+            className={`shrink-0 pb-4 px-1 font-medium transition-colors ${
               activeTab === "overview"
                 ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
                 : "text-gray-600 dark:text-[var(--dashboard-text-secondary)] hover:text-gray-900 dark:hover:text-white"
@@ -679,7 +687,7 @@ export default function TrainingModuleDetailPage() {
           </button>
           <button
             onClick={() => setActiveTab("curriculum")}
-            className={`pb-4 px-1 font-medium transition-colors ${
+            className={`shrink-0 pb-4 px-1 font-medium transition-colors ${
               activeTab === "curriculum"
                 ? "text-[var(--neon-blue)] border-b-2 border-[var(--neon-blue)]"
                 : "text-gray-600 dark:text-[var(--dashboard-text-secondary)] hover:text-gray-900 dark:hover:text-white"
@@ -689,11 +697,11 @@ export default function TrainingModuleDetailPage() {
           </button>
         </div>
 
-        <div className="flex gap-8">
-          <div className="flex-1">
+        <div className="flex min-w-0 flex-col gap-8 xl:flex-row xl:gap-8">
+          <div className="min-w-0 flex-1">
             {(activeTab === "overview" || activeTab === "curriculum") && (
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <h2 className="mb-6 text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
                   {activeTab === "overview" ? t("Here's what you will learn.") : t("Course Curriculum")}
                 </h2>
                 <div className="space-y-2">
@@ -719,7 +727,7 @@ export default function TrainingModuleDetailPage() {
                             <div className="w-8 h-8 rounded-full bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center flex-shrink-0">
                               <div className="w-2 h-2 bg-[var(--neon-blue)] rounded-full" />
                             </div>
-                            <span className="text-base font-medium text-gray-900 dark:text-white">
+                            <span className="min-w-0 truncate text-base font-medium text-gray-900 dark:text-white">
                               {module.title || `Module ${moduleIndex + 1}`}
                             </span>
                           </div>
@@ -785,8 +793,8 @@ export default function TrainingModuleDetailPage() {
             )}
           </div>
 
-          <div className="w-80 flex-shrink-0">
-            <div className="sticky top-8 space-y-8">
+          <div className="w-full min-w-0 shrink-0 xl:w-80">
+            <div className="space-y-8 xl:sticky xl:top-8">
               {/* Your progress - first */}
               {totalItems > 0 && (
                 <div>
@@ -796,10 +804,10 @@ export default function TrainingModuleDetailPage() {
                   <p className="text-xs text-gray-500 dark:text-[var(--dashboard-text-secondary)] mb-4">
                     {t("Overall completion rate")}
                   </p>
-                  <div className="flex flex-col items-center mb-4">
+                  <div className="mb-4 flex flex-col items-center">
                     <ProgressRadialChart
                       value={progressPercent}
-                      size={140}
+                      size={progressChartSize}
                       showIcon={true}
                     />
                   </div>
@@ -922,7 +930,7 @@ export default function TrainingModuleDetailPage() {
 
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-8 right-8 w-12 h-12 bg-[var(--neon-blue)] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors z-50"
+        className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--neon-blue)] text-white shadow-lg transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] sm:bottom-8 sm:right-8 sm:h-12 sm:w-12"
         aria-label="Scroll to top"
       >
         <ArrowUp className="w-5 h-5" />

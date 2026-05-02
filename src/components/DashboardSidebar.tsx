@@ -31,6 +31,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuBadge,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { ApiClient } from "@/lib/api";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -96,6 +97,7 @@ export function DashboardSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { isMobile, setOpenMobile } = useSidebar();
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -104,6 +106,10 @@ export function DashboardSidebar({
   const { t } = useTranslation();
   const isAdminRole =
     userRole === "system_admin" || userRole === "client_admin";
+
+  const closeMobileSidebar = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -169,7 +175,7 @@ export function DashboardSidebar({
             alt="CyberShield Logo"
             width={180}
             height={60}
-            className="h-12 w-auto object-contain sidebar-logo"
+            className="h-10 w-auto max-w-[min(100%,11rem)] object-contain sm:h-12 sm:max-w-none sidebar-logo"
           />
         </div>
         {/* Shiny line below logo */}
@@ -212,7 +218,7 @@ export function DashboardSidebar({
                         isActive={pathname === item.url}
                         tooltip={t(item.title)}
                       >
-                        <Link href={item.url}>
+                        <Link href={item.url} onClick={closeMobileSidebar}>
                           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                             <item.icon className="w-4 h-4 text-white" />
                           </div>
@@ -244,7 +250,10 @@ export function DashboardSidebar({
                             }
                             tooltip={t("Organizations Management")}
                           >
-                            <Link href="/dashboard/organizations-management">
+                            <Link
+                              href="/dashboard/organizations-management"
+                              onClick={closeMobileSidebar}
+                            >
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                                 <Building2 className="w-4 h-4 text-white" />
                               </div>
@@ -267,7 +276,10 @@ export function DashboardSidebar({
                             }
                             tooltip={t("Organization Management")}
                           >
-                            <Link href="/dashboard/organization-management">
+                            <Link
+                              href="/dashboard/organization-management"
+                              onClick={closeMobileSidebar}
+                            >
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[var(--neon-blue)]">
                                 <Building className="w-4 h-4 text-white" />
                               </div>

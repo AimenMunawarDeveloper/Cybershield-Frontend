@@ -476,7 +476,7 @@ export default function CertificatesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] dark:bg-[var(--navy-blue)] flex items-center justify-center">
+      <div className="flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-[#f8fafc] dark:bg-[var(--navy-blue)]">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-[var(--neon-blue)] mx-auto mb-4" />
           <p className="text-gray-600 dark:text-[var(--dashboard-text-secondary)]">{t("Loading certificates...")}</p>
@@ -487,12 +487,13 @@ export default function CertificatesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-[#f8fafc] dark:bg-[var(--navy-blue)] flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+      <div className="flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-[#f8fafc] px-4 dark:bg-[var(--navy-blue)]">
+        <div className="max-w-md text-center">
+          <p className="mb-4 break-words text-red-600 dark:text-red-400">{error}</p>
           <button
+            type="button"
             onClick={() => router.push("/dashboard")}
-            className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7]"
+            className="min-h-[44px] w-full rounded-lg bg-[var(--neon-blue)] px-4 py-2 text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] sm:w-auto"
           >
             {t("Go to Dashboard")}
           </button>
@@ -502,40 +503,42 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[var(--navy-blue)] p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-white px-3 py-4 dark:bg-[var(--navy-blue)] sm:p-6">
+      <div className="mx-auto max-w-7xl min-w-0">
         {/* Header - Cisco Style */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <button
+            type="button"
             onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 text-gray-600 dark:text-[var(--dashboard-text-secondary)] hover:text-[var(--neon-blue)] dark:hover:text-[var(--neon-blue)] mb-6 transition-colors text-sm"
+            className="mb-4 flex min-h-[44px] items-center gap-2 text-sm text-gray-600 transition-colors hover:text-[var(--neon-blue)] dark:text-[var(--dashboard-text-secondary)] dark:hover:text-[var(--neon-blue)] sm:mb-6"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="h-4 w-4 shrink-0" />
             {t("Back to Dashboard")}
           </button>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center">
-              <Award className="w-5 h-5 text-[var(--neon-blue)]" />
+          <div className="mb-2 flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20">
+              <Award className="h-5 w-5 text-[var(--neon-blue)]" />
             </div>
-            <div>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{t("My Certificates")}</h1>
+            <div className="min-w-0">
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white sm:text-2xl">{t("My Certificates")}</h1>
             </div>
           </div>
-          <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] ml-[3.25rem]">
+          <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] sm:ml-[3.25rem]">
             {displayCertificates.length} {displayCertificates.length !== 1 ? t("certificates") : t("certificate")} {t("earned")}
           </p>
         </div>
 
         {displayCertificates.length === 0 ? (
-          <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg border border-gray-200 dark:border-[var(--neon-blue)]/30 p-12 text-center">
+          <div className="rounded-lg border border-gray-200 bg-white p-6 text-center dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)] sm:p-12">
             <Award className="w-12 h-12 text-gray-300 dark:text-gray-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{t("No Certificates Yet")}</h3>
             <p className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] mb-6">
               {t("Complete courses to earn certificates and showcase your achievements.")}
             </p>
             <button
+              type="button"
               onClick={() => router.push("/dashboard/training-modules")}
-              className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium"
+              className="min-h-[44px] w-full rounded-md bg-[var(--neon-blue)] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] sm:w-auto"
             >
               {t("Browse Courses")}
             </button>
@@ -545,46 +548,48 @@ export default function CertificatesPage() {
             {displayCertificates.map((cert) => (
               <div
                 key={cert._id}
-                className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden hover:border-[var(--neon-blue)]/30 dark:hover:border-[var(--neon-blue)]/50 transition-all"
+                className="overflow-hidden rounded-lg border border-gray-200 bg-white transition-all hover:border-[var(--neon-blue)]/30 dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)] dark:hover:border-[var(--neon-blue)]/50"
               >
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center">
-                        <Award className="w-6 h-6 text-[var(--neon-blue)]" />
+                <div className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex min-w-0 flex-1 items-start gap-3 sm:gap-4">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20">
+                        <Award className="h-6 w-6 text-[var(--neon-blue)]" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="mb-2 break-words text-base font-semibold text-gray-900 dark:text-white">
                           {cert.courseTitle}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
-                          <div className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                            <span>{cert.userName}</span>
+                        <div className="flex flex-col gap-2 text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)] sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <User className="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
+                            <span className="truncate">{cert.userName}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+                            <Calendar className="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
                             <span>{new Date(cert.issuedDate).toLocaleDateString()}</span>
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <FileText className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-                            <span className="font-mono text-xs">{cert.certificateNumber}</span>
+                          <div className="flex min-w-0 items-center gap-1.5">
+                            <FileText className="h-3.5 w-3.5 shrink-0 text-gray-400 dark:text-gray-500" />
+                            <span className="break-all font-mono text-xs">{cert.certificateNumber}</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row">
                       <button
+                        type="button"
                         onClick={() => setSelectedCertificate(cert)}
-                        className="px-4 py-2 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium"
+                        className="min-h-[44px] w-full rounded-md bg-[var(--neon-blue)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] sm:w-auto"
                       >
                         {t("View")}
                       </button>
                       <button
+                        type="button"
                         onClick={() => handleDownload(cert)}
-                        className="px-4 py-2 border border-gray-300 dark:border-[var(--neon-blue)]/30 text-gray-700 dark:text-white rounded-md hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] transition-colors text-sm font-medium flex items-center gap-2"
+                        className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-[var(--neon-blue)]/30 dark:text-white dark:hover:bg-[var(--navy-blue-lighter)] sm:w-auto"
                       >
-                        <Download className="w-4 h-4" />
+                        <Download className="h-4 w-4 shrink-0" />
                         {t("Download")}
                       </button>
                     </div>
@@ -598,23 +603,25 @@ export default function CertificatesPage() {
         {/* Certificate Modal/View - Cisco Style */}
         {selectedCertificate && (
           <div
-            className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-6 overflow-y-auto"
+            className="fixed inset-0 z-50 flex items-end justify-center overflow-y-auto bg-black/50 p-0 dark:bg-black/70 sm:items-center sm:p-4 sm:p-6"
             onClick={() => setSelectedCertificate(null)}
           >
             <div
-              className="bg-white dark:bg-[var(--navy-blue-light)] rounded-lg max-w-5xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-lg"
+              className="max-h-[min(92dvh,100dvh)] w-full max-w-5xl overflow-y-auto rounded-t-2xl bg-white p-4 shadow-lg dark:bg-[var(--navy-blue-light)] sm:rounded-lg sm:p-6 min-h-0"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t("Certificate Details")}</h2>
+              <div className="mb-4 flex items-start justify-between gap-3 border-b border-gray-200 pb-4 dark:border-[var(--neon-blue)]/30 sm:mb-6">
+                <h2 className="min-w-0 text-base font-semibold text-gray-900 dark:text-white sm:text-lg">{t("Certificate Details")}</h2>
                 <button
+                  type="button"
                   onClick={() => setSelectedCertificate(null)}
-                  className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-white transition-colors p-1"
-                  aria-label="Close"
+                  className="shrink-0 rounded p-2 text-gray-400 transition-colors hover:text-gray-600 dark:text-gray-500 dark:hover:text-white min-h-[44px] min-w-[44px] flex items-center justify-center sm:min-h-0 sm:min-w-0 sm:p-1"
+                  aria-label={t("Close")}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
+              <div className="min-w-0 overflow-x-auto">
               <Certificate
                 userName={selectedCertificate.userName}
                 courseTitle={(() => {
@@ -633,18 +640,21 @@ export default function CertificatesPage() {
                 courseCreator={selectedCertificate.course?.createdByName}
                 language={language}
               />
-              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-[var(--neon-blue)]/30 flex justify-end gap-3">
+              </div>
+              <div className="mt-4 flex flex-col gap-2 border-t border-gray-200 pt-4 dark:border-[var(--neon-blue)]/30 sm:mt-6 sm:flex-row sm:justify-end sm:gap-3">
                 <button
+                  type="button"
                   onClick={() => setSelectedCertificate(null)}
-                  className="px-5 py-2.5 border border-gray-300 dark:border-[var(--neon-blue)]/30 text-gray-700 dark:text-white rounded-md hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] transition-colors text-sm font-medium"
+                  className="min-h-[44px] w-full rounded-md border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-[var(--neon-blue)]/30 dark:text-white dark:hover:bg-[var(--navy-blue-lighter)] sm:w-auto"
                 >
                   {t("Close")}
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleDownload(selectedCertificate)}
-                  className="px-5 py-2.5 bg-[var(--neon-blue)] text-white rounded-md hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-sm font-medium flex items-center gap-2"
+                  className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-md bg-[var(--neon-blue)] px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] sm:w-auto"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="h-4 w-4 shrink-0" />
                   {t("Download Certificate")}
                 </button>
               </div>

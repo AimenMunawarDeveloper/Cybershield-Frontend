@@ -419,16 +419,16 @@ export default function EmailPhishingPage() {
 
   return (
     <>
-      <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative">
+      <div className="relative flex min-w-0 flex-1 flex-col gap-6 overflow-x-hidden px-3 py-4 sm:p-6 sm:pt-4">
         <NetworkBackground />
         {/* Blurred background element */}
         <div className="blurred-background"></div>
 
         {/* Hero Section */}
-        <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden mb-8">
+        <div className="relative mb-6 overflow-hidden px-2 py-8 sm:mb-8 sm:px-6 sm:py-12 lg:px-8">
           <div className="blurred-background"></div>
           
-          <div className="max-w-7xl mx-auto relative z-10">
+          <div className="relative z-10 mx-auto max-w-7xl min-w-0">
             <div className="text-center space-y-4">
               <div className="flex justify-center mb-4">
               <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
@@ -436,7 +436,7 @@ export default function EmailPhishingPage() {
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
+              <h1 className="text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] dark:text-white sm:text-3xl md:text-4xl lg:text-5xl">
                 {t("Email Phishing")}
                 <span className="block text-[var(--neon-blue)] mt-1">{t("Awareness Training")}</span>
               </h1>
@@ -464,17 +464,17 @@ export default function EmailPhishingPage() {
         </div>
 
         {/* Phishing Templates Section */}
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl mt-8 ml-4 mr-4 mb-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mx-2 mb-6 rounded-3xl bg-[var(--navy-blue-light)]/95 backdrop-blur-sm sm:mx-4 lg:mx-6">
+          <div className="mx-auto max-w-7xl min-w-0 px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
             <div className="mb-8">
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-                <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)] dark:text-white underline decoration-[var(--neon-blue)]">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] underline decoration-[var(--neon-blue)] dark:text-white sm:text-2xl md:text-3xl">
                   {t("Phishing Email Templates")}
                 </h2>
                 <button
                   type="button"
                   onClick={() => setShowCustomTemplateModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:opacity-90 transition-opacity"
+                  className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-[var(--neon-blue)] px-4 py-2 text-white transition-opacity hover:opacity-90 sm:w-auto"
                 >
                   <FilePlus className="w-4 h-4" />
                   {t("Custom Template")}
@@ -486,7 +486,7 @@ export default function EmailPhishingPage() {
             </div>
 
             {/* Template Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+            <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8 lg:grid-cols-3">
               {loadingTemplates ? (
                 <div className="col-span-full text-center py-12">
                   <div className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("Loading templates...")}</div>
@@ -549,20 +549,20 @@ export default function EmailPhishingPage() {
                     </p>
 
                     {/* Action Buttons */}
-                    <div className="w-full mt-auto flex gap-2">
+                    <div className="mt-auto flex w-full min-w-0 flex-col gap-2 sm:flex-row">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleTemplateClick(template);
                         }}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                        className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--neon-blue)]/30 transition-all duration-300 hover:scale-[1.02] hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] hover:shadow-[var(--neon-blue)]/50"
                       >
                         <span>{t("View")}</span>
                         <Send className="w-4 h-4" />
                       </button>
                       <button
                         onClick={(e) => handleUseTemplate(template, e)}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                        className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-green-600 hover:to-green-500 hover:shadow-green-500/50"
                       >
                         <span>{t("Use")}</span>
                         <Mail className="w-4 h-4" />
@@ -605,17 +605,17 @@ export default function EmailPhishingPage() {
         </div>
 
         {/* Page Header */}
-        <div className="relative z-10 flex flex-1 flex-col gap-6 p-6 pt-4">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
-                <Mail className="w-5 h-5 text-white" />
+        <div className="relative z-10 flex flex-1 flex-col gap-6 px-1 sm:px-0">
+          <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-blue)]">
+                <Mail className="h-5 w-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
+              <div className="min-w-0">
+                <h1 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:text-2xl">
                   {t("Email Phishing Campaigns")}
                 </h1>
-                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
+                <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                   {t("Create and manage phishing awareness campaigns")}
                 </p>
               </div>
@@ -623,7 +623,7 @@ export default function EmailPhishingPage() {
             <button
               onClick={() => setShowModal(true)}
               disabled={isLoading}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-[var(--neon-blue)] px-4 py-2 text-white transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto"
             >
               <Plus className="w-4 h-4" />
               {t("New Campaign")}
@@ -634,10 +634,10 @@ export default function EmailPhishingPage() {
           {message && (
             <div className="relative z-10">
               <div
-                className={`p-4 rounded-lg text-sm ${
+                className={`rounded-lg p-4 text-sm break-words ${
                   message.type === "success"
-                    ? "bg-green-900 bg-opacity-20 border border-green-500 text-green-300"
-                    : "bg-red-900 bg-opacity-20 border border-red-500 text-red-300"
+                    ? "border border-green-500 bg-green-900 bg-opacity-20 text-green-300"
+                    : "border border-red-500 bg-red-900 bg-opacity-20 text-red-300"
                 }`}
               >
                 {message.text}
@@ -653,7 +653,7 @@ export default function EmailPhishingPage() {
 
           {/* Email History */}
           <div className="relative z-10">
-            <div className="dashboard-card rounded-lg p-6">
+            <div className="dashboard-card rounded-lg p-4 sm:p-6">
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">
                   {t("Recent Emails")}
@@ -691,11 +691,11 @@ export default function EmailPhishingPage() {
                           <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-2 flex-wrap">
-                            <p className="text-[var(--dashboard-text-primary)] dark:text-white font-semibold truncate">
+                          <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+                            <p className="min-w-0 font-semibold text-[var(--dashboard-text-primary)] dark:text-white break-words sm:truncate">
                               {t(email.subject)}
                             </p>
-                            <div className="flex items-center gap-2 flex-shrink-0">
+                            <div className="flex shrink-0 flex-wrap items-center gap-2">
                               {email.openedAt && (
                                 <span className="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-500/30 flex items-center gap-1">
                                   <Eye className="w-3 h-3" />
@@ -725,10 +725,10 @@ export default function EmailPhishingPage() {
                             </div>
                           </div>
                           <div className="space-y-1">
-                            <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] truncate">
+                            <p className="break-words text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:truncate">
                               <span className="text-[var(--dashboard-text-primary)] dark:text-white">{t("To")}:</span> {email.sentTo}
                             </p>
-                            <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] truncate">
+                            <p className="break-words text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:truncate">
                               <span className="text-[var(--dashboard-text-primary)] dark:text-white">{t("From")}:</span> {email.sentBy}
                             </p>
                             <div className="flex items-center gap-1 text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-2">

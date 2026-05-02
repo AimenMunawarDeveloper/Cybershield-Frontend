@@ -114,10 +114,10 @@ const EmailForm: React.FC<EmailFormProps> = ({
     }));
   };
   return (
-    <div className="rounded-2xl p-8 border-2 bg-[var(--dashboard-card-bg)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:via-[var(--navy-blue)] dark:to-[var(--navy-blue-lighter)] border-gray-300 dark:border-[#51b0ec] shadow-[0_0_40px_rgba(81,176,236,0.3)] backdrop-blur-sm">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#51b0ec]/10 via-transparent to-[#4fc3f7]/10 rounded-2xl"></div>
-      <div className="relative z-10">
-        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-6 flex items-center gap-2">
+    <div className="relative rounded-2xl border-2 border-gray-300 bg-[var(--dashboard-card-bg)] p-4 shadow-[0_0_40px_rgba(81,176,236,0.3)] backdrop-blur-sm dark:border-[#51b0ec] dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:via-[var(--navy-blue)] dark:to-[var(--navy-blue-lighter)] sm:p-8">
+      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-[#51b0ec]/10 via-transparent to-[#4fc3f7]/10"></div>
+      <div className="relative z-10 min-w-0">
+        <h3 className="mb-6 flex flex-wrap items-center gap-2 text-base font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:text-lg">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#51b0ec] to-[#4fc3f7] flex items-center justify-center shadow-[0_0_20px_rgba(81,176,236,0.6)]">
             <Mail className="w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           </div>
@@ -242,15 +242,15 @@ const EmailForm: React.FC<EmailFormProps> = ({
 
         {/* URLs (Optional) */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white flex items-center gap-2">
-              <Link className="w-5 h-5 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
+              <Link className="h-5 w-5 shrink-0 text-[#51b0ec] drop-shadow-[0_0_8px_rgba(81,176,236,0.6)]" />
               {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">({formData.urls.length})</span>}
             </label>
             <button
               type="button"
               onClick={handleAddUrl}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#51b0ec] hover:text-white bg-[var(--navy-blue)]/50 hover:bg-[#51b0ec]/20 rounded-lg border border-[#51b0ec]/30 hover:border-[#51b0ec] transition-all duration-300"
+              className="flex w-full shrink-0 items-center justify-center gap-1 rounded-lg border border-[#51b0ec]/30 bg-[var(--navy-blue)]/50 px-3 py-2 text-xs font-semibold text-[#51b0ec] transition-all duration-300 hover:border-[#51b0ec] hover:bg-[#51b0ec]/20 hover:text-white disabled:opacity-50 sm:w-auto sm:py-1.5"
               disabled={isLoading}
             >
               <Plus className="w-4 h-4" />
@@ -259,12 +259,12 @@ const EmailForm: React.FC<EmailFormProps> = ({
           </div>
           <div className="space-y-3">
             {formData.urls.map((url, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="flex min-w-0 gap-2">
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => handleUrlChange(index, e.target.value)}
-                  className={`flex-1 px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] transition-all duration-300 ${
+                  className={`min-w-0 flex-1 rounded-xl border-2 bg-white px-3 py-3 text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] transition-all duration-300 focus:shadow-[0_0_20px_rgba(81,176,236,0.3)] focus:outline-none focus:ring-4 focus:ring-[#51b0ec]/20 dark:bg-[var(--navy-blue)]/80 dark:text-white dark:placeholder-[var(--medium-grey)] sm:px-4 ${
                     url && !isValidUrl(url)
                       ? "border-yellow-500/50 focus:border-yellow-500"
                       : "border-gray-300 dark:border-[#51b0ec]/30 focus:border-[#51b0ec]"
@@ -355,10 +355,10 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
     }));
   };
   return (
-    <div className="rounded-2xl p-8 border-2 bg-[var(--dashboard-card-bg)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:via-[var(--navy-blue)] dark:to-[var(--navy-blue-lighter)] border-gray-300 dark:border-[#25d366] shadow-[0_0_40px_rgba(37,211,102,0.3)] backdrop-blur-sm">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#25d366]/10 via-transparent to-[#128c7e]/10 rounded-2xl"></div>
-      <div className="relative z-10">
-        <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-6 flex items-center gap-2">
+    <div className="relative rounded-2xl border-2 border-gray-300 bg-[var(--dashboard-card-bg)] p-4 shadow-[0_0_40px_rgba(37,211,102,0.3)] backdrop-blur-sm dark:border-[#25d366] dark:bg-gradient-to-br dark:from-[var(--navy-blue-lighter)] dark:via-[var(--navy-blue)] dark:to-[var(--navy-blue-lighter)] sm:p-8">
+      <div className="pointer-events-none absolute inset-0 rounded-2xl bg-gradient-to-br from-[#25d366]/10 via-transparent to-[#128c7e]/10"></div>
+      <div className="relative z-10 min-w-0">
+        <h3 className="mb-6 flex flex-wrap items-center gap-2 text-base font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:text-lg">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#25d366] to-[#128c7e] flex items-center justify-center shadow-[0_0_20px_rgba(37,211,102,0.6)]">
             <MessageSquare className="w-5 h-5 text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" />
           </div>
@@ -401,15 +401,15 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
 
         {/* URLs (Optional) */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <label className="block text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white flex items-center gap-2">
-              <Link className="w-5 h-5 text-[#25d366]" />
+          <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <label className="flex items-center gap-2 text-sm font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
+              <Link className="h-5 w-5 shrink-0 text-[#25d366]" />
               {t("URLs")} {formData.urls.length > 0 && <span className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">({formData.urls.length})</span>}
             </label>
             <button
               type="button"
               onClick={handleAddUrl}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-[#25d366] hover:text-white bg-[var(--navy-blue)]/50 hover:bg-[#25d366]/20 rounded-lg border border-[#25d366]/30 hover:border-[#25d366] transition-all duration-300"
+              className="flex w-full shrink-0 items-center justify-center gap-1 rounded-lg border border-[#25d366]/30 bg-[var(--navy-blue)]/50 px-3 py-2 text-xs font-semibold text-[#25d366] transition-all duration-300 hover:border-[#25d366] hover:bg-[#25d366]/20 hover:text-white disabled:opacity-50 sm:w-auto sm:py-1.5"
               disabled={isLoading}
             >
               <Plus className="w-4 h-4" />
@@ -418,12 +418,12 @@ const WhatsappForm: React.FC<WhatsappFormProps> = ({
           </div>
           <div className="space-y-3">
             {formData.urls.map((url, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={index} className="flex min-w-0 gap-2">
                 <input
                   type="url"
                   value={url}
                   onChange={(e) => handleUrlChange(index, e.target.value)}
-                  className={`flex-1 px-4 py-3 bg-white dark:bg-[var(--navy-blue)]/80 border-2 rounded-xl text-[var(--dashboard-text-primary)] dark:text-white placeholder-[var(--dashboard-text-secondary)] dark:placeholder-[var(--medium-grey)] focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 transition-all duration-300 ${
+                  className={`min-w-0 flex-1 rounded-xl border-2 bg-white px-3 py-3 text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#25d366]/30 dark:bg-[var(--navy-blue)]/80 dark:text-white dark:placeholder-[var(--medium-grey)] sm:px-4 ${
                     url && !isValidUrl(url)
                       ? "border-yellow-500/50 focus:border-yellow-500"
                       : "border-gray-300 dark:border-[var(--medium-grey)]/30 focus:border-[#25d366]"
@@ -805,8 +805,8 @@ export default function IncidentReportingPage() {
   // Show loading state while translating
   if (!translationReady) {
     return (
-      <div className="flex flex-1 items-center justify-center min-h-screen">
-        <div className="text-center space-y-4">
+      <div className="flex min-h-screen min-w-0 flex-1 items-center justify-center overflow-x-hidden px-4">
+        <div className="space-y-4 text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[var(--neon-blue)] mx-auto"></div>
           <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-lg">
             {language === "ur" ? "لوڈ ہو رہا ہے..." : "Loading..."}
@@ -818,26 +818,26 @@ export default function IncidentReportingPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+      <div className="relative min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
         <NetworkBackground />
         
         {/* Hero Section */}
-        <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="relative overflow-hidden px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
           <div className="blurred-background"></div>
           
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="text-center space-y-4">
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
-                  <AlertTriangle className="w-8 h-8 text-white" />
+          <div className="relative z-10 mx-auto max-w-7xl min-w-0">
+            <div className="space-y-4 text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/30">
+                  <AlertTriangle className="h-8 w-8 text-white" />
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
+              <h1 className="text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] dark:text-white sm:text-3xl md:text-4xl lg:text-5xl">
                 {t("Incident Reporting")}
               </h1>
               
-              <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-3xl mx-auto leading-relaxed">
+              <p className="mx-auto max-w-3xl text-base leading-relaxed text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] md:text-lg">
                 {t("Report security incidents and suspicious activities to help protect your organization.")}
               </p>
               
@@ -860,13 +860,13 @@ export default function IncidentReportingPage() {
         </div>
 
         {/* Form Section */}
-        <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-4">
+        <div className="mx-2 mt-6 min-h-screen rounded-t-3xl bg-[var(--dashboard-card-bg)] backdrop-blur-sm dark:bg-[var(--navy-blue-light)]/95 sm:mx-4 lg:mx-6">
+          <div className="mx-auto max-w-4xl min-w-0 px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
+            <div className="mb-8 text-center">
+              <h2 className="mb-3 text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:mb-4 sm:text-2xl md:text-3xl lg:text-4xl">
                 {viewMode === "form" ? t("Report an Incident") : t("Incident Reports")}
               </h2>
-              <p className="text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] max-w-2xl mx-auto">
+              <p className="mx-auto max-w-2xl text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:text-base md:text-lg">
                 {viewMode === "form" 
                   ? t("Fill out the form below to report a security incident. All fields marked with * are required.")
                   : t("View and manage all reported incidents")
@@ -875,30 +875,30 @@ export default function IncidentReportingPage() {
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex justify-center mb-8">
-              <div className="flex gap-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-gray-300 dark:border-[var(--medium-grey)]/20">
+            <div className="mb-8 flex justify-center px-1">
+              <div className="flex w-full max-w-md flex-col gap-2 rounded-xl border border-gray-300 bg-gray-200 p-2 backdrop-blur-md dark:border-[var(--medium-grey)]/20 dark:bg-[var(--navy-blue-lighter)]/50 sm:flex-row sm:gap-3">
                 <button
                   type="button"
                   onClick={() => setViewMode("form")}
-                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                  className={`flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300 sm:px-6 ${
                     viewMode === "form"
                       ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
                       : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50"
                   }`}
                 >
-                  <FileText className="w-5 h-5" />
+                  <FileText className="h-5 w-5 shrink-0" />
                   {t("Report")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setViewMode("table")}
-                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 flex items-center gap-2 ${
+                  className={`flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300 sm:px-6 ${
                     viewMode === "table"
                       ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_20px_rgba(81,176,236,0.4)]"
                       : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50"
                   }`}
                 >
-                  <Table2 className="w-5 h-5" />
+                  <Table2 className="h-5 w-5 shrink-0" />
                   {t("View Reports")}
                 </button>
               </div>
@@ -914,14 +914,14 @@ export default function IncidentReportingPage() {
               <>
 
             {/* Tabs with Neon Effects */}
-            <div className="flex gap-3 mb-8 bg-gray-200 dark:bg-[var(--navy-blue-lighter)]/50 backdrop-blur-md p-2 rounded-xl border border-gray-300 dark:border-[var(--medium-grey)] dark:border-opacity-20 shadow-2xl">
+            <div className="mb-8 flex flex-col gap-2 rounded-xl border border-gray-300 bg-gray-200 p-2 shadow-2xl backdrop-blur-md dark:border-[var(--medium-grey)] dark:border-opacity-20 dark:bg-[var(--navy-blue-lighter)]/50 sm:flex-row sm:gap-3">
               <button
                 type="button"
                 onClick={() => setActiveTab("email")}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-500 relative overflow-hidden group ${
+                className={`group relative flex min-h-[48px] flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-all duration-500 sm:px-4 ${
                   activeTab === "email"
-                    ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_30px_rgba(81,176,236,0.6)] scale-105 border-2 border-[#51b0ec]"
-                    : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[#51b0ec] hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50 border-2 border-transparent"
+                    ? "border-[#51b0ec] bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] text-white shadow-[0_0_30px_rgba(81,176,236,0.6)] sm:scale-105"
+                    : "border-transparent text-[var(--dashboard-text-primary)] hover:bg-gray-300 hover:text-[#51b0ec] dark:text-[var(--medium-grey)] dark:hover:bg-[var(--navy-blue)]/50"
                 }`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-r from-[#51b0ec]/20 to-[#4fc3f7]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${activeTab === "email" ? "opacity-100" : ""}`}></div>
@@ -934,10 +934,10 @@ export default function IncidentReportingPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("whatsapp")}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all duration-500 relative overflow-hidden group ${
+                className={`group relative flex min-h-[48px] flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl border-2 px-3 py-3 text-sm font-semibold transition-all duration-500 sm:px-4 ${
                   activeTab === "whatsapp"
-                    ? "bg-gradient-to-r from-[#25d366] via-[#128c7e] to-[#25d366] text-white shadow-[0_0_30px_rgba(37,211,102,0.6)] scale-105 border-2 border-[#25d366]"
-                    : "text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:text-[#25d366] hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)]/50 border-2 border-transparent"
+                    ? "border-[#25d366] bg-gradient-to-r from-[#25d366] via-[#128c7e] to-[#25d366] text-white shadow-[0_0_30px_rgba(37,211,102,0.6)] sm:scale-105"
+                    : "border-transparent text-[var(--dashboard-text-primary)] hover:bg-gray-300 hover:text-[#25d366] dark:text-[var(--medium-grey)] dark:hover:bg-[var(--navy-blue)]/50"
                 }`}
               >
                 <div className={`absolute inset-0 bg-gradient-to-r from-[#25d366]/20 to-[#128c7e]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${activeTab === "whatsapp" ? "opacity-100" : ""}`}></div>
@@ -952,24 +952,25 @@ export default function IncidentReportingPage() {
             {/* Message */}
             {message && (
               <div
-                className={`p-4 rounded-lg text-sm mb-6 transition-all duration-300 ${
+                className={`mb-6 rounded-lg p-4 text-sm transition-all duration-300 ${
                   message.type === "success"
-                    ? "bg-green-900 bg-opacity-20 border border-green-500 text-green-300"
-                    : "bg-red-900 bg-opacity-20 border border-red-500 text-red-300"
+                    ? "border border-green-500 bg-green-900 bg-opacity-20 text-green-300"
+                    : "border border-red-500 bg-red-900 bg-opacity-20 text-red-300"
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-2">
                     {message.type === "success" ? (
-                      <CheckCircle2 className="w-5 h-5" />
+                      <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
                     ) : (
-                      <XCircle className="w-5 h-5" />
+                      <XCircle className="mt-0.5 h-5 w-5 shrink-0" />
                     )}
-                    <span>{message.text}</span>
+                    <span className="break-words">{message.text}</span>
                   </div>
                   <button
+                    type="button"
                     onClick={() => setMessage(null)}
-                    className="ml-2 hover:opacity-70"
+                    className="shrink-0 self-end hover:opacity-70 sm:self-center"
                   >
                     ×
                   </button>
@@ -978,7 +979,7 @@ export default function IncidentReportingPage() {
             )}
 
             {/* Form Content with Smooth Transition */}
-            <div className="relative min-h-[500px]">
+            <div className="relative min-h-[min(500px,70vh)]">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {activeTab === "email" ? (
                   <EmailForm
@@ -999,19 +1000,19 @@ export default function IncidentReportingPage() {
                 )}
 
                 {/* Form Actions */}
-                <div className="flex justify-end gap-4 pt-6">
+                <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:justify-end sm:gap-4">
                   <button
                     type="button"
                     onClick={handleClear}
                     disabled={isLoading}
-                    className="px-8 py-4 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-all duration-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-[var(--navy-blue-lighter)] border-2 border-transparent hover:border-gray-300 dark:hover:border-[var(--medium-grey)]/30 disabled:opacity-50"
+                    className="min-h-[48px] rounded-xl border-2 border-transparent px-6 py-4 font-semibold text-[var(--dashboard-text-secondary)] transition-all duration-300 hover:border-gray-300 hover:bg-gray-200 hover:text-[var(--dashboard-text-primary)] disabled:opacity-50 dark:text-[var(--medium-grey)] dark:hover:border-[var(--medium-grey)]/30 dark:hover:bg-[var(--navy-blue-lighter)] dark:hover:text-white sm:px-8"
                   >
                     {t("Clear Form")}
                   </button>
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className={`px-8 py-4 text-white rounded-xl transition-all duration-300 font-bold shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 disabled:transform-none ${
+                    className={`flex min-h-[48px] w-full items-center justify-center gap-3 rounded-xl px-6 py-4 font-bold text-white shadow-2xl transition-all duration-300 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:w-auto sm:px-8 sm:hover:scale-105 ${
                       activeTab === "email"
                         ? "bg-gradient-to-r from-[#51b0ec] via-[#4fc3f7] to-[#51b0ec] hover:from-[#4fc3f7] hover:via-[#51b0ec] hover:to-[#4fc3f7] shadow-[#51b0ec]/50 hover:shadow-[#51b0ec]/70"
                         : "bg-gradient-to-r from-[#25d366] via-[#128c7e] to-[#25d366] hover:from-[#128c7e] hover:via-[#25d366] hover:to-[#128c7e] shadow-[#25d366]/50 hover:shadow-[#25d366]/70"
@@ -1040,10 +1041,10 @@ export default function IncidentReportingPage() {
 
       {/* Success Toast */}
       {showSuccessToast && (
-        <div className="fixed top-4 right-4 z-[101] animate-in slide-in-from-right-5 fade-in duration-300">
-          <div className="bg-[var(--dashboard-card-bg)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-light)] dark:to-[var(--navy-blue)] rounded-xl p-6 max-w-md w-full border-2 border-gray-300 dark:border-[var(--neon-blue)] shadow-[0_0_50px_rgba(81,176,236,0.5)] backdrop-blur-sm">
-            <div className="flex items-start gap-4">
-              <div className="flex-1">
+        <div className="fixed left-3 right-3 top-[max(1rem,env(safe-area-inset-top,0px))] z-[101] animate-in fade-in duration-300 sm:left-auto sm:right-4">
+          <div className="w-full max-w-md rounded-xl border-2 border-gray-300 bg-[var(--dashboard-card-bg)] p-4 shadow-[0_0_50px_rgba(81,176,236,0.5)] backdrop-blur-sm dark:border-[var(--neon-blue)] dark:bg-gradient-to-br dark:from-[var(--navy-blue-light)] dark:to-[var(--navy-blue)] sm:p-6">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="min-w-0 flex-1">
                 <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1 bg-gradient-to-r from-[#51b0ec] to-[#4fc3f7] bg-clip-text text-transparent">
                   {t("Report submitted")}
                 </h3>
@@ -1065,12 +1066,14 @@ export default function IncidentReportingPage() {
               </div>
               
               <button
+                type="button"
                 onClick={() => {
                   setShowSuccessToast(false);
                 }}
-                className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors flex-shrink-0"
+                className="shrink-0 rounded p-2 text-[var(--dashboard-text-secondary)] transition-colors hover:text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] dark:hover:text-white"
+                aria-label={t("Got it!")}
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>

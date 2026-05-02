@@ -341,6 +341,13 @@ export default function SubmodulePage() {
   const [quizResults, setQuizResults] = useState<Record<number, boolean>>({});
   const [sidebarExpanded, setSidebarExpanded] = useState<Set<number>>(new Set());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      setSidebarCollapsed(true);
+    }
+  }, []);
   // Quiz timer: start screen, then countdown; stop when time runs out
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizTimeRemainingSec, setQuizTimeRemainingSec] = useState(0);
@@ -770,6 +777,7 @@ export default function SubmodulePage() {
       const staticStrings = [
         // Navigation
         "Back to course",
+        "Close menu",
         "items",
         "complete",
         "of",
@@ -1112,14 +1120,24 @@ export default function SubmodulePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[var(--navy-blue)] flex">
+    <div className="relative flex min-h-screen min-w-0 flex-col bg-gray-50 lg:flex-row dark:bg-[var(--navy-blue)]">
+      {!sidebarCollapsed && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+          aria-label={t("Close menu")}
+          onClick={() => setSidebarCollapsed(true)}
+        />
+      )}
       {/* Sidebar Navigation */}
       <aside
-        className={`${
-          sidebarCollapsed ? "w-0" : "w-80"
-        } bg-white dark:bg-[var(--navy-blue-light)] border-r border-gray-200 dark:border-[var(--neon-blue)]/30 transition-all duration-300 overflow-hidden flex-shrink-0 sticky top-0 h-screen overflow-y-auto`}
+        className={`fixed inset-y-0 left-0 z-40 flex h-screen flex-shrink-0 flex-col overflow-hidden border-r border-gray-200 bg-white transition-all duration-300 dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)] lg:sticky lg:top-0 lg:z-10 lg:h-screen lg:translate-x-0 lg:shadow-none ${
+          sidebarCollapsed
+            ? "w-[min(20rem,calc(100vw-1rem))] -translate-x-full pointer-events-none lg:pointer-events-auto lg:w-0 lg:translate-x-0 lg:overflow-hidden lg:border-0"
+            : "w-[min(20rem,calc(100vw-1rem))] translate-x-0 shadow-2xl lg:w-80 lg:shadow-none"
+        }`}
       >
-        <div className="p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Course Header */}
           <div className="mb-6">
             <button
@@ -1270,20 +1288,22 @@ export default function SubmodulePage() {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="bg-white dark:bg-[var(--navy-blue-light)] border-b border-gray-200 dark:border-[var(--neon-blue)]/30 sticky top-0 z-20">
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-20 border-b border-gray-200 bg-white dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)]">
+          <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-6 sm:py-4">
+            <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
               <button
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)] rounded-lg transition-colors"
+                className="shrink-0 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-[var(--navy-blue-lighter)]"
                 aria-label="Toggle sidebar"
               >
-                <BookOpen className="w-5 h-5 text-gray-600 dark:text-[var(--dashboard-text-secondary)]" />
+                <BookOpen className="h-5 w-5 text-gray-600 dark:text-[var(--dashboard-text-secondary)]" />
               </button>
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">{displayCourse.courseTitle}</h1>
+              <div className="min-w-0">
+                <h1 className="truncate text-base font-semibold text-gray-900 dark:text-white sm:text-lg">
+                  {displayCourse.courseTitle}
+                </h1>
                 {currentModule && (
-                  <p className="text-sm text-gray-500 dark:text-[var(--dashboard-text-secondary)]">
+                  <p className="truncate text-xs text-gray-500 dark:text-[var(--dashboard-text-secondary)] sm:text-sm">
                     {currentModule.title}{" "}
                     {isQuiz
                       ? `• ${t("Module Quiz")}`
@@ -1296,17 +1316,17 @@ export default function SubmodulePage() {
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
               <span className="text-sm text-gray-600 dark:text-[var(--dashboard-text-secondary)]">
                 {moduleIndex + 1} {t("of")} {displayCourse.modules.length} {t("modules")}
-            </span>
+              </span>
+            </div>
           </div>
-        </div>
       </header>
 
         {/* Main content - professional layout */}
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto px-6 py-8">
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-8">
             {/* Certificate Generated Notification - Cisco Style with Cybershield Colors */}
             {certificateGenerated && (
               <div className="mb-6 bg-white dark:bg-[var(--navy-blue-light)] border border-[var(--neon-blue)]/30 dark:border-[var(--neon-blue)]/50 rounded-lg p-5 shadow-sm">
@@ -1350,7 +1370,7 @@ export default function SubmodulePage() {
               <article className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl shadow-sm border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden">
                 {/* Start Quiz screen */}
                 {!quizStarted ? (
-                  <div className="px-8 py-12 text-center">
+                  <div className="px-4 sm:px-8 py-12 text-center">
                     <div className="max-w-md mx-auto">
                       <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center mx-auto mb-6">
                         <FileQuestion className="w-10 h-10 text-[var(--neon-blue)]" />
@@ -1368,7 +1388,7 @@ export default function SubmodulePage() {
                       <button
                         type="button"
                         onClick={startQuiz}
-                        className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
+                        className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-lg font-semibold shadow-md hover:shadow-lg"
                       >
                         <PlayCircle className="w-6 h-6" />
                         {t("Start Quiz")}
@@ -1377,7 +1397,7 @@ export default function SubmodulePage() {
                   </div>
                 ) : (
                 <>
-                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 px-8 py-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
+                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 px-4 sm:px-8 py-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
                   <div className="flex items-center justify-between flex-wrap gap-4">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
@@ -1406,11 +1426,11 @@ export default function SubmodulePage() {
                   </div>
                 </div>
                 {quizTimeExpired && (
-                  <div className="px-8 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-400 text-sm font-medium">
+                  <div className="px-4 sm:px-8 py-3 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-400 text-sm font-medium">
                     {t("The quiz has ended. Submit your answers to see your score.")}
                   </div>
                 )}
-                <div className="px-8 py-8">
+                <div className="px-4 sm:px-8 py-8">
               {quizQuestions.length === 0 ? (
                     <div className="text-center py-12">
                       <FileQuestion className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
@@ -1612,7 +1632,7 @@ export default function SubmodulePage() {
         ) : isActivity ? (
               <article className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl shadow-sm border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden">
                 {!activityStarted ? (
-                  <div className="px-8 py-12">
+                  <div className="px-4 sm:px-8 py-12">
                     <div className="max-w-md mx-auto">
                       <div className="w-20 h-20 rounded-2xl bg-[var(--neon-blue)]/10 dark:bg-[var(--neon-blue)]/20 flex items-center justify-center mx-auto mb-6">
                         {activityType === "whatsapp" ? (
@@ -1672,7 +1692,7 @@ export default function SubmodulePage() {
                           type="button"
                           onClick={() => startActivity()}
                           disabled={activitySendLoading}
-                          className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-lg font-semibold shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
+                          className="inline-flex items-center justify-center gap-2 px-4 sm:px-8 py-4 rounded-xl bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors text-lg font-semibold shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                           {activitySendLoading ? (
                             <>
@@ -1690,7 +1710,7 @@ export default function SubmodulePage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="px-8 py-8">
+                  <div className="px-4 sm:px-8 py-8">
                     <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 rounded-xl p-6 mb-8">
                       <div className="flex items-center gap-4 mb-4">
                         {activityType === "whatsapp" ? (
@@ -1911,7 +1931,7 @@ export default function SubmodulePage() {
         ) : currentSection ? (
               <article className="bg-white dark:bg-[var(--navy-blue-light)] rounded-xl shadow-sm border border-gray-200 dark:border-[var(--neon-blue)]/30 overflow-hidden">
                 {/* Section Header */}
-                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 px-8 py-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
+                <div className="bg-gradient-to-r from-[var(--neon-blue)]/10 to-[var(--electric-blue)]/10 dark:from-[var(--neon-blue)]/20 dark:to-[var(--electric-blue)]/20 px-4 sm:px-8 py-6 border-b border-gray-200 dark:border-[var(--neon-blue)]/30">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-[var(--neon-blue)] flex items-center justify-center shadow-lg">
                       <BookOpen className="w-7 h-7 text-white" />
@@ -1928,7 +1948,7 @@ export default function SubmodulePage() {
                 </div>
 
                 {/* Section Content */}
-                <div className="px-8 py-8">
+                <div className="px-4 sm:px-8 py-8">
                   {(currentSection.material || translatedSectionMaterial) && (
                     <article className="max-w-none mb-8 prose prose-lg prose-gray max-w-none">
                       <div className="text-gray-800 dark:text-[var(--dashboard-text-secondary)] leading-relaxed space-y-6">
@@ -2057,22 +2077,22 @@ export default function SubmodulePage() {
         )}
 
         {/* Bottom navigation */}
-        <nav className="mt-10 flex items-center justify-between gap-4">
+        <nav className="mt-8 flex flex-col-reverse gap-3 sm:mt-10 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           {prevUrl ? (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${prevUrl}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 dark:border-[var(--neon-blue)]/30 bg-white dark:bg-[var(--navy-blue-light)] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)] dark:hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium shadow-sm hover:shadow-md"
+                  className="inline-flex w-full items-center justify-center gap-2.5 rounded-lg border-2 border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 shadow-sm transition-colors hover:border-[var(--neon-blue)] hover:bg-gray-50 hover:text-[var(--neon-blue)] dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)] dark:text-white dark:hover:bg-[var(--navy-blue-lighter)] dark:hover:border-[var(--neon-blue)] sm:w-auto sm:px-6"
             >
-                  <ChevronLeft className="w-5 h-5 flex-shrink-0" />
+                  <ChevronLeft className="h-5 w-5 shrink-0" />
                   <span>{t("Previous")}</span>
             </button>
           ) : (
-            <div />
+            <div className="hidden sm:block" />
           )}
           {nextUrl ? (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}/${nextUrl}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-[var(--neon-blue)] text-white hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] transition-colors font-semibold shadow-md hover:shadow-lg ml-auto"
+                  className="inline-flex w-full items-center justify-center gap-2.5 rounded-lg bg-[var(--neon-blue)] px-4 py-3 font-semibold text-white shadow-md transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[#4fc3f7] sm:ml-auto sm:w-auto sm:px-6"
             >
                   <span>
                     {sectionIndex === sections.length - 1 && hasQuiz
@@ -2081,14 +2101,14 @@ export default function SubmodulePage() {
                         ? t("Activity")
                         : t("Next")}
                   </span>
-                  <ChevronRight className="w-5 h-5 flex-shrink-0" />
+                  <ChevronRight className="h-5 w-5 shrink-0" />
             </button>
           ) : (
             <button
               onClick={() => router.push(`/dashboard/training-modules/${courseId}`)}
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg border-2 border-gray-300 dark:border-[var(--neon-blue)]/30 bg-white dark:bg-[var(--navy-blue-light)] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-[var(--navy-blue-lighter)] hover:border-[var(--neon-blue)] dark:hover:border-[var(--neon-blue)] hover:text-[var(--neon-blue)] transition-colors font-medium ml-auto shadow-sm hover:shadow-md"
+                  className="inline-flex w-full items-center justify-center gap-2.5 rounded-lg border-2 border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 shadow-sm transition-colors hover:border-[var(--neon-blue)] hover:bg-gray-50 hover:text-[var(--neon-blue)] dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)] dark:text-white dark:hover:bg-[var(--navy-blue-lighter)] sm:ml-auto sm:w-auto sm:px-6"
             >
-                  <ArrowLeft className="w-5 h-5 flex-shrink-0" />
+                  <ArrowLeft className="h-5 w-5 shrink-0" />
                   <span>{t("Back to Course")}</span>
             </button>
           )}

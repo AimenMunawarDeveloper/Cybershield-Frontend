@@ -533,41 +533,40 @@ export default function Chatbot() {
       {/* Chat Window */}
       {isOpen && (
         <div
-          className={`fixed bottom-26 right-6 z-50 transition-all duration-300 ease-in-out ${
+          className={`fixed z-50 transition-all duration-300 ease-in-out max-sm:left-3 max-sm:right-3 sm:bottom-24 sm:right-6 ${
             isMinimized
-              ? "w-80 h-18 opacity-90"
-              : "w-96 h-[600px] opacity-100"
+              ? "bottom-[max(5.5rem,env(safe-area-inset-bottom,0px)+4.5rem)] h-[4.5rem] w-full max-w-md opacity-90 sm:left-auto sm:w-80"
+              : "bottom-[max(5.5rem,env(safe-area-inset-bottom,0px)+4.5rem)] h-[min(600px,calc(100dvh-8rem))] w-full max-w-md opacity-100 sm:left-auto sm:h-[600px] sm:w-96"
           }`}
-          style={{
-            transform: isMinimized ? "translateY(0)" : "translateY(0)",
-          }}
         >
-          <div className="bg-white dark:bg-[var(--navy-blue-light)] rounded-2xl shadow-2xl border border-gray-200 dark:border-[var(--neon-blue)]/30 flex flex-col h-full overflow-hidden">
+          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)]">
             {/* Header */}
-            <div className="bg-gradient-to-r from-[var(--neon-blue)] to-[#3a8bc2] dark:from-[var(--neon-blue)] dark:to-[#4fc3f7] text-white p-4 rounded-t-2xl flex items-center justify-between shadow-lg dark:shadow-[var(--neon-blue)]/20">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center">
-                  <Bot className="w-5 h-5" />
+            <div className="flex shrink-0 items-center justify-between gap-2 rounded-t-2xl bg-gradient-to-r from-[var(--neon-blue)] to-[#3a8bc2] p-3 text-white shadow-lg dark:from-[var(--neon-blue)] dark:to-[#4fc3f7] dark:shadow-[var(--neon-blue)]/20 sm:p-4">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 dark:bg-white/10 sm:h-10 sm:w-10">
+                  <Bot className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Sentra</h3>
-                  <p className="text-xs text-white/80 dark:text-white/70">{language === "ur" ? t("We typically reply in seconds") : "We typically reply in seconds"}</p>
+                <div className="min-w-0">
+                  <h3 className="truncate text-sm font-semibold">Sentra</h3>
+                  <p className="truncate text-xs text-white/80 dark:text-white/70">{language === "ur" ? t("We typically reply in seconds") : "We typically reply in seconds"}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
                 <button
+                  type="button"
                   onClick={() => setIsMinimized(!isMinimized)}
-                  className="p-1.5 hover:bg-white/20 dark:hover:bg-white/10 rounded-lg transition-colors"
+                  className="rounded-lg p-2 transition-colors hover:bg-white/20 dark:hover:bg-white/10 sm:p-1.5"
                   aria-label={isMinimized ? "Expand" : "Minimize"}
                 >
-                  <Minimize2 className="w-4 h-4" />
+                  <Minimize2 className="h-4 w-4" />
                 </button>
                 <button
+                  type="button"
                   onClick={closeChat}
-                  className="p-1.5 hover:bg-white/20 dark:hover:bg-white/10 rounded-lg transition-colors"
+                  className="rounded-lg p-2 transition-colors hover:bg-white/20 dark:hover:bg-white/10 sm:p-1.5"
                   aria-label="Close"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -575,7 +574,7 @@ export default function Chatbot() {
             {/* Messages Container */}
             {!isMinimized && (
               <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-[var(--navy-blue)]">
+                <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain bg-gray-50 p-3 dark:bg-[var(--navy-blue)] sm:p-4">
                   {messages.map((message) => (
                     <div
                       key={message.id}
@@ -589,13 +588,13 @@ export default function Chatbot() {
                         </div>
                       )}
                       <div
-                        className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
+                        className={`max-w-[min(85%,20rem)] rounded-2xl px-3 py-2.5 sm:max-w-[75%] sm:px-4 ${
                           message.role === "user"
-                            ? "bg-[var(--neon-blue)] text-white rounded-br-md"
-                            : "bg-white dark:bg-[var(--navy-blue-lighter)] text-gray-800 dark:text-white border border-gray-200 dark:border-[var(--neon-blue)]/30 rounded-bl-md shadow-sm"
+                            ? "rounded-br-md bg-[var(--neon-blue)] text-white"
+                            : "rounded-bl-md border border-gray-200 bg-white text-gray-800 shadow-sm dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-lighter)] dark:text-white"
                         }`}
                       >
-                        <div className="text-sm leading-relaxed">
+                        <div className="break-words text-sm leading-relaxed [overflow-wrap:anywhere]">
                           {formatMarkdown(message.content, message.role === "user")}
                         </div>
                         <span className="text-xs opacity-70 mt-1 block">
@@ -630,7 +629,7 @@ export default function Chatbot() {
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-gray-200 dark:border-[var(--neon-blue)]/30 p-4 bg-white dark:bg-[var(--navy-blue-light)]">
+                <div className="shrink-0 border-t border-gray-200 bg-white p-3 pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-light)] sm:p-4 sm:pb-4">
                   <div className="flex gap-2">
                     <input
                       ref={inputRef}
@@ -639,15 +638,17 @@ export default function Chatbot() {
                       onChange={(e) => setInputMessage(e.target.value)}
                       onKeyPress={handleKeyPress}
                       placeholder={language === "ur" ? t("Type your message...") : "Type your message..."}
-                      className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-[var(--neon-blue)]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] focus:border-transparent text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder-gray-400 bg-white dark:bg-[var(--navy-blue-lighter)]"
+                      className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[var(--neon-blue)] dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-lighter)] dark:text-white dark:placeholder-gray-400 sm:min-h-0 sm:px-4 sm:py-2.5"
                       disabled={isLoading}
                     />
                     <button
+                      type="button"
                       onClick={sendMessage}
                       disabled={!inputMessage.trim() || isLoading}
-                      className="px-4 py-2.5 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[#3a8bc2] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[var(--neon-blue)] text-white transition-colors hover:bg-[#3a8bc2] disabled:cursor-not-allowed disabled:opacity-50 sm:h-auto sm:w-auto sm:px-4 sm:py-2.5"
+                      aria-label="Send"
                     >
-                      <Send className="w-4 h-4" />
+                      <Send className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -659,11 +660,12 @@ export default function Chatbot() {
 
       {/* Floating Button */}
       <button
+        type="button"
         onClick={toggleChat}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg dark:shadow-[var(--neon-blue)]/30 transition-all duration-300 hover:scale-110 bg-[var(--neon-blue)] dark:bg-[var(--neon-blue)] hover:bg-[#3a8bc2] dark:hover:bg-[#4fc3f7] text-white flex items-center justify-center group"
+        className="group fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--neon-blue)] text-white shadow-lg transition-all duration-300 hover:scale-110 hover:bg-[#3a8bc2] dark:bg-[var(--neon-blue)] dark:shadow-[var(--neon-blue)]/30 dark:hover:bg-[#4fc3f7] sm:bottom-6 sm:right-6"
         aria-label={isOpen ? "Toggle chat" : "Open chat"}
       >
-        <MessageSquare className="w-6 h-6" />
+        <MessageSquare className="h-6 w-6" />
       </button>
     </>
   );

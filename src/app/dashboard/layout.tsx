@@ -18,9 +18,9 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider>
       <DashboardSidebar />
-      <SidebarInset className="m-0 bg-[var(--navy-blue)]">
+      <SidebarInset className="m-0 min-h-0 min-w-0 flex-1 bg-[var(--navy-blue)]">
         <TopBar variant="dashboard" showSidebarTrigger={true} />
-        <div className="bg-[var(--navy-blue)] min-h-screen relative overflow-hidden rounded-none transition-colors">
+        <div className="relative min-h-screen w-full min-w-0 overflow-x-hidden rounded-none bg-[var(--navy-blue)] px-3 py-4 transition-colors sm:px-4 md:px-6">
           {children}
         </div>
       </SidebarInset>
