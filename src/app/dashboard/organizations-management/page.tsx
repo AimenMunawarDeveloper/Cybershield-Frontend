@@ -334,27 +334,27 @@ export default function SystemAdminPanel() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
+    <div className="relative flex min-h-screen w-full min-w-0 flex-1 flex-col gap-6 overflow-x-hidden px-3 py-4 sm:px-4 sm:py-6 md:px-6">
       {/* Network Background */}
       <NetworkBackground />
 
       {/* Blurred background element */}
       <div className="blurred-background"></div>
 
-      <div className="max-w-7xl mx-auto w-full relative z-10">
+      <div className="relative z-10 mx-auto w-full min-w-0 max-w-7xl">
         {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] rounded-lg flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="mb-6 sm:mb-10">
+          <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)]">
+              <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-[var(--dashboard-text-primary)]">
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] sm:text-3xl md:text-4xl">
                 {t("Organizations Management")}
               </h1>
-              <p className="text-[var(--dashboard-text-secondary)] text-lg">
+              <p className="mt-1 text-sm text-[var(--dashboard-text-secondary)] sm:text-base md:text-lg">
                 {t("Manage organizations and invite client administrators")}
               </p>
             </div>
@@ -362,7 +362,7 @@ export default function SystemAdminPanel() {
         </div>
 
         {/* Create Organization Form */}
-        <div className="dashboard-card rounded-xl mb-8 p-8 shadow-2xl border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(81,176,236,0.3)] group">
+        <div className="dashboard-card group mb-8 rounded-xl border border-[var(--neon-blue)]/20 p-4 shadow-2xl transition-all duration-500 hover:border-[var(--neon-blue)]/40 hover:shadow-[0_0_30px_rgba(81,176,236,0.3)] sm:p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -489,7 +489,7 @@ export default function SystemAdminPanel() {
         </div>
 
         {/* Invite Client Admin Form */}
-        <div className="dashboard-card rounded-xl mb-8 p-8 shadow-2xl border border-[var(--electric-blue)]/20 hover:border-[var(--electric-blue)]/40 transition-all duration-500 hover:shadow-[0_0_30px_rgba(79,195,247,0.3)] group">
+        <div className="dashboard-card group mb-8 rounded-xl border border-[var(--electric-blue)]/20 p-4 shadow-2xl transition-all duration-500 hover:border-[var(--electric-blue)]/40 hover:shadow-[0_0_30px_rgba(79,195,247,0.3)] sm:p-6 md:p-8">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-8 h-8 bg-gradient-to-br from-[var(--electric-blue)] to-[var(--neon-blue)] rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -535,7 +535,7 @@ export default function SystemAdminPanel() {
                 </label>
                 <div className="relative dropdown-container">
                   {dropdownOpen && (
-                    <div className="absolute z-50 w-full bottom-full mb-2 bg-[var(--navy-blue)] border-2 border-[var(--border)] rounded-xl shadow-2xl overflow-hidden">
+                    <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border-2 border-[var(--border)] bg-[var(--navy-blue)] shadow-2xl sm:bottom-full sm:top-auto sm:mb-2 sm:mt-0">
                       <div className="py-2">
                         {organizations.map((org) => (
                           <button
@@ -560,11 +560,9 @@ export default function SystemAdminPanel() {
                   <button
                     type="button"
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="w-full px-4 py-4 bg-[var(--navy-blue)] border-2 border-[var(--border)] rounded-xl text-[var(--dashboard-text-primary)] 
-              focus:outline-none focus:ring-2 focus:ring-[var(--electric-blue)] focus:border-[var(--electric-blue)]
-              transition-all duration-300 cursor-pointer font-medium hover:border-[var(--electric-blue)]/60 hover:shadow-[0_0_20px_rgba(79,195,247,0.3)] flex items-center justify-between"
+                    className="flex w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-xl border-2 border-[var(--border)] bg-[var(--navy-blue)] px-4 py-4 text-[var(--dashboard-text-primary)] font-medium transition-all duration-300 hover:border-[var(--electric-blue)]/60 hover:shadow-[0_0_20px_rgba(79,195,247,0.3)] focus:border-[var(--electric-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--electric-blue)]"
                   >
-                    <span className="text-left">
+                    <span className="min-w-0 flex-1 truncate text-left">
                       {inviteForm.orgId 
                         ? t(organizations.find(org => org._id === inviteForm.orgId)?.name || "")
                         : t("Select organization")
@@ -654,17 +652,17 @@ export default function SystemAdminPanel() {
         
 
         {/* Organizations List */}
-        <div className="dashboard-card rounded-xl p-8 shadow-2xl border border-[var(--border)]/20 hover:border-[var(--neon-blue)]/30 transition-all duration-500 hover:shadow-[0_0_30px_rgba(81,176,236,0.2)]">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="dashboard-card rounded-xl border border-[var(--border)]/20 p-4 shadow-2xl transition-all duration-500 hover:border-[var(--neon-blue)]/30 hover:shadow-[0_0_30px_rgba(81,176,236,0.2)] sm:p-6 md:p-8">
+          <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--neon-blue)] to-[var(--electric-blue)] shadow-lg sm:h-12 sm:w-12">
+                <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <div>
-                <h2 className="text-3xl font-bold text-[var(--dashboard-text-primary)]">{t("Organizations")}</h2>
-                <p className="text-[var(--dashboard-text-secondary)] text-lg">
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] sm:text-2xl md:text-3xl">{t("Organizations")}</h2>
+                <p className="text-sm text-[var(--dashboard-text-secondary)] sm:text-base md:text-lg">
                   {t("Manage and view all organizations")} ({organizations.length})
                 </p>
               </div>
@@ -672,7 +670,7 @@ export default function SystemAdminPanel() {
             <button
               onClick={fetchOrganizations}
               disabled={loading}
-              className="px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--electric-blue)] text-white rounded-xl hover:from-[var(--electric-blue)] hover:to-[var(--neon-blue)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 flex items-center gap-3 font-semibold hover:scale-105 hover:shadow-[0_0_20px_rgba(81,176,236,0.4)] active:scale-95"
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-blue)] to-[var(--electric-blue)] px-4 py-3 font-semibold text-white transition-all duration-300 hover:scale-105 hover:from-[var(--electric-blue)] hover:to-[var(--neon-blue)] hover:shadow-[0_0_20px_rgba(81,176,236,0.4)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:gap-3 sm:px-6"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -710,8 +708,8 @@ export default function SystemAdminPanel() {
           )}
 
           {!loading && !error && (
-            <div className="rounded-xl border border-[var(--border)]/20 overflow-hidden">
-              <table className="w-full divide-y divide-[var(--border)]/30">
+            <div className="-mx-4 overflow-x-auto rounded-xl border border-[var(--border)]/20 px-4 sm:mx-0 sm:px-0">
+              <table className="min-w-[720px] w-full divide-y divide-[var(--border)]/30 sm:min-w-full">
                 <thead className="bg-gradient-to-r from-[var(--navy-blue-lighter)] to-[var(--navy-blue-lighter)]/80">
                   <tr>
                     <th className="px-4 py-4 text-left text-xs font-bold text-[var(--dashboard-text-primary)] uppercase tracking-wider w-1/4">

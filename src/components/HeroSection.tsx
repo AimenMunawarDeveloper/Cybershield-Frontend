@@ -183,19 +183,19 @@ export default function HeroSection({ courses = [], translationReady = true }: H
   }, [displayModules.length]);
 
   return (
-    <div className="bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="relative overflow-x-hidden bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] px-3 py-10 sm:px-6 sm:py-16 lg:px-8">
       {/* Network Animation Background */}
       <NetworkBackground />
 
-      <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center relative z-10">
-        <div className="space-y-8 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl font-serif font-bold text-[var(--dashboard-text-primary)] leading-tight">
+      <div className="relative z-10 mx-auto grid max-w-7xl min-w-0 items-center gap-8 md:grid-cols-2 md:gap-12">
+        <div className="space-y-6 text-center md:space-y-8 md:text-left">
+          <h1 className="font-serif text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] sm:text-4xl md:text-5xl">
             {t("Master Cybersecurity, Protect Your Digital World.")}
           </h1>
-          <p className="text-xl text-[var(--dashboard-text-secondary)] leading-relaxed">
+          <p className="text-base leading-relaxed text-[var(--dashboard-text-secondary)] sm:text-lg md:text-xl">
             {t("Interactive training modules designed to enhance your cybersecurity awareness. Learn through engaging scenarios and real-world examples.")}
           </p>
-          <button className="group inline-flex items-center space-x-3 bg-[var(--neon-blue)] text-white px-8 py-4 rounded-full text-lg font-medium hover:bg-[var(--medium-blue)] transform hover:scale-105 transition-all duration-300">
+          <button className="group inline-flex w-full items-center justify-center space-x-3 rounded-full bg-[var(--neon-blue)] px-6 py-3 text-base font-medium text-white transition-all duration-300 hover:scale-105 hover:bg-[var(--medium-blue)] sm:w-auto sm:px-8 sm:py-4 sm:text-lg">
             <span>{t("Explore All Modules")}</span>
             <ArrowRight className="group-hover:translate-x-2 transition-transform duration-300" />
           </button>

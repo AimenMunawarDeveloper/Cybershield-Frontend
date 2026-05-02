@@ -156,7 +156,7 @@ export default function LeaderboardsPage() {
 
   if (loading || !isLoaded) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative flex items-center justify-center">
+      <div className="relative flex min-h-screen min-w-0 items-center justify-center overflow-x-hidden bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-[var(--neon-blue)] mx-auto mb-4" />
           <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)]">
@@ -168,25 +168,25 @@ export default function LeaderboardsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+    <div className="relative min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
       <NetworkBackground />
       {/* Hero Section */}
-      <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="relative overflow-hidden px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
         <div className="blurred-background" />
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="text-center space-y-4">
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
-                <Medal className="w-8 h-8 text-white" />
+        <div className="relative z-10 mx-auto max-w-7xl min-w-0">
+          <div className="space-y-4 text-center">
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/30">
+                <Medal className="h-8 w-8 text-white" />
               </div>
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
+            <h1 className="text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] dark:text-white sm:text-3xl md:text-4xl lg:text-5xl">
               {t("Leaderboards")}
-              <span className="block text-[var(--neon-blue)] mt-1">
+              <span className="mt-1 block text-[var(--neon-blue)]">
                 {t("Top performers by learning score")}
               </span>
             </h1>
-            <p className="text-base md:text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] max-w-2xl mx-auto">
+            <p className="mx-auto max-w-2xl text-base text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] md:text-lg">
               {t("See how you rank globally or within your organization.")}
             </p>
           </div>
@@ -194,27 +194,27 @@ export default function LeaderboardsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-2 mt-6 min-h-screen rounded-t-3xl bg-[var(--dashboard-card-bg)] backdrop-blur-sm dark:bg-[var(--navy-blue-light)]/95 sm:mx-4 lg:mx-6">
+        <div className="mx-auto max-w-4xl min-w-0 px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
           {/* Top 3 Podium */}
           {topThree.length > 0 && (
             <div className="mb-14">
-              <h2 className="text-center text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] mb-8">
+              <h2 className="mb-6 text-center text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] sm:mb-8">
                 {t("Top 3")}
               </h2>
-              <div className="grid grid-cols-3 gap-4 items-end max-w-2xl mx-auto">
+              <div className="mx-auto grid max-w-2xl grid-cols-3 items-end gap-1 px-0 sm:gap-4 sm:px-2">
                 {podiumOrder.filter(Boolean).map((entry) => (
                 <div
                   key={`podium-${activeTab}-${entry.position}`}
                   className="flex flex-col items-center"
                 >
                   {/* Avatar + medal */}
-                  <div className="relative mb-3">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-200 dark:bg-[var(--navy-blue)] border-2 border-gray-400 dark:border-[var(--neon-blue)]/50 flex items-center justify-center text-xl sm:text-2xl font-bold text-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/20">
+                  <div className="relative mb-2 sm:mb-3">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-gray-400 bg-gray-200 text-lg font-bold text-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/20 dark:border-[var(--neon-blue)]/50 dark:bg-[var(--navy-blue)] sm:h-24 sm:w-24 sm:text-2xl">
                       {getInitials(entry.name)}
                     </div>
                     <div
-                      className={`absolute -top-1 -right-1 w-8 h-8 rounded-full border-2 flex items-center justify-center shadow-lg ${getTrophyStyle(
+                      className={`absolute -right-0.5 -top-0.5 flex h-7 w-7 items-center justify-center rounded-full border-2 shadow-lg sm:-right-1 sm:-top-1 sm:h-8 sm:w-8 ${getTrophyStyle(
                         entry.position
                       )}`}
                       title={entry.position === 1 ? "1st" : entry.position === 2 ? "2nd" : "3rd"}
@@ -222,24 +222,24 @@ export default function LeaderboardsPage() {
                       <Trophy className="w-4 h-4" />
                     </div>
                   </div>
-                  <p className="font-bold text-[var(--dashboard-text-primary)] dark:text-white text-center text-sm sm:text-base truncate w-full max-w-[120px]">
+                  <p className="w-full max-w-[min(30vw,7.5rem)] truncate px-0.5 text-center text-[10px] font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:max-w-[120px] sm:text-sm md:text-base">
                     {entry.name}
                   </p>
-                  <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-center truncate w-full max-w-[120px] mt-0.5">
+                  <p className="mt-0.5 w-full max-w-[min(30vw,7.5rem)] truncate px-0.5 text-center text-[9px] text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:max-w-[120px] sm:text-xs">
                     {entry.email}
                   </p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <Award className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
-                    <span className="font-semibold text-[var(--dashboard-text-primary)] dark:text-white text-sm tabular-nums">
+                  <div className="mt-1 flex items-center gap-1 sm:mt-2 sm:gap-1.5">
+                    <Award className="h-3.5 w-3.5 shrink-0 text-[var(--neon-blue)] sm:h-4 sm:w-4" />
+                    <span className="text-xs font-semibold tabular-nums text-[var(--dashboard-text-primary)] dark:text-white sm:text-sm">
                       {entry.learningScore}
                     </span>
                   </div>
                   {/* Podium block */}
                   <div
-                    className={`w-full mt-4 rounded-t-lg border border-gray-300 dark:border-[var(--neon-blue)]/30 flex items-center justify-center font-bold text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)]/60 text-2xl sm:text-3xl
-                      ${entry.position === 1 ? "h-20 sm:h-24 bg-gray-200 dark:bg-[var(--navy-blue)]/90" : ""}
-                      ${entry.position === 2 ? "h-14 sm:h-16 bg-gray-200 dark:bg-[var(--navy-blue)]/80" : ""}
-                      ${entry.position === 3 ? "h-10 sm:h-12 bg-gray-200 dark:bg-[var(--navy-blue)]/70" : ""}`}
+                    className={`mt-2 flex w-full items-center justify-center rounded-t-lg border border-gray-300 text-lg font-bold text-[var(--dashboard-text-secondary)] dark:border-[var(--neon-blue)]/30 dark:text-[var(--light-blue)]/60 sm:mt-4 sm:text-2xl md:text-3xl
+                      ${entry.position === 1 ? "h-16 bg-gray-200 dark:bg-[var(--navy-blue)]/90 sm:h-24" : ""}
+                      ${entry.position === 2 ? "h-12 bg-gray-200 dark:bg-[var(--navy-blue)]/80 sm:h-16" : ""}
+                      ${entry.position === 3 ? "h-9 bg-gray-200 dark:bg-[var(--navy-blue)]/70 sm:h-12" : ""}`}
                   >
                     {entry.position}
                   </div>
@@ -260,58 +260,59 @@ export default function LeaderboardsPage() {
           )}
 
           {/* Tabs: Global | Organization (only show org tab if user has access) */}
-          <div className="flex justify-center mb-10">
-            <div className="inline-flex gap-6 p-1.5 bg-gray-200 dark:bg-[var(--navy-blue)] rounded-xl border border-gray-300 dark:border-[var(--neon-blue)]/20">
+          <div className="mb-8 flex justify-center sm:mb-10">
+            <div className="flex w-full max-w-md gap-1 rounded-xl border border-gray-300 bg-gray-200 p-1 dark:border-[var(--neon-blue)]/20 dark:bg-[var(--navy-blue)] sm:gap-2 sm:p-1.5">
             <button
               type="button"
               onClick={() => setActiveTab("global")}
-              className={`w-40 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              className={`flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-semibold transition-all duration-200 sm:gap-2 sm:py-3 ${
                 activeTab === "global"
                   ? "bg-[var(--neon-blue)] text-white shadow-lg shadow-[var(--neon-blue)]/30"
                   : "text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] hover:bg-gray-300 dark:hover:bg-white/5"
               }`}
             >
-              <Globe className="w-5 h-5" />
-              {t("Global")}
+              <Globe className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+              <span className="truncate">{t("Global")}</span>
             </button>
             {/* Only show organization tab for affiliated users and client admins */}
             {(profile?.role === "affiliated" || profile?.role === "client_admin") && profile?.orgId && (
             <button
               type="button"
               onClick={() => setActiveTab("organization")}
-              className={`w-40 flex items-center justify-center gap-2 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              className={`flex min-h-[44px] min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-sm font-semibold transition-all duration-200 sm:gap-2 sm:py-3 ${
                 activeTab === "organization"
                   ? "bg-[var(--neon-blue)] text-white shadow-lg shadow-[var(--neon-blue)]/30"
                   : "text-[var(--dashboard-text-primary)] dark:text-[var(--light-blue)] hover:bg-gray-300 dark:hover:bg-white/5"
               }`}
             >
-              <Building2 className="w-5 h-5" />
-              {t("Organization")}
+              <Building2 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" />
+              <span className="truncate">{t("Organization")}</span>
             </button>
             )}
             </div>
           </div>
 
+          <div className="min-w-0 overflow-x-auto rounded-xl [-ms-overflow-style:none] [scrollbar-width:thin] sm:overflow-x-visible">
           {/* Table header */}
-          <div className="grid grid-cols-[auto_1fr_auto] gap-4 px-4 py-3 rounded-t-xl bg-gray-100 dark:bg-[var(--navy-blue)]/80 border border-gray-300 dark:border-[var(--neon-blue)]/20 border-b-0 text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm font-medium">
-            <span className="w-14 text-center">{t("Rank")}</span>
-            <span>{t("Participant")}</span>
-            <span className="w-24 text-right">{t("Score")}</span>
+          <div className="grid min-w-[280px] grid-cols-[3rem_1fr_4.5rem] gap-2 px-2 py-3 text-xs font-medium text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:min-w-0 sm:grid-cols-[auto_1fr_auto] sm:gap-4 sm:px-4 sm:text-sm rounded-t-xl border border-gray-300 border-b-0 bg-gray-100 dark:border-[var(--neon-blue)]/20 dark:bg-[var(--navy-blue)]/80">
+            <span className="w-full text-center sm:w-14">{t("Rank")}</span>
+            <span className="min-w-0">{t("Participant")}</span>
+            <span className="w-full text-right sm:w-24">{t("Score")}</span>
           </div>
 
           {/* Leaderboard list */}
           {entries.length > 0 ? (
-            <ul className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 overflow-hidden bg-white dark:bg-[var(--navy-blue)]/40">
+            <ul className="min-w-[280px] overflow-hidden rounded-b-xl border border-gray-300 border-t-0 bg-white dark:border-[var(--neon-blue)]/20 dark:bg-[var(--navy-blue)]/40 sm:min-w-0">
               {entries.map((entry, index) => (
               <li
                 key={`${activeTab}-${entry.position}-${entry.email}`}
-                className={`grid grid-cols-[auto_1fr_auto] gap-4 items-center px-4 py-4 border-b border-gray-200 dark:border-[var(--neon-blue)]/10 last:border-b-0 ${
+                className={`grid grid-cols-[3rem_1fr_4.5rem] items-center gap-2 border-b border-gray-200 px-2 py-3 last:border-b-0 dark:border-[var(--neon-blue)]/10 sm:grid-cols-[auto_1fr_auto] sm:gap-4 sm:px-4 sm:py-4 ${
                   index % 2 === 0 ? "bg-gray-50 dark:bg-[var(--navy-blue)]/30" : "bg-white dark:bg-[var(--navy-blue)]/20"
-                } hover:bg-gray-100 dark:hover:bg-[var(--neon-blue)]/10 transition-colors`}
+                } transition-colors hover:bg-gray-100 dark:hover:bg-[var(--neon-blue)]/10`}
               >
-                <div className="flex justify-center w-14">
+                <div className="flex w-full justify-center sm:w-14">
                   <span
-                    className={`inline-flex items-center justify-center w-10 h-10 rounded-full border font-bold text-sm ${getPositionStyle(
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-bold sm:h-10 sm:w-10 sm:text-sm ${getPositionStyle(
                       entry.position
                     )}`}
                   >
@@ -319,14 +320,14 @@ export default function LeaderboardsPage() {
                   </span>
                 </div>
                 <div className="min-w-0">
-                  <p className="font-bold text-[var(--dashboard-text-primary)] dark:text-white truncate">{entry.name}</p>
-                  <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] truncate mt-0.5">
+                  <p className="truncate font-bold text-[var(--dashboard-text-primary)] dark:text-white">{entry.name}</p>
+                  <p className="mt-0.5 truncate text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                     {entry.email}
                   </p>
                 </div>
-                <div className="flex items-center justify-end gap-1.5 w-24">
-                  <Award className="w-4 h-4 text-[var(--neon-blue)] flex-shrink-0" />
-                  <span className="font-semibold text-[var(--dashboard-text-primary)] dark:text-white tabular-nums">
+                <div className="flex w-full items-center justify-end gap-1 sm:w-24 sm:gap-1.5">
+                  <Award className="h-3.5 w-3.5 shrink-0 text-[var(--neon-blue)] sm:h-4 sm:w-4" />
+                  <span className="text-sm font-semibold tabular-nums text-[var(--dashboard-text-primary)] dark:text-white">
                     {entry.learningScore}
                   </span>
                 </div>
@@ -334,7 +335,7 @@ export default function LeaderboardsPage() {
               ))}
             </ul>
           ) : (
-            <div className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 bg-white dark:bg-[var(--navy-blue)]/40 p-8 text-center">
+            <div className="rounded-b-xl border border-gray-300 dark:border-[var(--neon-blue)]/20 border-t-0 bg-white dark:bg-[var(--navy-blue)]/40 p-6 text-center sm:p-8">
               <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                 {activeTab === "global"
                   ? t("No users found for global leaderboard.")
@@ -342,8 +343,9 @@ export default function LeaderboardsPage() {
               </p>
             </div>
           )}
+          </div>
 
-          <p className="mt-6 text-center text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
+          <p className="mt-6 px-1 text-center text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
             {activeTab === "global"
               ? t("Global leaderboard shows top performers across all organizations.")
               : t("Organization leaderboard shows top performers within your organization.")}

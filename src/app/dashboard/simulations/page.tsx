@@ -359,13 +359,13 @@ export default function SimulationsPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)] relative">
+      <div className="relative min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-br from-[var(--navy-blue)] via-[var(--navy-blue-light)] to-[var(--navy-blue)]">
         <NetworkBackground />
         {/* Hero Section */}
-        <div className="relative py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="relative overflow-hidden px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
           <div className="blurred-background"></div>
           
-          <div className="max-w-7xl mx-auto relative z-10">
+          <div className="relative z-10 mx-auto max-w-7xl min-w-0">
             <div className="text-center space-y-4">
               <div className="flex justify-center mb-4">
                 <div className="w-16 h-16 bg-[var(--neon-blue)] rounded-2xl flex items-center justify-center shadow-lg shadow-[var(--neon-blue)]/30">
@@ -373,7 +373,7 @@ export default function SimulationsPage() {
                 </div>
               </div>
               
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--dashboard-text-primary)] dark:text-white leading-tight">
+              <h1 className="text-2xl font-bold leading-tight text-[var(--dashboard-text-primary)] dark:text-white sm:text-3xl md:text-4xl lg:text-5xl">
                 {t("Campaign Simulations")}
                 <span className="block text-[var(--neon-blue)] mt-1">
                   {t("Unified Multi-Channel Security Training")}
@@ -403,19 +403,19 @@ export default function SimulationsPage() {
         </div>
 
         {/* Main Content Section */}
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-t-3xl mt-8 min-h-screen ml-4 mr-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mx-2 mt-6 min-h-screen rounded-t-3xl bg-[var(--navy-blue-light)]/95 backdrop-blur-sm sm:mx-4 lg:mx-6">
+          <div className="mx-auto max-w-7xl min-w-0 px-3 py-8 sm:px-6 sm:py-12 lg:px-8">
             {/* Header with Create Button */}
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("All Campaigns")}</h2>
-                <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mt-1">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:text-2xl">{t("All Campaigns")}</h2>
+                <p className="mt-1 text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] sm:text-base">
                   {t("Manage your multi-channel phishing simulations")}
                 </p>
               </div>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] dark:to-black text-white rounded-xl hover:from-[var(--medium-blue)] dark:hover:from-black hover:to-[var(--neon-blue)] transition-all duration-300 shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02]"
+                className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] px-5 py-3 text-white shadow-lg shadow-[var(--neon-blue)]/30 transition-all duration-300 hover:scale-[1.02] hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] hover:shadow-[var(--neon-blue)]/50 dark:to-black dark:hover:from-black sm:w-auto sm:px-6"
               >
                 <Plus className="w-5 h-5" />
                 {t("Create Campaign")}
@@ -424,9 +424,9 @@ export default function SimulationsPage() {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 p-4 bg-red-900/20 border border-red-500 rounded-lg text-red-300 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-                <span>{error}</span>
+              <div className="mb-6 flex items-start gap-2 rounded-lg border border-red-500 bg-red-900/20 p-4 text-sm text-red-300">
+                <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
+                <span className="min-w-0 break-words">{error}</span>
               </div>
             )}
 
@@ -451,24 +451,24 @@ export default function SimulationsPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 {campaigns.map((campaign) => (
                   <div
                     key={campaign._id}
                     className="group relative bg-gradient-to-br from-[var(--navy-blue-lighter)] to-[var(--navy-blue)] rounded-2xl shadow-xl overflow-hidden border border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/60 transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl hover:shadow-[var(--neon-blue)]/20 flex flex-col"
                   >
                     {/* Campaign Header */}
-                    <div className="p-6 flex flex-col flex-1">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white mb-1 group-hover:text-[var(--neon-blue)] transition-colors">
+                    <div className="flex flex-1 flex-col p-4 sm:p-6">
+                      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="mb-1 text-lg font-bold text-[var(--dashboard-text-primary)] transition-colors group-hover:text-[var(--neon-blue)] dark:text-white sm:text-xl">
                             {campaign.name}
                           </h3>
-                          <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] line-clamp-2">
+                          <p className="line-clamp-2 text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                             {campaign.description}
                           </p>
                         </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold border flex items-center gap-1 ${getStatusColor(campaign.status)}`}>
+                        <div className={`flex shrink-0 items-center gap-1 self-start rounded-full border px-3 py-1 text-xs font-semibold ${getStatusColor(campaign.status)}`}>
                           {getStatusIcon(campaign.status)}
                           {t(campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1))}
                         </div>
@@ -497,7 +497,7 @@ export default function SimulationsPage() {
                       </div>
 
                       {/* Stats */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="mb-4 grid grid-cols-2 gap-3 sm:gap-4">
                         <div className="bg-[var(--navy-blue)] rounded-lg p-3">
                           <div className="flex items-center gap-2 mb-1">
                             <Users className="w-4 h-4 text-[var(--neon-blue)]" />
@@ -527,13 +527,13 @@ export default function SimulationsPage() {
                       )}
 
                       {/* Action Buttons */}
-                      <div className="w-full mt-auto flex gap-2 flex-wrap">
+                      <div className="mt-auto flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
                         <button
                           onClick={() => {
                             setSelectedCampaign(campaign);
                             setShowDetailModal(true);
                           }}
-                          className="flex-1 px-4 py-3 bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] text-white rounded-xl hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] transition-all duration-300 text-sm font-semibold shadow-lg shadow-[var(--neon-blue)]/30 hover:shadow-[var(--neon-blue)]/50 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                          className="flex min-h-[44px] w-full flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-blue)] to-[var(--medium-blue)] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-[var(--neon-blue)]/30 transition-all duration-300 hover:scale-[1.02] hover:from-[var(--medium-blue)] hover:to-[var(--neon-blue)] hover:shadow-[var(--neon-blue)]/50 sm:min-w-0"
                         >
                           <Eye className="w-4 h-4" />
                           {t("View Details")}
@@ -544,7 +544,7 @@ export default function SimulationsPage() {
                             <button
                               onClick={() => handleCampaignAction(campaign._id, "start")}
                               disabled={actionLoading === campaign._id}
-                              className="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-green-600 hover:to-green-500 hover:shadow-green-500/50 disabled:opacity-50 sm:min-w-0"
                             >
                               <Play className="w-4 h-4" />
                               {t("Start")}
@@ -552,7 +552,7 @@ export default function SimulationsPage() {
                             <button
                               onClick={() => handleCampaignAction(campaign._id, "delete")}
                               disabled={actionLoading === campaign._id}
-                              className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-red-600 hover:to-red-500 hover:shadow-red-500/50 disabled:opacity-50 sm:min-w-0"
                             >
                               <Trash2 className="w-4 h-4" />
                               {t("Delete")}
@@ -563,7 +563,7 @@ export default function SimulationsPage() {
                             <button
                               onClick={() => handleCampaignAction(campaign._id, "pause")}
                               disabled={actionLoading === campaign._id}
-                              className="px-4 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl hover:from-yellow-600 hover:to-yellow-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-yellow-500/30 hover:shadow-yellow-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-yellow-600 hover:to-yellow-500 hover:shadow-yellow-500/50 disabled:opacity-50 sm:min-w-0"
                             >
                               <Pause className="w-4 h-4" />
                               {t("Pause")}
@@ -571,7 +571,7 @@ export default function SimulationsPage() {
                             <button
                               onClick={() => handleCampaignAction(campaign._id, "cancel")}
                               disabled={actionLoading === campaign._id}
-                              className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-red-600 hover:to-red-500 hover:shadow-red-500/50 disabled:opacity-50 sm:min-w-0"
                             >
                               <Ban className="w-4 h-4" />
                               {t("Cancel")}
@@ -582,7 +582,7 @@ export default function SimulationsPage() {
                             <button
                               onClick={() => handleCampaignAction(campaign._id, "resume")}
                               disabled={actionLoading === campaign._id}
-                              className="px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-green-500/30 hover:shadow-green-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-green-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-green-600 hover:to-green-500 hover:shadow-green-500/50 disabled:opacity-50 sm:min-w-0"
                             >
                               <Play className="w-4 h-4" />
                               {t("Resume")}
@@ -590,7 +590,7 @@ export default function SimulationsPage() {
                             <button
                               onClick={() => handleCampaignAction(campaign._id, "cancel")}
                               disabled={actionLoading === campaign._id}
-                              className="px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-500 transition-all duration-300 text-sm font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transform hover:scale-[1.02] flex items-center justify-center gap-2 disabled:opacity-50"
+                              className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-[1.02] hover:from-red-600 hover:to-red-500 hover:shadow-red-500/50 disabled:opacity-50 sm:min-w-0"
                             >
                               <Ban className="w-4 h-4" />
                               {t("Cancel")}

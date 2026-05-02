@@ -8,7 +8,7 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { Bell, Search, Moon, Sun } from "lucide-react";
+import { Bell, Moon, Sun } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePathname } from "next/navigation";
@@ -21,7 +21,6 @@ import {
   NavigationMenuLink,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -64,32 +63,21 @@ function UserGreeting() {
   const firstName = t(user?.firstName || "User");
 
   return (
-    <div className="flex flex-col">
-      <span className="text-lg font-semibold text-[var(--dashboard-text-primary)]">
+    <div className="flex min-w-0 flex-col">
+      <span className="truncate text-sm font-semibold sm:text-lg text-[var(--dashboard-text-primary)]">
         {t("Hello")} {firstName}
       </span>
-      <span className="text-sm text-[var(--dashboard-text-secondary)]">
-        {formatTime(currentTime)} • {formatDate(currentTime)}
+      <span className="truncate text-[10px] leading-tight sm:text-sm text-[var(--dashboard-text-secondary)]">
+        {formatTime(currentTime)}{" "}
+        <span className="hidden sm:inline">• {formatDate(currentTime)}</span>
+        <span className="sm:hidden">
+          •{" "}
+          {currentTime.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })}
+        </span>
       </span>
-    </div>
-  );
-}
-
-// Component for search bar
-function SearchBar() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const { t } = useTranslation();
-
-  return (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--dashboard-text-secondary)]" />
-      <Input
-        type="text"
-        placeholder={t("Search...")}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="pl-10 w-80 h-8 text-sm bg-[var(--navy-blue-lighter)] border-[var(--sidebar-border)] text-[var(--dashboard-text-primary)] placeholder-[var(--dashboard-text-secondary)] focus:border-[var(--neon-blue)]"
-      />
     </div>
   );
 }
@@ -116,16 +104,13 @@ export default function TopBar({
   // Show loading state while authentication is being determined
   if (!isLoaded) {
     return (
-      <header className="flex justify-between items-center my-2 px-4 gap-4 h-12">
-        <div className="flex items-center gap-4">
-          {showSidebarTrigger && <SidebarTrigger className="-ml-1" />}
-          <div className="h-12 w-48 bg-gray-200 animate-pulse rounded"></div>
+      <header className="flex min-h-12 w-full flex-wrap items-center justify-between gap-2 px-2 py-2 sm:gap-3 sm:px-4 md:gap-4">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+          {showSidebarTrigger && <SidebarTrigger className="-ml-1 shrink-0" />}
+          <div className="h-10 min-w-0 flex-1 max-w-[12rem] animate-pulse rounded bg-gray-200 sm:max-w-xs"></div>
         </div>
-        <div className="flex items-center gap-4">
-          {variant === "dashboard" && (
-            <div className="h-8 w-80 bg-gray-200 animate-pulse rounded"></div>
-          )}
-          <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
+        <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+          <div className="h-8 w-8 shrink-0 animate-pulse rounded-full bg-gray-200"></div>
         </div>
       </header>
     );
@@ -133,17 +118,17 @@ export default function TopBar({
 
   return (
     <header
-      className={`flex justify-between items-center gap-4 h-12 ${
+      className={`flex w-full min-h-12 flex-wrap items-center gap-x-2 gap-y-2 px-2 py-2 sm:gap-x-3 sm:px-4 md:gap-4 ${
         variant === "dashboard"
-          ? "bg-[var(--navy-blue)] my-2 px-4"
+          ? "bg-[var(--navy-blue)] sm:my-2"
           : isAuthPage
-          ? "bg-white w-full px-4 py-4"
-          : "bg-[var(--navy-blue)] my-2 px-4"
+          ? "w-full bg-white px-4 py-4"
+          : "my-2 bg-[var(--navy-blue)] px-2 sm:px-4"
       }`}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex min-w-0 flex-1 basis-[min(100%,14rem)] items-center gap-2 sm:gap-4 md:basis-auto md:flex-none">
         {showSidebarTrigger && (
-          <SidebarTrigger className="-ml-1 text-white hover:bg-[var(--navy-blue-lighter)]" />
+          <SidebarTrigger className="-ml-1 shrink-0 text-white hover:bg-[var(--navy-blue-lighter)]" />
         )}
         {variant === "main" ? (
           <Image
@@ -151,7 +136,7 @@ export default function TopBar({
             alt="CyberShield Logo"
             width={200}
             height={60}
-            className={`h-12 w-full object-contain ${
+            className={`h-10 w-auto max-w-[min(100%,12rem)] object-contain sm:h-12 sm:max-w-none ${
               isAuthPage ? "brightness-0" : "brightness-0 invert"
             }`}
           />
@@ -160,15 +145,9 @@ export default function TopBar({
         )}
       </div>
 
-      {variant === "dashboard" && (
-        <div className="flex-1 flex justify-center">
-          <SearchBar />
-        </div>
-      )}
-
-      <div className="flex items-center gap-4">
-        <NavigationMenu className="flex items-center gap-4">
-          <NavigationMenuList className="flex items-center gap-4">
+      <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-2 md:gap-4">
+        <NavigationMenu className="max-w-none">
+          <NavigationMenuList className="flex items-center gap-1 sm:gap-2 md:gap-4">
             <SignedOut>
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>

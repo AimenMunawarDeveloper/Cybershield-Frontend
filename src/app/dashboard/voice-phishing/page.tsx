@@ -1038,10 +1038,10 @@ export default function VoicePhishingPage() {
   // Show loading state while profile is loading
   if (profileLoading) {
     return (
-      <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
+      <div className="relative flex min-h-screen min-w-0 flex-1 flex-col gap-6 overflow-x-hidden px-3 py-4 sm:p-6 sm:pt-4">
         <NetworkBackground />
-        <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <div className="w-10 h-10 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        <div className="relative z-10 flex min-h-[50vh] items-center justify-center">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-white border-t-transparent" />
         </div>
       </div>
     );
@@ -1051,20 +1051,22 @@ export default function VoicePhishingPage() {
   const isAdmin = profile && (profile.role === "system_admin" || profile.role === "client_admin");
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6 pt-4 relative min-h-screen">
+    <div className="relative flex min-h-screen min-w-0 flex-1 flex-col gap-6 overflow-x-hidden px-3 py-4 sm:p-6 sm:pt-4">
       <NetworkBackground />
       {/* Blurred background element */}
       <div className="blurred-background"></div>
 
       {/* Page Header */}
-      <div className="relative z-10">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 bg-[var(--neon-blue)] rounded-lg flex items-center justify-center">
-            <Phone className="w-5 h-5 text-white" />
+      <div className="relative z-10 min-w-0">
+        <div className="mb-2 flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--neon-blue)]">
+            <Phone className="h-5 w-5 text-white" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Voice Phishing Simulation")}</h1>
-            <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm">
+          <div className="min-w-0">
+            <h1 className="text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:text-2xl">
+              {t("Voice Phishing Simulation")}
+            </h1>
+            <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
               {t("Test your ability to resist phishing attempts through voice calls")}
             </p>
           </div>
@@ -1072,11 +1074,11 @@ export default function VoicePhishingPage() {
       </div>
 
       {/* Main Voice Chat Interface */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center">
-        <div className="w-full max-w-2xl mx-auto">
+      <div className="relative z-10 flex flex-1 flex-col items-center justify-center">
+        <div className="mx-auto w-full max-w-2xl min-w-0">
           {/* Voice Chat Card */}
-          <div className="bg-[var(--navy-blue)]/80 backdrop-blur-xl rounded-3xl border border-[var(--neon-blue)]/20 p-8 md:p-12 shadow-2xl shadow-[var(--neon-blue)]/10">
-            <div className="flex flex-col items-center justify-center space-y-8">
+          <div className="rounded-3xl border border-[var(--neon-blue)]/20 bg-[var(--navy-blue)]/80 p-4 shadow-2xl shadow-[var(--neon-blue)]/10 backdrop-blur-xl sm:p-8 md:p-12">
+            <div className="flex flex-col items-center justify-center space-y-6 sm:space-y-8">
               
               {/* Show Orb and Controls only when call is not completed */}
               {score === null && (
@@ -1184,8 +1186,8 @@ export default function VoicePhishingPage() {
                   </div>
 
                   {/* Status Text */}
-                  <div className="text-center space-y-2">
-                    <h2 className="text-xl md:text-2xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">
+                  <div className="space-y-2 px-1 text-center">
+                    <h2 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:text-xl md:text-2xl">
                       {loading 
                         ? t("Connecting...") 
                         : calculatingScore 
@@ -1194,7 +1196,7 @@ export default function VoicePhishingPage() {
                             ? t("Call in progress...") 
                             : t("Ready to start")}
                     </h2>
-                    <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] text-sm md:text-base">
+                    <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--light-blue)] md:text-base">
                       {loading 
                         ? t("Setting up your voice phishing simulation") 
                         : calculatingScore
@@ -1208,8 +1210,8 @@ export default function VoicePhishingPage() {
 
                   {/* Scenario Info Badge - Only show for admins */}
                   {displayScenario && isAdmin && (
-                    <div className="px-4 py-2 bg-[var(--navy-blue-lighter)]/80 rounded-full border border-[var(--neon-blue)]/30">
-                      <div className="flex items-center gap-2">
+                    <div className="max-w-full rounded-full border border-[var(--neon-blue)]/30 bg-[var(--navy-blue-lighter)]/80 px-3 py-2 sm:px-4">
+                      <div className="flex items-center justify-center gap-2">
                         {displayScenario.type === "phishing" ? (
                           <AlertTriangle className="w-4 h-4 text-yellow-400" />
                         ) : (
@@ -1223,12 +1225,13 @@ export default function VoicePhishingPage() {
                   )}
 
                   {/* Control Buttons */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
                     {/* Cancel/Close Button */}
                     {(isConnected || conversationId) && !calculatingScore && (
                       <button
+                        type="button"
                         onClick={isConnected ? endConversation : cancelCall}
-                        className="w-14 h-14 rounded-full bg-gray-200 dark:bg-[var(--navy-blue-lighter)] border border-gray-300 dark:border-[var(--medium-grey)]/30 flex items-center justify-center hover:bg-gray-300 dark:hover:bg-[var(--navy-blue-lighter)]/80 transition-all hover:scale-105"
+                        className="flex h-14 w-14 items-center justify-center rounded-full border border-gray-300 bg-gray-200 transition-all hover:scale-105 hover:bg-gray-300 dark:border-[var(--medium-grey)]/30 dark:bg-[var(--navy-blue-lighter)] dark:hover:bg-[var(--navy-blue-lighter)]/80"
                       >
                         <X className="w-6 h-6 text-[var(--dashboard-text-primary)] dark:text-white" />
                       </button>
@@ -1237,9 +1240,10 @@ export default function VoicePhishingPage() {
                     {/* Main Action Button */}
                     {!isConnected && !conversationId && !calculatingScore && (
                       <button
+                        type="button"
                         onClick={initiateConversation}
                         disabled={loading}
-                        className="w-16 h-16 rounded-full bg-[var(--neon-blue)] flex items-center justify-center hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--neon-blue)]/30"
+                        className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--neon-blue)] shadow-lg shadow-[var(--neon-blue)]/30 transition-all hover:scale-105 hover:bg-[var(--medium-blue)] disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-[var(--neon-blue)]/80"
                       >
                         <Mic className="w-7 h-7 text-white" />
                       </button>
@@ -1248,8 +1252,9 @@ export default function VoicePhishingPage() {
                     {/* End Call Button */}
                     {isConnected && !calculatingScore && (
                       <button
+                        type="button"
                         onClick={endConversation}
-                        className="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center hover:bg-red-600 transition-all hover:scale-105 shadow-lg shadow-red-500/30"
+                        className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500 shadow-lg shadow-red-500/30 transition-all hover:scale-105 hover:bg-red-600"
                       >
                         <PhoneOff className="w-7 h-7 text-white" />
                       </button>
@@ -1260,27 +1265,27 @@ export default function VoicePhishingPage() {
 
               {/* Error Display */}
               {error && (
-                <div className="w-full max-w-md p-4 bg-red-500/20 border border-red-500/50 rounded-xl">
-                  <p className="text-sm text-red-400 text-center">{error}</p>
+                <div className="w-full max-w-md rounded-xl border border-red-500/50 bg-red-500/20 p-4">
+                  <p className="break-words text-center text-sm text-red-400">{error}</p>
                 </div>
               )}
 
               {/* Score Display - Only shown when call is completed */}
               {score !== null && (
-                <div className="w-full max-w-md p-6">
-                  <div className="flex items-center justify-center mb-6">
-                    <Trophy className="w-12 h-12 text-yellow-400" />
+                <div className="w-full max-w-md p-4 sm:p-6">
+                  <div className="mb-6 flex items-center justify-center">
+                    <Trophy className="h-12 w-12 text-yellow-400" />
                   </div>
                   <div className="text-center">
-                    <h3 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white mb-2">{t("Call Completed")}</h3>
-                    <div className={`text-6xl font-bold mb-2 ${getScoreColor(score)}`}>
+                    <h3 className="mb-2 text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Call Completed")}</h3>
+                    <div className={`mb-2 text-4xl font-bold sm:text-6xl ${getScoreColor(score)}`}>
                       {score}
                     </div>
                     <div className="text-lg text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-6">
                       {getScoreLabel(score)}
                     </div>
                     {scoreDetails && (
-                      <div className="text-left space-y-3 text-sm bg-[var(--navy-blue-lighter)]/50 rounded-xl p-4 mb-6">
+                      <div className="mb-6 space-y-3 rounded-xl bg-[var(--navy-blue-lighter)]/50 p-3 text-left text-sm sm:p-4">
                         <div className="flex items-center gap-2">
                           {scoreDetails.fellForPhishing ? (
                             <XCircle className="w-5 h-5 text-red-400" />
@@ -1314,8 +1319,9 @@ export default function VoicePhishingPage() {
                   
                   {/* Start New Call Button */}
                   <button
+                    type="button"
                     onClick={cancelCall}
-                    className="w-full px-6 py-4 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors font-semibold text-lg shadow-lg shadow-[var(--neon-blue)]/30"
+                    className="min-h-[48px] w-full rounded-xl bg-[var(--neon-blue)] px-6 py-4 text-base font-semibold text-white shadow-lg shadow-[var(--neon-blue)]/30 transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 sm:text-lg"
                   >
                     {t("Start New Call")}
                   </button>
@@ -1328,11 +1334,15 @@ export default function VoicePhishingPage() {
 
       {/* Default Scenarios Section - Only visible to admins */}
       {isAdmin && (
-        <div className="relative z-10 mt-8">
-          <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <FileText className="w-6 h-6 text-[var(--neon-blue)]" />
-              <h3 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Available Templates")}</h3>
+        <div className="relative z-10 mt-6 min-w-0 sm:mt-8">
+          <div className="rounded-3xl bg-[var(--navy-blue-light)]/95 p-4 backdrop-blur-sm sm:p-6 md:p-8">
+            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                <FileText className="h-6 w-6 shrink-0 text-[var(--neon-blue)]" />
+                <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:text-xl">
+                  {t("Available Templates")}
+                </h3>
+              </div>
               <span className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
                 ({t("Add these to your templates")})
               </span>
@@ -1348,7 +1358,7 @@ export default function VoicePhishingPage() {
                 <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("No default scenarios available")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
                 {defaultScenarios.map((scenario) => {
                   const isAdded = isDefaultScenarioAdded(scenario);
                   return (
@@ -1439,16 +1449,17 @@ export default function VoicePhishingPage() {
 
       {/* Templates Management Section - Only visible to admins */}
       {isAdmin && (
-        <div className="relative z-10 mt-8">
-          <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <FileText className="w-6 h-6 text-[var(--neon-blue)]" />
-              <h3 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Scenario Templates")}</h3>
+        <div className="relative z-10 mt-6 min-w-0 sm:mt-8">
+          <div className="rounded-3xl bg-[var(--navy-blue-light)]/95 p-4 backdrop-blur-sm sm:p-6 md:p-8">
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <FileText className="h-6 w-6 shrink-0 text-[var(--neon-blue)]" />
+              <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:text-xl">{t("Scenario Templates")}</h3>
             </div>
             <button
+              type="button"
               onClick={handleCreateTemplate}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors"
+              className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--neon-blue)] px-4 py-2 text-white transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 sm:w-auto"
             >
               <Plus className="w-5 h-5" />
               <span>{t("Create Template")}</span>
@@ -1468,7 +1479,7 @@ export default function VoicePhishingPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
               {displayTemplates.map((template) => (
                 <div
                   key={template._id}
@@ -1553,11 +1564,11 @@ export default function VoicePhishingPage() {
       )}
 
       {/* Call History Section */}
-      <div className="relative z-10 mt-8">
-        <div className="bg-[var(--navy-blue-light)]/95 backdrop-blur-sm rounded-3xl p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <Clock className="w-6 h-6 text-[var(--neon-blue)]" />
-            <h3 className="text-xl font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Call History")}</h3>
+      <div className="relative z-10 mt-6 min-w-0 sm:mt-8">
+        <div className="rounded-3xl bg-[var(--navy-blue-light)]/95 p-4 backdrop-blur-sm sm:p-6 md:p-8">
+          <div className="mb-6 flex items-center gap-3">
+            <Clock className="h-6 w-6 shrink-0 text-[var(--neon-blue)]" />
+            <h3 className="text-lg font-semibold text-[var(--dashboard-text-primary)] dark:text-white sm:text-xl">{t("Call History")}</h3>
           </div>
           
           {displayConversations.length === 0 ? (
@@ -1567,7 +1578,7 @@ export default function VoicePhishingPage() {
               <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm mt-1">{t("Your call history will appear here")}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
               {displayConversations.map((conv) => (
                 <div
                   key={conv._id}
@@ -1615,15 +1626,16 @@ export default function VoicePhishingPage() {
       {/* Transcript Button - Bottom Right (only show after call starts) */}
       {(isConnected || conversationId) && (
         <button
+          type="button"
           onClick={() => setShowTranscript(!showTranscript)}
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all ${
+          className={`fixed bottom-[max(1rem,env(safe-area-inset-bottom,0px))] right-3 z-50 flex max-w-[calc(100vw-1.5rem)] items-center gap-2 rounded-full px-3 py-3 shadow-lg transition-all sm:bottom-6 sm:right-6 sm:px-4 ${
             showTranscript
               ? 'bg-[var(--neon-blue)] text-white'
-              : 'bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white border border-gray-300 dark:border-[var(--neon-blue)]/30 hover:border-[var(--neon-blue)]'
+              : 'border border-gray-300 bg-gray-200 text-[var(--dashboard-text-primary)] dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue-lighter)] dark:text-white hover:border-[var(--neon-blue)]'
           }`}
         >
-          <MessageSquare className="w-5 h-5" />
-          <span className="font-medium">{t("Transcript")}</span>
+          <MessageSquare className="h-5 w-5 shrink-0" />
+          <span className="truncate font-medium sm:inline">{t("Transcript")}</span>
           {messages.length > 0 && (
             <span className="w-5 h-5 bg-[var(--neon-blue)] rounded-full text-xs flex items-center justify-center text-white">
               {messages.length}
@@ -1639,20 +1651,22 @@ export default function VoicePhishingPage() {
 
       {/* Transcript Panel */}
       {showTranscript && (isConnected || conversationId) && (
-        <div className="fixed bottom-20 right-6 z-50 w-96 max-h-[60vh] bg-white dark:bg-[var(--navy-blue)]/95 backdrop-blur-xl rounded-2xl border border-gray-300 dark:border-[var(--neon-blue)]/30 shadow-2xl overflow-hidden">
-          <div className="p-4 border-b border-gray-300 dark:border-[var(--neon-blue)]/20 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-[var(--neon-blue)]" />
-              <h3 className="font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Conversation Transcript")}</h3>
+        <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 z-50 max-h-[min(60vh,32rem)] overflow-hidden rounded-2xl border border-gray-300 bg-white shadow-2xl backdrop-blur-xl dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue)]/95 sm:bottom-24 sm:left-auto sm:right-6 sm:w-96 sm:max-w-[calc(100vw-3rem)]">
+          <div className="flex items-center justify-between border-b border-gray-300 p-3 dark:border-[var(--neon-blue)]/20 sm:p-4">
+            <div className="flex min-w-0 items-center gap-2">
+              <MessageSquare className="h-5 w-5 shrink-0 text-[var(--neon-blue)]" />
+              <h3 className="truncate font-semibold text-[var(--dashboard-text-primary)] dark:text-white">{t("Conversation Transcript")}</h3>
             </div>
             <button
+              type="button"
               onClick={() => setShowTranscript(false)}
-              className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors"
+              className="shrink-0 rounded p-2 text-[var(--dashboard-text-secondary)] transition-colors hover:text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] dark:hover:text-white"
+              aria-label={t("Cancel")}
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
-          <div className="p-4 max-h-[50vh] overflow-y-auto space-y-3">
+          <div className="max-h-[min(50vh,28rem)] space-y-3 overflow-y-auto overscroll-contain p-3 sm:p-4">
             {messages.length === 0 ? (
               <p className="text-sm text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-center py-8">
                 {isConnected
@@ -1681,7 +1695,7 @@ export default function VoicePhishingPage() {
                     }`}>
                       {msg.role === "user" ? t("You") : t("Agent")}
                     </div>
-                    <div className={`text-sm ${
+                    <div className={`break-words text-sm ${
                       msg.role === "user" 
                         ? "text-white" 
                         : "text-[var(--dashboard-text-primary)] dark:text-white"
@@ -1697,17 +1711,19 @@ export default function VoicePhishingPage() {
 
       {/* Template Modal - Only visible to admins */}
       {showTemplateModal && isAdmin && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue)] rounded-3xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/30">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4">
+          <div className="max-h-[min(92dvh,100dvh)] w-full max-w-2xl overflow-y-auto rounded-t-3xl border border-[var(--dashboard-card-border)] bg-[var(--dashboard-card-bg)] p-4 dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue)] sm:rounded-3xl sm:p-6 md:p-8">
+            <div className="mb-6 flex items-start justify-between gap-3">
+              <h2 className="min-w-0 text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:text-2xl">
                 {editingTemplate ? t("Edit Template") : t("Create Template")}
               </h2>
               <button
+                type="button"
                 onClick={() => setShowTemplateModal(false)}
-                className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] hover:text-[var(--dashboard-text-primary)] dark:hover:text-white transition-colors"
+                className="shrink-0 rounded p-2 text-[var(--dashboard-text-secondary)] transition-colors hover:text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] dark:hover:text-white"
+                aria-label={t("Cancel")}
               >
-                <X className="w-6 h-6" />
+                <X className="h-6 w-6" />
               </button>
             </div>
 
@@ -1770,16 +1786,18 @@ export default function VoicePhishingPage() {
                 />
               </div>
 
-              <div className="flex items-center gap-4 pt-4">
+              <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:gap-4">
                 <button
+                  type="button"
                   onClick={handleSaveTemplate}
-                  className="flex-1 px-6 py-3 bg-[var(--neon-blue)] text-white rounded-xl hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 transition-colors font-semibold"
+                  className="min-h-[48px] w-full flex-1 rounded-xl bg-[var(--neon-blue)] px-6 py-3 font-semibold text-white transition-colors hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/80 sm:w-auto"
                 >
                   {editingTemplate ? t("Update Template") : t("Create Template")}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setShowTemplateModal(false)}
-                  className="flex-1 px-6 py-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-[var(--navy-blue-lighter)]/80 transition-colors font-semibold border border-gray-300 dark:border-transparent"
+                  className="min-h-[48px] w-full flex-1 rounded-xl border border-gray-300 bg-gray-200 px-6 py-3 font-semibold text-[var(--dashboard-text-primary)] transition-colors hover:bg-gray-300 dark:border-transparent dark:bg-[var(--navy-blue-lighter)] dark:text-white dark:hover:bg-[var(--navy-blue-lighter)]/80 sm:w-auto"
                 >
                   {t("Cancel")}
                 </button>
@@ -1791,10 +1809,10 @@ export default function VoicePhishingPage() {
 
       {/* Delete Confirmation Modal */}
       {templateToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--dashboard-card-bg)] dark:bg-[var(--navy-blue)] rounded-3xl p-6 md:p-8 max-w-md w-full border border-[var(--dashboard-card-border)] dark:border-[var(--neon-blue)]/30">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-[var(--dashboard-text-primary)] dark:text-white">{t("Delete Template?")}</h2>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 sm:items-center sm:p-4">
+          <div className="w-full max-w-md rounded-t-3xl border border-[var(--dashboard-card-border)] bg-[var(--dashboard-card-bg)] p-4 dark:border-[var(--neon-blue)]/30 dark:bg-[var(--navy-blue)] sm:rounded-3xl sm:p-6 md:p-8">
+            <div className="mb-6 flex items-start justify-between gap-3">
+              <h2 className="min-w-0 text-xl font-bold text-[var(--dashboard-text-primary)] dark:text-white sm:text-2xl">{t("Delete Template?")}</h2>
               <button
                 type="button"
                 onClick={() => setTemplateToDelete(null)}
@@ -1804,15 +1822,15 @@ export default function VoicePhishingPage() {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] mb-6">
+            <p className="mb-6 break-words text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">
               {t("Are you sure you want to delete this template?")} {t("This action cannot be undone.")}
             </p>
-            <div className="flex items-center gap-4 pt-4">
+            <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:gap-4">
               <button
                 type="button"
                 onClick={() => setTemplateToDelete(null)}
                 disabled={deletingTemplate}
-                className="flex-1 px-6 py-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white rounded-xl hover:bg-gray-300 dark:hover:bg-[var(--navy-blue-lighter)]/80 transition-colors font-semibold border border-gray-300 dark:border-transparent disabled:opacity-50"
+                className="min-h-[48px] w-full flex-1 rounded-xl border border-gray-300 bg-gray-200 px-6 py-3 font-semibold text-[var(--dashboard-text-primary)] transition-colors hover:bg-gray-300 disabled:opacity-50 dark:border-transparent dark:bg-[var(--navy-blue-lighter)] dark:text-white dark:hover:bg-[var(--navy-blue-lighter)]/80 sm:w-auto"
               >
                 {t("Cancel")}
               </button>
@@ -1820,7 +1838,7 @@ export default function VoicePhishingPage() {
                 type="button"
                 onClick={confirmDeleteTemplate}
                 disabled={deletingTemplate}
-                className="flex-1 px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-[48px] w-full flex-1 rounded-xl bg-red-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 {deletingTemplate ? t("Deleting…") : t("Delete")}
               </button>
