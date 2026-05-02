@@ -122,6 +122,24 @@
   display: none !important;
 }
 
+/* Sign-in / sign-up only: no raised card (shadow/border) around Clerk */
+.auth-clerk-form .cl-rootBox,
+.auth-clerk-form .cl-cardBox,
+.auth-clerk-form .cl-card,
+.auth-clerk-form .cl-scrollBox,
+.auth-clerk-form .cl-main {
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+.auth-clerk-form .cl-rootBox,
+.auth-clerk-form .cl-cardBox,
+.auth-clerk-form .cl-card {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
