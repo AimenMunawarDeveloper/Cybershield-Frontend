@@ -122,7 +122,7 @@ export default function SignUpPage() {
   return (
     <div className="flex w-full min-h-0 flex-col overflow-x-hidden lg:min-h-[calc(100dvh-6rem)] lg:flex-row">
       <section className="flex w-full flex-col justify-center bg-[var(--white)] px-4 py-8 sm:px-6 sm:py-10 md:p-10 lg:w-1/2 lg:min-h-0 lg:flex-1 lg:justify-center">
-        <h1 className="mb-5 text-center text-2xl font-bold text-[#0f1a2a] sm:mb-6 sm:text-3xl lg:text-left">
+        <h1 className="mb-5 text-center text-2xl font-bold text-[#0f1a2a] sm:mb-6 sm:text-3xl">
           Sign Up
         </h1>
         <div className="auth-clerk-form mx-auto w-full max-w-md">

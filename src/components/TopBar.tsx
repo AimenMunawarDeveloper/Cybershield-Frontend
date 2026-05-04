@@ -8,7 +8,7 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import Link from "next/link";
-import { Bell, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import LanguageToggle from "@/components/LanguageToggle";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePathname } from "next/navigation";
@@ -190,15 +190,6 @@ export default function TopBar({
                   ) : (
                     <Sun className="h-4 w-4 text-[var(--dashboard-text-primary)]" />
                   )}
-                </Button>
-              </NavigationMenuItem>
-              <NavigationMenuItem>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="p-1.5 hover:bg-[var(--navy-blue-lighter)] rounded-full transition-colors h-8 w-8"
-                >
-                  <Bell className="h-4 w-4 text-[var(--dashboard-text-primary)]" />
                 </Button>
               </NavigationMenuItem>
               <NavigationMenuItem>

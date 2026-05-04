@@ -130,6 +130,15 @@ interface UserProfile {
   orgId?: string;
 }
 
+/** Match dashboard phishing template sections (email / WhatsApp). */
+const VOICE_PHISHING_CARD_SECTION_PREVIEW = 6;
+const VOICE_PHISHING_CALL_HISTORY_PREVIEW = 6;
+
+const SEE_MORE_PRIMARY_BTN_CLASS =
+  "px-8 py-3 bg-[var(--neon-blue)] text-white rounded-lg font-medium hover:bg-[var(--medium-blue)] transition-colors";
+const SEE_MORE_SECONDARY_BTN_CLASS =
+  "px-8 py-3 bg-gray-200 dark:bg-[var(--navy-blue-lighter)] text-[var(--dashboard-text-primary)] dark:text-white rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-[var(--navy-blue)] transition-colors border border-gray-300 dark:border-[var(--neon-blue)]/30";
+
 export default function VoicePhishingPage() {
   const { getToken } = useAuth();
   const { user, isLoaded } = useUser();
@@ -189,6 +198,15 @@ export default function VoicePhishingPage() {
   } | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState(false);
+  const [visibleDefaultScenarioCount, setVisibleDefaultScenarioCount] = useState(
+    VOICE_PHISHING_CARD_SECTION_PREVIEW
+  );
+  const [visibleScenarioTemplatesCount, setVisibleScenarioTemplatesCount] = useState(
+    VOICE_PHISHING_CARD_SECTION_PREVIEW
+  );
+  const [visibleCallHistoryCount, setVisibleCallHistoryCount] = useState(
+    VOICE_PHISHING_CALL_HISTORY_PREVIEW
+  );
 
   const conversation = useConversation({
     overrides: conversationOverrides,
@@ -416,6 +434,9 @@ export default function VoicePhishingPage() {
         
         // Call history
         "Call History",
+        "See More",
+        "more",
+        "Show Less",
         "No previous calls",
         "Your call history will appear here",
         
@@ -559,6 +580,33 @@ export default function VoicePhishingPage() {
   const displayConversations = useMemo(() => {
     return language === "ur" && translatedConversations.length > 0 ? translatedConversations : conversationHistory;
   }, [translatedConversations, conversationHistory, language]);
+
+  const visibleDefaultScenarios = useMemo(
+    () =>
+      defaultScenarios.slice(
+        0,
+        Math.min(visibleDefaultScenarioCount, defaultScenarios.length)
+      ),
+    [defaultScenarios, visibleDefaultScenarioCount]
+  );
+
+  const visibleDisplayTemplates = useMemo(
+    () =>
+      displayTemplates.slice(
+        0,
+        Math.min(visibleScenarioTemplatesCount, displayTemplates.length)
+      ),
+    [displayTemplates, visibleScenarioTemplatesCount]
+  );
+
+  const visibleConversations = useMemo(
+    () =>
+      displayConversations.slice(
+        0,
+        Math.min(visibleCallHistoryCount, displayConversations.length)
+      ),
+    [displayConversations, visibleCallHistoryCount]
+  );
 
   // Translate current scenario when language or scenario changes
   useEffect(() => {
@@ -730,12 +778,20 @@ export default function VoicePhishingPage() {
       const API_BASE_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
 
-      const url = editingTemplate
-        ? `${API_BASE_URL}/voice-phishing-templates/${editingTemplate._id}`
+      const editId =
+        editingTemplate?._id != null
+          ? String(editingTemplate._id)
+          : editingTemplate?.id != null
+            ? String(editingTemplate.id)
+            : null;
+      const isUpdate = Boolean(editingTemplate && editId);
+
+      const url = isUpdate
+        ? `${API_BASE_URL}/voice-phishing-templates/${editId}`
         : `${API_BASE_URL}/voice-phishing-templates`;
 
       const response = await fetch(url, {
-        method: editingTemplate ? "PUT" : "POST",
+        method: isUpdate ? "PUT" : "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -1358,8 +1414,9 @@ export default function VoicePhishingPage() {
                 <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)]">{t("No default scenarios available")}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-                {defaultScenarios.map((scenario) => {
+              <>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
+                  {visibleDefaultScenarios.map((scenario) => {
                   const isAdded = isDefaultScenarioAdded(scenario);
                   return (
                     <div
@@ -1409,6 +1466,7 @@ export default function VoicePhishingPage() {
                             </span>
                           ) : (
                             <button
+                              type="button"
                               onClick={() => handleAddDefaultScenario(scenario)}
                               className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--neon-blue)] text-white rounded-lg hover:bg-[var(--medium-blue)] dark:hover:bg-[var(--neon-blue)]/90 transition-all duration-200 text-xs font-semibold shadow-sm hover:shadow-md hover:shadow-[var(--neon-blue)]/30"
                             >
@@ -1442,6 +1500,36 @@ export default function VoicePhishingPage() {
                   );
                 })}
               </div>
+              {defaultScenarios.length > VOICE_PHISHING_CARD_SECTION_PREVIEW && (
+                <div className="mt-8 text-center sm:mt-10">
+                  {/* See More Button */}
+                  {visibleDefaultScenarioCount < defaultScenarios.length ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setVisibleDefaultScenarioCount(defaultScenarios.length)
+                      }
+                      className={SEE_MORE_PRIMARY_BTN_CLASS}
+                    >
+                      {t("See More")} ({defaultScenarios.length - visibleDefaultScenarioCount}{" "}
+                      {t("more")})
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setVisibleDefaultScenarioCount(
+                          VOICE_PHISHING_CARD_SECTION_PREVIEW
+                        )
+                      }
+                      className={SEE_MORE_SECONDARY_BTN_CLASS}
+                    >
+                      {t("Show Less")}
+                    </button>
+                  )}
+                </div>
+              )}
+              </>
             )}
           </div>
         </div>
@@ -1479,10 +1567,11 @@ export default function VoicePhishingPage() {
               </p>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-              {displayTemplates.map((template) => (
+              {visibleDisplayTemplates.map((template) => (
                 <div
-                  key={template._id}
+                  key={String(template._id ?? template.id)}
                   className="group relative overflow-hidden bg-[var(--navy-blue-lighter)]/80 dark:bg-[var(--navy-blue-lighter)]/80 rounded-2xl border border-[var(--neon-blue)]/10 dark:border-[var(--neon-blue)]/20 hover:border-[var(--neon-blue)]/40 dark:hover:border-[var(--neon-blue)]/50 transition-all duration-300 hover:shadow-lg hover:shadow-[var(--neon-blue)]/10 dark:hover:shadow-[var(--neon-blue)]/20 hover:-translate-y-1"
                 >
                   {/* Gradient accent bar */}
@@ -1519,6 +1608,7 @@ export default function VoicePhishingPage() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <button
+                          type="button"
                           onClick={() => handleEditTemplate(template)}
                           className="p-2 hover:bg-[var(--navy-blue)]/50 dark:hover:bg-[var(--navy-blue)]/80 rounded-lg transition-all duration-200 hover:scale-110 group/btn"
                           title={t("Edit Template")}
@@ -1526,7 +1616,10 @@ export default function VoicePhishingPage() {
                           <Edit className="w-4 h-4 text-[var(--neon-blue)] group-hover/btn:text-[var(--medium-blue)] transition-colors" />
                         </button>
                         <button
-                          onClick={() => handleDeleteTemplate(template._id)}
+                          type="button"
+                          onClick={() =>
+                            handleDeleteTemplate(String(template._id ?? template.id))
+                          }
                           className="p-2 hover:bg-red-500/20 dark:hover:bg-red-500/30 rounded-lg transition-all duration-200 hover:scale-110 group/btn"
                           title={t("Delete Template")}
                         >
@@ -1558,6 +1651,36 @@ export default function VoicePhishingPage() {
                 </div>
               ))}
             </div>
+            {displayTemplates.length > VOICE_PHISHING_CARD_SECTION_PREVIEW && (
+              <div className="mt-8 text-center sm:mt-10">
+                {/* See More Button */}
+                {visibleScenarioTemplatesCount < displayTemplates.length ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleScenarioTemplatesCount(displayTemplates.length)
+                    }
+                    className={SEE_MORE_PRIMARY_BTN_CLASS}
+                  >
+                    {t("See More")} ({displayTemplates.length - visibleScenarioTemplatesCount}{" "}
+                    {t("more")})
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleScenarioTemplatesCount(
+                        VOICE_PHISHING_CARD_SECTION_PREVIEW
+                      )
+                    }
+                    className={SEE_MORE_SECONDARY_BTN_CLASS}
+                  >
+                    {t("Show Less")}
+                  </button>
+                )}
+              </div>
+            )}
+            </>
           )}
         </div>
         </div>
@@ -1578,8 +1701,9 @@ export default function VoicePhishingPage() {
               <p className="text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] text-sm mt-1">{t("Your call history will appear here")}</p>
             </div>
           ) : (
+            <>
             <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {displayConversations.map((conv) => (
+              {visibleConversations.map((conv) => (
                 <div
                   key={conv._id}
                   onClick={() => router.push(`/dashboard/voice-phishing/${conv._id}`)}
@@ -1619,6 +1743,36 @@ export default function VoicePhishingPage() {
                 </div>
               ))}
             </div>
+            {displayConversations.length > VOICE_PHISHING_CALL_HISTORY_PREVIEW && (
+              <div className="mt-8 text-center sm:mt-10">
+                {/* See More Button */}
+                {visibleCallHistoryCount < displayConversations.length ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleCallHistoryCount(displayConversations.length)
+                    }
+                    className={SEE_MORE_PRIMARY_BTN_CLASS}
+                  >
+                    {t("See More")} ({displayConversations.length - visibleCallHistoryCount}{" "}
+                    {t("more")})
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisibleCallHistoryCount(
+                        VOICE_PHISHING_CALL_HISTORY_PREVIEW
+                      )
+                    }
+                    className={SEE_MORE_SECONDARY_BTN_CLASS}
+                  >
+                    {t("Show Less")}
+                  </button>
+                )}
+              </div>
+            )}
+            </>
           )}
         </div>
       </div>

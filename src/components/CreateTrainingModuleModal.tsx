@@ -1473,12 +1473,12 @@ export default function CreateTrainingModuleModal({
                         </div>
 
                         {/* Activity - after quiz: Email or WhatsApp */}
-                        <div className="border-t border-[var(--medium-grey)]/50 pt-4 mt-4">
+                        <div className="border-t border-gray-200 dark:border-[var(--medium-grey)]/50 pt-4 mt-4">
                           <div className="flex items-center gap-3 mb-2">
                             <Mail className="w-5 h-5 text-[var(--neon-blue)]" />
-                            <span className="font-medium text-white">{t("Activity")}</span>
+                            <span className="font-medium text-[var(--dashboard-text-primary)] dark:text-white">{t("Activity")}</span>
                           </div>
-                          <p className="text-xs text-[var(--medium-grey)] ml-8 mb-3">
+                          <p className="text-xs text-[var(--dashboard-text-secondary)] dark:text-[var(--medium-grey)] ml-8 mb-3">
                             {t("Select how learners complete this activity")}
                           </p>
                           <div className="ml-8 flex flex-wrap gap-3">
@@ -1487,8 +1487,8 @@ export default function CreateTrainingModuleModal({
                               onClick={() => updateModule(moduleIndex, { activityType: "email" })}
                               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
                                 mod.activityType === "email"
-                                  ? "bg-[var(--neon-blue)]/20 border-[var(--neon-blue)] text-white"
-                                  : "border-[var(--medium-grey)]/50 text-[var(--medium-grey)] hover:border-[var(--neon-blue)]/50 hover:text-white"
+                                  ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] dark:text-white"
+                                  : "border-gray-300 dark:border-[var(--medium-grey)] text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:border-[var(--neon-blue)] dark:hover:border-white/50 hover:text-[var(--neon-blue)] dark:hover:text-white"
                               }`}
                             >
                               <Mail className="w-4 h-4" />
@@ -1499,8 +1499,8 @@ export default function CreateTrainingModuleModal({
                               onClick={() => updateModule(moduleIndex, { activityType: "whatsapp" })}
                               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
                                 mod.activityType === "whatsapp"
-                                  ? "bg-[var(--neon-blue)]/20 border-[var(--neon-blue)] text-white"
-                                  : "border-[var(--medium-grey)]/50 text-[var(--medium-grey)] hover:border-[var(--neon-blue)]/50 hover:text-white"
+                                  ? "border-[var(--neon-blue)] bg-[var(--neon-blue)]/20 text-[var(--neon-blue)] dark:text-white"
+                                  : "border-gray-300 dark:border-[var(--medium-grey)] text-[var(--dashboard-text-primary)] dark:text-[var(--medium-grey)] hover:border-[var(--neon-blue)] dark:hover:border-white/50 hover:text-[var(--neon-blue)] dark:hover:text-white"
                               }`}
                             >
                               <MessageCircle className="w-4 h-4" />
